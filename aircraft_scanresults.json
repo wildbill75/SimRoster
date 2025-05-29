@@ -1,0 +1,20 @@
+[
+    {
+        "model": "A319",
+        "registration": "F-GRHB",
+        "company": "Air France",
+        "icao": "AFR"
+    },
+    {
+        "model": "A320",
+        "registration": "F-GKXS",
+        "company": "Air France",
+        "icao": "AFR"
+    },
+    {
+        "model": "A321",
+        "registration": "F-GTAT",
+        "company": "Air France",
+        "icao": "AFR"
+    }
+]
