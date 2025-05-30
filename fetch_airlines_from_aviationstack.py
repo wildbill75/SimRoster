@@ -1,7 +1,7 @@
 import requests
 import csv
 
-API_KEY = "***REMOVED***"
+
 API_URL = "http://api.aviationstack.com/v1/airlines"
 
 def fetch_airlines():
