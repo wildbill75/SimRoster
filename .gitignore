@@ -1,3 +1,11 @@
-.env
 __pycache__/
 *.pyc
+*.pyo
+.env
+*.log
+*.bak
+*.swp
+.DS_Store
+Thumbs.db
+*.old
+tools/

@@ -1,9 +1,16 @@
 import os
+import sys
 import requests
 import time
 from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 
+# Ajout du dossier courant (scripts/) au path Python pour les imports locaux
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+from utils import read_json_file, write_json_file
+
+# Chargement de la config .env (API keys etc)
 load_dotenv()
 
 API_KEY = os.getenv("AERODATABOX_API_KEY")

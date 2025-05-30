@@ -1,0 +1,32 @@
+[
+    {
+        "flight_number": "AF6200",
+        "airline": "Air France",
+        "icao": "AFR",
+        "departure_icao": "LFPO",
+        "arrival_icao": "LFMN",
+        "scheduled_departure": "2024-05-31T08:30:00",
+        "scheduled_arrival": "2024-05-31T09:55:00",
+        "actual_departure": "2024-05-31T08:45:00",
+        "actual_arrival": "2024-05-31T10:00:00",
+        "aircraft_model": "A320",
+        "registration": "F-GKXS",
+        "departure_gate": "A21",
+        "arrival_gate": "B17"
+    },
+    {
+        "flight_number": "AF6201",
+        "airline": "Air France",
+        "icao": "AFR",
+        "departure_icao": "LFMN",
+        "arrival_icao": "LFPO",
+        "scheduled_departure": "2024-05-31T11:15:00",
+        "scheduled_arrival": "2024-05-31T12:40:00",
+        "actual_departure": "2024-05-31T11:30:00",
+        "actual_arrival": "2024-05-31T12:55:00",
+        "aircraft_model": "A321",
+        "registration": "F-GTAT",
+        "departure_gate": "C02",
+        "arrival_gate": "D34"
+    }
+]
