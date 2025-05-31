@@ -1,0 +1,21 @@
+{
+    "departure": {
+        "icao": "LFPO",
+        "name": "Paris-Orly",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community/LFPO",
+        "source": "community"
+    },
+    "arrival": {
+        "icao": "LFMN",
+        "name": "Nice-Côte d'Azur",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages/fs24-microsoft-airport-lfmn-nice",
+        "source": "official"
+    },
+    "aircraft": {
+        "company": "Air France",
+        "engine_type": "CFM",
+        "icao": "AFR",
+        "model": "A321",
+        "registration": "F-GTAT"
+    }
+}
