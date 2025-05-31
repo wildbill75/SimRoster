@@ -2,6 +2,7 @@ import sys
 import os
 import json
 import webbrowser
+import csv
 
 from PyQt5.QtWidgets import (
     QApplication,
@@ -21,12 +22,17 @@ from PyQt5.QtWidgets import (
     QGroupBox,
     QFormLayout,
 )
-from PyQt5.QtCore import QTimer
+
+from PyQt5.QtCore import QTimer, QUrl
+from PyQt5.QtWebEngineWidgets import QWebEngineView
+
 
 # Chemins relatifs
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 RESULTS_DIR = os.path.join(BASE_DIR, "results")
 DATA_DIR = os.path.join(BASE_DIR, "scripts", "data")
+MAP_DIR = os.path.join(BASE_DIR, "map")
+MAP_HTML_PATH = os.path.join(MAP_DIR, "map.html")
 
 
 class MainWindow(QMainWindow):
@@ -62,13 +68,29 @@ class MainWindow(QMainWindow):
     def build_dashboard_tab(self):
         tab = QWidget()
         layout = QVBoxLayout()
-        layout.addWidget(QLabel("Carte (à venir)"))
+
+        self.map_view = QWebEngineView()
+
+        # Ajout immédiat du widget dans l'UI
+        layout.addWidget(self.map_view)
+
+        # Bouton pour forcer le rechargement plus tard
+        btn_refresh_map = QPushButton("Rafraîchir la carte")
+        btn_refresh_map.clicked.connect(self.refresh_map)
+        layout.addWidget(btn_refresh_map)
+
+        # Éléments d'interface déjà présents dans ton onglet Dashboard
         layout.addWidget(QLabel("Infos"))
         layout.addWidget(QLabel("Envol"))
         layout.addWidget(QLabel("Préparation"))
         layout.addWidget(QLabel("Dernier scan"))
         layout.addWidget(QLabel("Statistiques à venir"))
+
         tab.setLayout(layout)
+
+        # 🧠 Appel direct de la méthode qui charge la carte
+        self.refresh_map()
+
         return tab
 
     def build_scan_tab(self):
@@ -351,6 +373,7 @@ class MainWindow(QMainWindow):
         tab = QWidget()
         layout = QVBoxLayout(tab)
 
+        # Combo pour la liste des vols simulés
         self.combo_realflights = QComboBox()
         layout.addWidget(QPushButton("Charger les vols simulés"))
         btn = layout.itemAt(layout.count() - 1).widget()
@@ -358,17 +381,23 @@ class MainWindow(QMainWindow):
 
         layout.addWidget(self.combo_realflights)
 
+        # Zone d'affichage des infos de vol
         self.label_flightinfo = QLabel("Aucun vol sélectionné.")
+        self.label_flightinfo.setWordWrap(True)
         layout.addWidget(self.label_flightinfo)
 
+        # Bouton Enregistrer
         btn_save = QPushButton("Enregistrer ce vol")
         btn_save.clicked.connect(self.save_selected_realflight)
         layout.addWidget(btn_save)
 
-        btn_simbrief = QPushButton("Générer dans SimBrief")
-        btn_simbrief.clicked.connect(self.launch_simbrief)
-        layout.addWidget(btn_simbrief)
+        # Bouton SimBrief avec self.
+        self.btn_simbrief = QPushButton("Générer dans SimBrief")
+        self.btn_simbrief.setEnabled(False)  # désactivé par défaut
+        self.btn_simbrief.clicked.connect(self.launch_simbrief)
+        layout.addWidget(self.btn_simbrief)
 
+        # Mise à jour des infos quand un vol est sélectionné
         self.combo_realflights.currentIndexChanged.connect(self.update_flightinfo)
 
         return tab
@@ -391,15 +420,28 @@ class MainWindow(QMainWindow):
         idx = self.combo_realflights.currentIndex()
         if idx < 0:
             self.label_flightinfo.setText("Aucun vol sélectionné.")
+            self.btn_simbrief.setEnabled(False)
             return
-        f = self.combo_realflights.itemData(idx)
+
+        flight = self.combo_realflights.itemData(idx)
         self.label_flightinfo.setText(
-            f"<b>{f['flight_number']}</b><br>"
-            f"De {f['departure_icao']} à {f['arrival_icao']}<br>"
-            f"Départ prévu : {f['scheduled_departure']}<br>"
-            f"Arrivée prévue : {f['scheduled_arrival']}<br>"
-            f"Avion : {f['aircraft_model']} ({f['registration']})"
+            f"<b>{flight['flight_number']}</b><br>"
+            f"De {flight['departure_icao']} à {flight['arrival_icao']}<br>"
+            f"Départ prévu : {flight['scheduled_departure']}<br>"
+            f"Arrivée prévue : {flight['scheduled_arrival']}<br>"
+            f"Avion : {flight['aircraft_model']} ({flight['registration']})"
         )
+
+        # Activation intelligente du bouton SimBrief
+        fields = [
+            "aircraft_model",
+            "registration",
+            "departure_icao",
+            "arrival_icao",
+            "icao",
+        ]
+        is_valid = all(flight.get(field) for field in fields)
+        self.btn_simbrief.setEnabled(is_valid)
 
     def save_selected_realflight(self):
         idx = self.combo_realflights.currentIndex()
@@ -427,6 +469,7 @@ class MainWindow(QMainWindow):
             f"userid={simbrief_userid}"
             f"&type={flight['aircraft_model']}"
             f"&airline={flight['icao']}"
+            f"&fltnum={flight['flight_number'].replace(' ', '')}"
             f"&reg={flight['registration']}"
             f"&orig={flight['departure_icao']}"
             f"&dest={flight['arrival_icao']}"
@@ -435,6 +478,61 @@ class MainWindow(QMainWindow):
 
     def refresh_scan_tab(self):
         print("[DEBUG] Rafraîchissement visuel forcé des labels Scan.")
+
+    def refresh_map(self):
+        # On remonte à la racine du projet (RealAirlinesPlanner) et on va dans "map/map.html"
+        map_path = os.path.abspath(os.path.join(BASE_DIR, "map", "map.html"))
+        print("[DEBUG] Chemin absolu vers la carte :", map_path)
+
+        if not os.path.exists(map_path):
+            print("[ERREUR] Le fichier map.html est introuvable à ce chemin.")
+        else:
+            print("[DEBUG] Le fichier map.html a été trouvé correctement.")
+
+        self.map_view.load(QUrl.fromLocalFile(map_path))
+        print("[INFO] Carte rechargée dans le dashboard.")
+
+    def generate_airports_map_data(self):
+        """
+        Génère un fichier JSON contenant les aéroports sélectionnés avec coordonnées lat/lon
+        à partir de 'airports.csv' pour affichage dans Leaflet.
+        """
+        csv_path = os.path.join(DATA_DIR, "airports.csv")
+        selected_json = os.path.join(RESULTS_DIR, "selected_airports.json")
+        output_json = os.path.join("map", "airports_map_data.json")
+
+        if not os.path.exists(csv_path) or not os.path.exists(selected_json):
+            print("[WARN] Fichier CSV ou JSON manquant pour la carte.")
+            return
+
+        with open(selected_json, "r", encoding="utf-8") as f:
+            selected = json.load(f)
+            selected_icaos = {a["icao"] for a in selected if "icao" in a}
+
+        results = []
+        with open(csv_path, newline="", encoding="utf-8") as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                icao = row.get("ICAO", "").strip().upper()
+                if icao in selected_icaos:
+                    try:
+                        lat = float(row["Latitude"])
+                        lon = float(row["Longitude"])
+                        results.append(
+                            {
+                                "icao": icao,
+                                "name": row.get("Name", "Unknown"),
+                                "lat": lat,
+                                "lon": lon,
+                            }
+                        )
+                    except Exception as e:
+                        print(f"[ERREUR] Coordonnées invalides pour {icao} : {e}")
+
+        with open(output_json, "w", encoding="utf-8") as out:
+            json.dump(results, out, indent=2)
+            print(f"[INFO] {len(results)} aéroports exportés pour la carte.")   
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

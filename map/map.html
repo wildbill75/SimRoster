@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Carte des aéroports</title>
+    <style>
+        html, body, #map {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+    <div id="map"></div>
+
+    <script>
+        const map = L.map('map').setView([48.8566, 2.3522], 5); // Paris par défaut
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap',
+            maxZoom: 10,
+        }).addTo(map);
+
+        // Charger les données JSON
+        fetch('../results/map_data.json')
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(airport => {
+                    const marker = L.marker([airport.lat, airport.lon]).addTo(map);
+                    marker.bindPopup(`<b>${airport.icao}</b><br>${airport.name}`);
+                });
+            })
+            .catch(error => {
+                console.error("Erreur lors du chargement des données : ", error);
+            });
+    </script>
+</body>
+</html>
