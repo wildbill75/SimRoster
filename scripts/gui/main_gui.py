@@ -1,17 +1,33 @@
 import sys
 import os
 import json
+import webbrowser
 
 from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QVBoxLayout, QTabWidget, QLabel,
-    QPushButton, QFileDialog, QHBoxLayout, QLineEdit, QMessageBox, QComboBox,
-    QTableWidget, QTableWidgetItem
+    QApplication,
+    QMainWindow,
+    QWidget,
+    QVBoxLayout,
+    QTabWidget,
+    QLabel,
+    QPushButton,
+    QFileDialog,
+    QHBoxLayout,
+    QLineEdit,
+    QMessageBox,
+    QComboBox,
+    QCheckBox,
+    QScrollArea,
+    QGroupBox,
+    QFormLayout,
 )
+from PyQt5.QtCore import QTimer
 
-# Chemin vers le dossier 'results' à la racine du projet
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+# Chemins relatifs
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 RESULTS_DIR = os.path.join(BASE_DIR, "results")
 DATA_DIR = os.path.join(BASE_DIR, "scripts", "data")
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -22,8 +38,12 @@ class MainWindow(QMainWindow):
         self.tabs = QTabWidget()
         self.setCentralWidget(self.tabs)
 
-        self.community_path = os.path.expandvars(r"%LOCALAPPDATA%\Packages\Microsoft.Limitless_8wekyb3d8bbwe\LocalCache\Packages\Community")
-        self.streamed_path = os.path.expandvars(r"%LOCALAPPDATA%\Packages\Microsoft.Limitless_8wekyb3d8bbwe\LocalCache\Packages\StreamedPackages")
+        self.community_path = os.path.expandvars(
+            r"%LOCALAPPDATA%\Packages\Microsoft.Limitless_8wekyb3d8bbwe\LocalCache\Packages\Community"
+        )
+        self.streamed_path = os.path.expandvars(
+            r"%LOCALAPPDATA%\Packages\Microsoft.Limitless_8wekyb3d8bbwe\LocalCache\Packages\StreamedPackages"
+        )
 
         self.dashboard_tab = self.build_dashboard_tab()
         self.scan_tab = self.build_scan_tab()
@@ -37,108 +57,189 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.flightplan_tab, "Flight Plan")
         self.tabs.addTab(self.realflight_tab, "Vol réel")
 
+        QTimer.singleShot(500, self.refresh_scan_tab)
+
     def build_dashboard_tab(self):
         tab = QWidget()
-        layout = QVBoxLayout(tab)
+        layout = QVBoxLayout()
         layout.addWidget(QLabel("Carte (à venir)"))
-        layout.addWidget(QLabel("Infos / Envol / Préparation / Dernier scan / Statistiques à venir"))
+        layout.addWidget(QLabel("Infos"))
+        layout.addWidget(QLabel("Envol"))
+        layout.addWidget(QLabel("Préparation"))
+        layout.addWidget(QLabel("Dernier scan"))
+        layout.addWidget(QLabel("Statistiques à venir"))
+        tab.setLayout(layout)
         return tab
 
     def build_scan_tab(self):
         tab = QWidget()
         layout = QVBoxLayout(tab)
 
-        self.btn_load_aircraft = QPushButton("Charger les avions sélectionnés")
-        self.btn_load_airports = QPushButton("Charger les aéroports sélectionnés")
+        # Groupes pour aéroports et avions
+        self.aircraft_checkboxes = []
+        self.airport_checkboxes = []
 
-        self.btn_load_aircraft.clicked.connect(self.load_selected_aircraft)
-        self.btn_load_airports.clicked.connect(self.load_selected_airports)
+        # Scroll area pour les avions
+        aircraft_group = QGroupBox("Avions détectés")
+        aircraft_layout = QVBoxLayout()
+        self.scroll_aircraft = QScrollArea()
+        self.scroll_aircraft.setWidgetResizable(True)
+        self.container_aircraft = QWidget()
+        self.container_aircraft.setLayout(aircraft_layout)
+        self.scroll_aircraft.setWidget(self.container_aircraft)
+        aircraft_group.setLayout(QVBoxLayout())
+        aircraft_group.layout().addWidget(self.scroll_aircraft)
 
-        layout.addWidget(self.btn_load_aircraft)
-        layout.addWidget(self.btn_load_airports)
+        # Scroll area pour les aéroports
+        airport_group = QGroupBox("Aéroports détectés")
+        airport_layout = QVBoxLayout()
+        self.scroll_airport = QScrollArea()
+        self.scroll_airport.setWidgetResizable(True)
+        self.container_airport = QWidget()
+        self.container_airport.setLayout(airport_layout)
+        self.scroll_airport.setWidget(self.container_airport)
+        airport_group.setLayout(QVBoxLayout())
+        airport_group.layout().addWidget(self.scroll_airport)
 
-        self.aircraft_table = QTableWidget()
-        self.aircraft_table.setColumnCount(4)
-        self.aircraft_table.setHorizontalHeaderLabels(["Model", "Registration", "Company", "ICAO"])
-        layout.addWidget(QLabel("Avions détectés :"))
-        layout.addWidget(self.aircraft_table)
-        self.aircraft_count = QLabel("")
-        layout.addWidget(self.aircraft_count)
+        # Boutons de sauvegarde
+        btn_save_aircraft = QPushButton("Sauvegarder les avions sélectionnés")
+        btn_save_airports = QPushButton("Sauvegarder les aéroports sélectionnés")
+        btn_save_aircraft.clicked.connect(self.save_aircraft_selection)
+        btn_save_airports.clicked.connect(self.save_airport_selection)
 
-        self.airport_table = QTableWidget()
-        self.airport_table.setColumnCount(3)
-        self.airport_table.setHorizontalHeaderLabels(["ICAO", "Name", "Source"])
-        layout.addWidget(QLabel("Aéroports détectés :"))
-        layout.addWidget(self.airport_table)
-        self.airport_count = QLabel("")
-        layout.addWidget(self.airport_count)
+        # Ajoute tout au layout principal
+        layout.addWidget(aircraft_group)
+        layout.addWidget(btn_save_aircraft)
+        layout.addSpacing(20)
+        layout.addWidget(airport_group)
+        layout.addWidget(btn_save_airports)
+
+        tab.setLayout(layout)
+
+        # Chargement initial
+        self.load_aircraft_list()
+        self.load_airport_list()
 
         return tab
 
-    def load_selected_aircraft(self):
-        path = os.path.join(RESULTS_DIR, 'selected_aircraft.json')
-        if not os.path.exists(path):
-            QMessageBox.warning(self, "Erreur lecture avions", f"Fichier introuvable :\n{path}")
-            return
+    def load_aircraft_list(self):
+        self.aircraft_checkboxes.clear()
+        layout = self.container_aircraft.layout()
+        while layout.count():
+            child = layout.takeAt(0)
+            if child.widget():
+                child.widget().deleteLater()
 
-        with open(path, "r", encoding="utf-8") as f:
-            aircraft_list = json.load(f)
+        path = os.path.join(RESULTS_DIR, "aircraft_scanresults.json")
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                self.aircraft_data = json.load(f)
+            for aircraft in self.aircraft_data:
+                label = f"{aircraft.get('model', 'Unknown')} - {aircraft.get('company', '')} ({aircraft.get('registration', '')})"
+                cb = QCheckBox(label)
+                cb.setChecked(True)
+                self.aircraft_checkboxes.append(cb)
+                layout.addWidget(cb)
+        except Exception as e:
+            print(f"[ERREUR] Chargement des avions : {e}")
 
-        self.aircraft_table.setRowCount(len(aircraft_list))
-        for row, aircraft in enumerate(aircraft_list):
-            self.aircraft_table.setItem(row, 0, QTableWidgetItem(aircraft.get("model", "")))
-            self.aircraft_table.setItem(row, 1, QTableWidgetItem(aircraft.get("registration", "")))
-            self.aircraft_table.setItem(row, 2, QTableWidgetItem(aircraft.get("company", "")))
-            self.aircraft_table.setItem(row, 3, QTableWidgetItem(aircraft.get("icao", "")))
+    def load_airport_list(self):
+        self.airport_checkboxes.clear()
+        layout = self.container_airport.layout()
+        while layout.count():
+            child = layout.takeAt(0)
+            if child.widget():
+                child.widget().deleteLater()
 
-        self.aircraft_count.setText(f"{len(aircraft_list)} avion(s) sélectionné(s).")
+        path = os.path.join(RESULTS_DIR, "airport_scanresults.json")
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                self.airport_data = json.load(f)
+            for airport in self.airport_data:
+                label = f"{airport.get('icao', '???')} - {airport.get('name', 'Nom inconnu')}"
+                cb = QCheckBox(label)
+                cb.setChecked(True)
+                self.airport_checkboxes.append(cb)
+                layout.addWidget(cb)
+        except Exception as e:
+            print(f"[ERREUR] Chargement des aéroports : {e}")
+            try:
+                path = os.path.join(RESULTS_DIR, "airport_scanresults.json")
+                with open(path, "r", encoding="utf-8") as f:
+                    airports = json.load(f)
+                self.label_airports.setText(f"{len(airports)} aéroport(s) sélectionné(s).")
+                self.label_airports.repaint()
+                print(f"[DEBUG] Chargement aéroports depuis : {path}")
+                print(f"[DEBUG] Nombre d'aéroports : {len(airports)}")
+            except Exception as e:
+                self.label_airports.setText("Erreur lors du chargement des aéroports.")
+                print(f"[ERREUR] load_selected_airports : {e}")
 
-    def load_selected_airports(self):
-        path = os.path.join(RESULTS_DIR, 'selected_airports.json')
-        if not os.path.exists(path):
-            QMessageBox.warning(self, "Erreur lecture aéroports", f"Fichier introuvable :\n{path}")
-            return
+    def save_aircraft_selection(self):
+        selected = []
+        for cb, data in zip(self.aircraft_checkboxes, self.aircraft_data):
+            if cb.isChecked():
+                selected.append(data)
+        path = os.path.join(RESULTS_DIR, "selected_aircraft.json")
+        try:
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(selected, f, indent=4, ensure_ascii=False)
+            QMessageBox.information(
+                self, "Succès", f"{len(selected)} avion(s) sauvegardé(s) !"
+            )
+        except Exception as e:
+            QMessageBox.critical(self, "Erreur", f"Erreur sauvegarde avions : {e}")
 
-        with open(path, "r", encoding="utf-8") as f:
-            airport_list = json.load(f)
-
-        self.airport_table.setRowCount(len(airport_list))
-        for row, airport in enumerate(airport_list):
-            self.airport_table.setItem(row, 0, QTableWidgetItem(airport.get("icao", "")))
-            self.airport_table.setItem(row, 1, QTableWidgetItem(airport.get("name", "")))
-            self.airport_table.setItem(row, 2, QTableWidgetItem(airport.get("source", "")))
-
-        self.airport_count.setText(f"{len(airport_list)} aéroport(s) sélectionné(s).")
+    def save_airport_selection(self):
+        selected = []
+        for cb, data in zip(self.airport_checkboxes, self.airport_data):
+            if cb.isChecked():
+                selected.append(data)
+        path = os.path.join(RESULTS_DIR, "selected_airports.json")
+        try:
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(selected, f, indent=4, ensure_ascii=False)
+            QMessageBox.information(
+                self, "Succès", f"{len(selected)} aéroport(s) sauvegardé(s) !"
+            )
+        except Exception as e:
+            QMessageBox.critical(self, "Erreur", f"Erreur sauvegarde aéroports : {e}")
 
     def build_settings_tab(self):
         tab = QWidget()
         layout = QVBoxLayout(tab)
 
-        layout.addWidget(QLabel("Chemin du dossier Community :"))
         self.input_community = QLineEdit(self.community_path)
-        btn_browse_community = QPushButton("Parcourir...")
+        btn_browse_community = QPushButton("Parcourir Community")
         btn_browse_community.clicked.connect(self.browse_community)
+
+        self.input_streamed = QLineEdit(self.streamed_path)
+        btn_browse_streamed = QPushButton("Parcourir StreamedPackages")
+        btn_browse_streamed.clicked.connect(self.browse_streamed)
+
+        layout.addWidget(QLabel("Dossier Community"))
         layout.addWidget(self.input_community)
         layout.addWidget(btn_browse_community)
 
-        layout.addWidget(QLabel("Chemin du dossier StreamedPackages :"))
-        self.input_streamed = QLineEdit(self.streamed_path)
-        btn_browse_streamed = QPushButton("Parcourir...")
-        btn_browse_streamed.clicked.connect(self.browse_streamed)
+        layout.addWidget(QLabel("Dossier StreamedPackages"))
         layout.addWidget(self.input_streamed)
         layout.addWidget(btn_browse_streamed)
 
         return tab
 
     def browse_community(self):
-        path = QFileDialog.getExistingDirectory(self, "Sélectionner le dossier Community")
-        if path:
-            self.input_community.setText(path)
+        folder = QFileDialog.getExistingDirectory(
+            self, "Sélectionner le dossier Community"
+        )
+        if folder:
+            self.input_community.setText(folder)
 
     def browse_streamed(self):
-        path = QFileDialog.getExistingDirectory(self, "Sélectionner le dossier StreamedPackages")
-        if path:
-            self.input_streamed.setText(path)
+        folder = QFileDialog.getExistingDirectory(
+            self, "Sélectionner le dossier StreamedPackages"
+        )
+        if folder:
+            self.input_streamed.setText(folder)
 
     def build_flightplan_tab(self):
         tab = QWidget()
@@ -159,12 +260,12 @@ class MainWindow(QMainWindow):
         layout.addWidget(QLabel("Avion utilisé"))
         layout.addWidget(self.combo_aircraft)
 
-        self.label_summary = QLabel("")
+        self.label_summary = QLabel("Résumé du vol")
         layout.addWidget(self.label_summary)
 
-        btn_save_flightplan = QPushButton("Enregistrer le plan de vol")
-        btn_save_flightplan.clicked.connect(self.save_flightplan)
-        layout.addWidget(btn_save_flightplan)
+        btn_save = QPushButton("Enregistrer le plan de vol")
+        btn_save.clicked.connect(self.save_flightplan)
+        layout.addWidget(btn_save)
 
         self.load_selected_data()
         self.combo_departure.currentIndexChanged.connect(self.update_summary)
@@ -176,87 +277,164 @@ class MainWindow(QMainWindow):
     def load_selected_data(self):
         self.selected_airports = []
         self.selected_aircraft = []
+        ap_path = os.path.join(RESULTS_DIR, "airport_scanresults.json")
+        ac_path = os.path.join(RESULTS_DIR, "aircraft_scanresults.json")
 
-        airport_path = os.path.join(RESULTS_DIR, "selected_airports.json")
-        aircraft_path = os.path.join(RESULTS_DIR, "selected_aircraft.json")
-
-        if os.path.exists(airport_path):
-            with open(airport_path, "r", encoding="utf-8") as f:
+        if os.path.exists(ap_path):
+            with open(ap_path, "r", encoding="utf-8") as f:
                 self.selected_airports = json.load(f)
-
-        if os.path.exists(aircraft_path):
-            with open(aircraft_path, "r", encoding="utf-8") as f:
+        if os.path.exists(ac_path):
+            with open(ac_path, "r", encoding="utf-8") as f:
                 self.selected_aircraft = json.load(f)
 
         self.combo_departure.clear()
         self.combo_arrival.clear()
         self.combo_aircraft.clear()
 
-        for airport in self.selected_airports:
-            label = f"{airport.get('icao', '')} | {airport.get('name', '')}"
-            self.combo_departure.addItem(label, airport)
-            self.combo_arrival.addItem(label, airport)
+        for ap in self.selected_airports:
+            label = f"{ap['icao']} | {ap['name']}"
+            self.combo_departure.addItem(label, ap)
+            self.combo_arrival.addItem(label, ap)
 
         for ac in self.selected_aircraft:
-            label = f"{ac.get('model', '')} | {ac.get('company', '')} | {ac.get('registration', '')}"
+            label = f"{ac['model']} | {ac['company']} | {ac['registration']}"
             self.combo_aircraft.addItem(label, ac)
 
         self.update_summary()
 
     def update_summary(self):
-        if self.combo_departure.count() < 1 or self.combo_arrival.count() < 1 or self.combo_aircraft.count() < 1:
-            self.label_summary.setText("Merci de sélectionner au moins deux aéroports et un avion.")
+        if (
+            self.combo_departure.count() < 1
+            or self.combo_arrival.count() < 1
+            or self.combo_aircraft.count() < 1
+        ):
+            self.label_summary.setText(
+                "Merci de charger au moins 2 aéroports et 1 avion."
+            )
             return
 
-        dep_idx = self.combo_departure.currentIndex()
-        arr_idx = self.combo_arrival.currentIndex()
-        ac_idx = self.combo_aircraft.currentIndex()
+        dep = self.combo_departure.currentData()
+        arr = self.combo_arrival.currentData()
+        ac = self.combo_aircraft.currentData()
 
-        if dep_idx == arr_idx:
+        if dep["icao"] == arr["icao"]:
             self.label_summary.setText("Départ et arrivée doivent être différents.")
             return
 
-        dep_airport = self.combo_departure.itemData(dep_idx)
-        arr_airport = self.combo_arrival.itemData(arr_idx)
-        aircraft = self.combo_aircraft.itemData(ac_idx)
-
-        summary = (
-            f"<b>Départ:</b> {dep_airport['icao']} ({dep_airport['name']})<br>"
-            f"<b>Arrivée:</b> {arr_airport['icao']} ({arr_airport['name']})<br>"
-            f"<b>Avion:</b> {aircraft['model']} {aircraft['company']} ({aircraft['registration']})"
+        self.label_summary.setText(
+            f"<b>Départ :</b> {dep['icao']} ({dep['name']})<br>"
+            f"<b>Arrivée :</b> {arr['icao']} ({arr['name']})<br>"
+            f"<b>Avion :</b> {ac['model']} {ac['company']} ({ac['registration']})"
         )
-        self.label_summary.setText(summary)
 
     def save_flightplan(self):
-        dep_idx = self.combo_departure.currentIndex()
-        arr_idx = self.combo_arrival.currentIndex()
-        ac_idx = self.combo_aircraft.currentIndex()
+        dep = self.combo_departure.currentData()
+        arr = self.combo_arrival.currentData()
+        ac = self.combo_aircraft.currentData()
 
-        if dep_idx == arr_idx:
-            QMessageBox.warning(self, "Erreur", "Départ et arrivée doivent être différents.")
+        if dep["icao"] == arr["icao"]:
+            QMessageBox.warning(
+                self, "Erreur", "Départ et arrivée doivent être différents."
+            )
             return
 
-        dep_airport = self.combo_departure.itemData(dep_idx)
-        arr_airport = self.combo_arrival.itemData(arr_idx)
-        aircraft = self.combo_aircraft.itemData(ac_idx)
-
-        plan = {
-            "departure": dep_airport,
-            "arrival": arr_airport,
-            "aircraft": aircraft
-        }
-
-        output_file = os.path.join(RESULTS_DIR, "selected_flight_plan.json")
-        with open(output_file, "w", encoding="utf-8") as f:
+        plan = {"departure": dep, "arrival": arr, "aircraft": ac}
+        outpath = os.path.join(RESULTS_DIR, "selected_flight_plan.json")
+        with open(outpath, "w", encoding="utf-8") as f:
             json.dump(plan, f, indent=4, ensure_ascii=False)
 
-        QMessageBox.information(self, "Plan de vol enregistré", f"Le plan de vol a été enregistré !\n\n{output_file}")
+        QMessageBox.information(
+            self, "Plan enregistré", f"Enregistré dans :\n{outpath}"
+        )
 
     def build_realflight_tab(self):
         tab = QWidget()
         layout = QVBoxLayout(tab)
-        layout.addWidget(QLabel("Fonctionnalités de vol réel à venir..."))
+
+        self.combo_realflights = QComboBox()
+        layout.addWidget(QPushButton("Charger les vols simulés"))
+        btn = layout.itemAt(layout.count() - 1).widget()
+        btn.clicked.connect(self.load_mock_flights)
+
+        layout.addWidget(self.combo_realflights)
+
+        self.label_flightinfo = QLabel("Aucun vol sélectionné.")
+        layout.addWidget(self.label_flightinfo)
+
+        btn_save = QPushButton("Enregistrer ce vol")
+        btn_save.clicked.connect(self.save_selected_realflight)
+        layout.addWidget(btn_save)
+
+        btn_simbrief = QPushButton("Générer dans SimBrief")
+        btn_simbrief.clicked.connect(self.launch_simbrief)
+        layout.addWidget(btn_simbrief)
+
+        self.combo_realflights.currentIndexChanged.connect(self.update_flightinfo)
+
         return tab
+
+    def load_mock_flights(self):
+        path = os.path.join(RESULTS_DIR, "mock_fr24_flights.json")
+        if not os.path.exists(path):
+            QMessageBox.critical(self, "Erreur", f"Fichier introuvable :\n{path}")
+            return
+
+        with open(path, "r", encoding="utf-8") as f:
+            flights = json.load(f)
+
+        self.combo_realflights.clear()
+        for f in flights:
+            label = f"{f['flight_number']} | {f['airline']} | {f['departure_icao']} -> {f['arrival_icao']}"
+            self.combo_realflights.addItem(label, f)
+
+    def update_flightinfo(self):
+        idx = self.combo_realflights.currentIndex()
+        if idx < 0:
+            self.label_flightinfo.setText("Aucun vol sélectionné.")
+            return
+        f = self.combo_realflights.itemData(idx)
+        self.label_flightinfo.setText(
+            f"<b>{f['flight_number']}</b><br>"
+            f"De {f['departure_icao']} à {f['arrival_icao']}<br>"
+            f"Départ prévu : {f['scheduled_departure']}<br>"
+            f"Arrivée prévue : {f['scheduled_arrival']}<br>"
+            f"Avion : {f['aircraft_model']} ({f['registration']})"
+        )
+
+    def save_selected_realflight(self):
+        idx = self.combo_realflights.currentIndex()
+        if idx < 0:
+            QMessageBox.warning(self, "Erreur", "Aucun vol sélectionné.")
+            return
+        f = self.combo_realflights.itemData(idx)
+        path = os.path.join(RESULTS_DIR, "selected_fr24_flight.json")
+        with open(path, "w", encoding="utf-8") as out:
+            json.dump(f, out, indent=4, ensure_ascii=False)
+        QMessageBox.information(
+            self, "Vol enregistré", f"Vol enregistré dans :\n{path}"
+        )
+
+    def launch_simbrief(self):
+        idx = self.combo_realflights.currentIndex()
+        if idx < 0:
+            QMessageBox.warning(self, "Erreur", "Aucun vol sélectionné.")
+            return
+
+        flight = self.combo_realflights.itemData(idx)
+        simbrief_userid = "25756"
+        url = (
+            f"https://www.simbrief.com/system/dispatch.php?"
+            f"userid={simbrief_userid}"
+            f"&type={flight['aircraft_model']}"
+            f"&airline={flight['icao']}"
+            f"&reg={flight['registration']}"
+            f"&orig={flight['departure_icao']}"
+            f"&dest={flight['arrival_icao']}"
+        )
+        webbrowser.open(url)
+
+    def refresh_scan_tab(self):
+        print("[DEBUG] Rafraîchissement visuel forcé des labels Scan.")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

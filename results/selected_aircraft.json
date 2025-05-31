@@ -1,23 +1,23 @@
 [
     {
-        "company": "Air France",
-        "engine_type": "CFM",
-        "icao": "AFR",
         "model": "A319",
-        "registration": "F-GRHB"
+        "registration": "F-GRHB",
+        "company": "Air France",
+        "icao": "AFR",
+        "engine_type": "CFM"
     },
     {
-        "company": "Air France",
-        "engine_type": "CFM",
-        "icao": "AFR",
         "model": "A320",
-        "registration": "F-GKXS"
+        "registration": "F-GKXS",
+        "company": "Air France",
+        "icao": "AFR",
+        "engine_type": "CFM"
     },
     {
-        "company": "Air France",
-        "engine_type": "CFM",
-        "icao": "AFR",
         "model": "A321",
-        "registration": "F-GTAT"
+        "registration": "F-GTAT",
+        "company": "Air France",
+        "icao": "AFR",
+        "engine_type": "CFM"
     }
 ]
