@@ -1,42 +1,44 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Carte des aéroports</title>
+    <meta charset="utf-8" />
+    <title>Carte des Aéroports</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <style>
-        html, body, #map {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
+        html, body { height: 100%; margin: 0; }
+        #map { width: 100%; height: 100%; }
     </style>
-    <!-- Leaflet CSS & JS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
     <div id="map"></div>
-
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script>
-        const map = L.map('map').setView([48.8566, 2.3522], 5); // Paris par défaut
-
+        const map = L.map('map').setView([46.5, 2.5], 6);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap',
-            maxZoom: 10,
+            attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        // Charger les données JSON
-        fetch('../results/map_data.json')
-            .then(response => response.json())
-            .then(data => {
-                data.forEach(airport => {
-                    const marker = L.marker([airport.lat, airport.lon]).addTo(map);
-                    marker.bindPopup(`<b>${airport.icao}</b><br>${airport.name}`);
-                });
-            })
-            .catch(error => {
-                console.error("Erreur lors du chargement des données : ", error);
-            });
+        const airportData = [
+  {
+    "icao": "LFMN",
+    "name": "Nice-Côte d'Azur Airport",
+    "lat": 43.658401,
+    "lon": 7.21587
+  },
+  {
+    "icao": "LFPO",
+    "name": "Paris-Orly Airport",
+    "lat": 48.72333,
+    "lon": 2.37944
+  }
+];
+
+        airportData.forEach(airport => {
+            L.marker([airport.lat, airport.lon])
+             .addTo(map)
+             .bindPopup(`<strong>${airport.icao}</strong><br>${airport.name}`);
+        });
     </script>
 </body>
 </html>

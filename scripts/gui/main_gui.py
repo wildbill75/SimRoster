@@ -1,5 +1,9 @@
 import sys
 import os
+
+# ✅ On ajoute ici le chemin racine du projet pour que les imports fonctionnent
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+
 import json
 import webbrowser
 import csv
@@ -22,15 +26,25 @@ from PyQt5.QtWidgets import (
     QGroupBox,
     QFormLayout,
 )
+from scripts.utils.generate_map import (
+    generate_airports_map_data,
+    generate_airports_map_html,
+)
 
 from PyQt5.QtCore import QTimer, QUrl
 from PyQt5.QtWebEngineWidgets import QWebEngineView
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+
+    def generate_airports_map_data(): ...
+    def generate_airports_map_html(): ...
 
 
 # Chemins relatifs
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 RESULTS_DIR = os.path.join(BASE_DIR, "results")
-DATA_DIR = os.path.join(BASE_DIR, "scripts", "data")
+DATA_DIR = os.path.join(BASE_DIR, "data")
 MAP_DIR = os.path.join(BASE_DIR, "map")
 MAP_HTML_PATH = os.path.join(MAP_DIR, "map.html")
 
@@ -41,8 +55,12 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Real Airlines Planner Prototype")
         self.setGeometry(100, 100, 900, 600)
 
-        self.tabs = QTabWidget()
-        self.setCentralWidget(self.tabs)
+        # Définition des chemins de base
+        BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        self.base_dir = BASE_DIR
+        self.results_dir = os.path.join(BASE_DIR, "results")
+        self.data_dir = os.path.join(BASE_DIR, "scripts", "data")
+        self.map_dir = os.path.join(BASE_DIR, "map")
 
         self.community_path = os.path.expandvars(
             r"%LOCALAPPDATA%\Packages\Microsoft.Limitless_8wekyb3d8bbwe\LocalCache\Packages\Community"
@@ -50,6 +68,10 @@ class MainWindow(QMainWindow):
         self.streamed_path = os.path.expandvars(
             r"%LOCALAPPDATA%\Packages\Microsoft.Limitless_8wekyb3d8bbwe\LocalCache\Packages\StreamedPackages"
         )
+
+        # Création des onglets
+        self.tabs = QTabWidget()
+        self.setCentralWidget(self.tabs)
 
         self.dashboard_tab = self.build_dashboard_tab()
         self.scan_tab = self.build_scan_tab()
@@ -63,33 +85,44 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.flightplan_tab, "Flight Plan")
         self.tabs.addTab(self.realflight_tab, "Vol réel")
 
+        # Générer map_data.json automatiquement au démarrage
+        generate_airports_map_data()
+
+        # Rafraîchir le visuel de Scan une fois l’interface chargée
         QTimer.singleShot(500, self.refresh_scan_tab)
 
+
     def build_dashboard_tab(self):
+        """
+        Onglet Dashboard : affiche la carte interactive avec les aéroports sélectionnés,
+        et un bouton pour recharger manuellement la carte.
+        """
         tab = QWidget()
         layout = QVBoxLayout()
 
+        # 🔁 Agrandissement de la carte
         self.map_view = QWebEngineView()
+        self.map_view.setMinimumHeight(500)  # Ajuste ici si besoin (ex : 600, 700...)
+        layout.addWidget(self.map_view, stretch=1)
 
-        # Ajout immédiat du widget dans l'UI
-        layout.addWidget(self.map_view)
-
-        # Bouton pour forcer le rechargement plus tard
+        # 🔁 Bouton de rafraîchissement manuel
         btn_refresh_map = QPushButton("Rafraîchir la carte")
         btn_refresh_map.clicked.connect(self.refresh_map)
         layout.addWidget(btn_refresh_map)
 
-        # Éléments d'interface déjà présents dans ton onglet Dashboard
-        layout.addWidget(QLabel("Infos"))
-        layout.addWidget(QLabel("Envol"))
-        layout.addWidget(QLabel("Préparation"))
-        layout.addWidget(QLabel("Dernier scan"))
-        layout.addWidget(QLabel("Statistiques à venir"))
+        # ❌ Labels supprimés pour libérer de l'espace
+        # layout.addWidget(QLabel("Infos"))
+        # layout.addWidget(QLabel("Envol"))
+        # layout.addWidget(QLabel("Préparation"))
+        # layout.addWidget(QLabel("Dernier scan"))
+        # layout.addWidget(QLabel("Statistiques à venir"))
 
+        # Appliquer le layout
         tab.setLayout(layout)
 
-        # 🧠 Appel direct de la méthode qui charge la carte
-        self.refresh_map()
+        # 🔁 Génération initiale des fichiers map
+        generate_airports_map_data()
+        generate_airports_map_html()
 
         return tab
 
@@ -477,61 +510,129 @@ class MainWindow(QMainWindow):
         webbrowser.open(url)
 
     def refresh_scan_tab(self):
-        print("[DEBUG] Rafraîchissement visuel forcé des labels Scan.")
+        print("[DEBUG] Rafraîchissement visuel forcé des listes Scan.")
+        self.load_airport_list()
+        self.load_aircraft_list()
 
     def refresh_map(self):
-        # On remonte à la racine du projet (RealAirlinesPlanner) et on va dans "map/map.html"
-        map_path = os.path.abspath(os.path.join(BASE_DIR, "map", "map.html"))
-        print("[DEBUG] Chemin absolu vers la carte :", map_path)
+        """
+        Rafraîchit la carte interactive affichée dans le dashboard.
+        Cette méthode génère le fichier map_data.json à partir de la sélection,
+        vérifie l'existence de map.html et recharge la carte.
+        """
+        # Générer le fichier map_data.json à partir de la sélection
+        generate_airports_map_data()
 
+        # Déterminer le chemin absolu vers map.html
+        map_path = os.path.abspath(os.path.join(self.map_dir, "map.html"))
+        print(f"[DEBUG] Chemin absolu vers la carte : {map_path}")
+
+        # Vérifier l’existence de la carte
         if not os.path.exists(map_path):
-            print("[ERREUR] Le fichier map.html est introuvable à ce chemin.")
+            print(f"[ERREUR] Le fichier map.html est introuvable à ce chemin.")
+            return
         else:
-            print("[DEBUG] Le fichier map.html a été trouvé correctement.")
+            print(f"[DEBUG] Le fichier map.html a été trouvé correctement.")
 
+        # Vérifier l’existence de map_data.json
+        map_data_path = os.path.abspath(os.path.join(self.map_dir, "map_data.json"))
+        if not os.path.exists(map_data_path):
+            print(f"[ERREUR] Le fichier map_data.json est introuvable.")
+        else:
+            print(f"[DEBUG] Le fichier map_data.json a été généré correctement.")
+
+        # Charger le contenu du fichier JSON (aéroports)
+        mapdata_path = os.path.join(self.map_dir, "map_data.json")
+        airports_data = []
+        if os.path.exists(mapdata_path):
+            try:
+                with open(mapdata_path, "r", encoding="utf-8") as f:
+                    airports_data = json.load(f)
+                    print(f"[DEBUG] Le fichier map_data.json a été chargé correctement.")
+            except Exception as e:
+                print(f"[ERREUR] Lecture de map_data.json : {e}")
+        else:
+            print(f"[ERREUR] Le fichier map_data.json est introuvable.")
+
+        # Injecter les données dans le HTML (remplacement de la variable spéciale)
+        html_template_path = os.path.join(self.map_dir, "map.html")
+        try:
+            with open(html_template_path, "r", encoding="utf-8") as f:
+                html_content = f.read()
+                html_with_data = html_content.replace(
+                    "__AIRPORTS_DATA__", json.dumps(airports_data, ensure_ascii=False, indent=2)
+                )
+            with open(html_template_path, "w", encoding="utf-8") as f:
+                f.write(html_with_data)
+            print("[DEBUG] Données injectées dans map.html avec succès.")
+        except Exception as e:
+            print(f"[ERREUR] Injection dans map.html : {e}")
+
+        # Charger la carte dans le composant QWebEngineView
         self.map_view.load(QUrl.fromLocalFile(map_path))
         print("[INFO] Carte rechargée dans le dashboard.")
 
-    def generate_airports_map_data(self):
-        """
-        Génère un fichier JSON contenant les aéroports sélectionnés avec coordonnées lat/lon
-        à partir de 'airports.csv' pour affichage dans Leaflet.
-        """
-        csv_path = os.path.join(DATA_DIR, "airports.csv")
-        selected_json = os.path.join(RESULTS_DIR, "selected_airports.json")
-        output_json = os.path.join("map", "airports_map_data.json")
 
-        if not os.path.exists(csv_path) or not os.path.exists(selected_json):
-            print("[WARN] Fichier CSV ou JSON manquant pour la carte.")
-            return
+def generate_airports_map_html():
+    """
+    Génère un fichier HTML `map.html` à partir de `map_data.json`,
+    avec les données injectées directement dans le JavaScript.
+    """
+    map_json_path = os.path.join(MAP_DIR, "map_data.json")
+    map_html_path = os.path.join(MAP_DIR, "map.html")
 
-        with open(selected_json, "r", encoding="utf-8") as f:
-            selected = json.load(f)
-            selected_icaos = {a["icao"] for a in selected if "icao" in a}
+    if not os.path.exists(map_json_path):
+        print(f"[ERREUR] map_data.json introuvable : {map_json_path}")
+        return
 
-        results = []
-        with open(csv_path, newline="", encoding="utf-8") as csvfile:
-            reader = csv.DictReader(csvfile)
-            for row in reader:
-                icao = row.get("ICAO", "").strip().upper()
-                if icao in selected_icaos:
-                    try:
-                        lat = float(row["Latitude"])
-                        lon = float(row["Longitude"])
-                        results.append(
-                            {
-                                "icao": icao,
-                                "name": row.get("Name", "Unknown"),
-                                "lat": lat,
-                                "lon": lon,
-                            }
-                        )
-                    except Exception as e:
-                        print(f"[ERREUR] Coordonnées invalides pour {icao} : {e}")
+    # Charger les données JSON des aéroports
+    with open(map_json_path, "r", encoding="utf-8") as f:
+        airports_data = json.load(f)
 
-        with open(output_json, "w", encoding="utf-8") as out:
-            json.dump(results, out, indent=2)
-            print(f"[INFO] {len(results)} aéroports exportés pour la carte.")   
+    # HTML avec variable spéciale __AIRPORTS_DATA__
+    html_template = f"""<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Carte des Aéroports</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        html, body {{ height: 100%; margin: 0; }}
+        #map {{ width: 100%; height: 100%; }}
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('map').setView([46.5, 2.5], 6);
+        L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png', {{
+            attribution: '© OpenStreetMap contributors'
+        }}).addTo(map);
+
+        const airportData = __AIRPORTS_DATA__;
+
+        airportData.forEach(airport => {{
+            L.marker([airport.lat, airport.lon])
+             .addTo(map)
+             .bindPopup(`<strong>${{airport.icao}}</strong><br>${{airport.name}}`);
+        }});
+    </script>
+</body>
+</html>
+"""
+
+    # Injecter les données dans le HTML
+    html_final = html_template.replace(
+        "__AIRPORTS_DATA__", json.dumps(airports_data, ensure_ascii=False, indent=2)
+    )
+
+    # Écrire le fichier final
+    with open(map_html_path, "w", encoding="utf-8") as f:
+        f.write(html_final)
+
+    print(f"[INFO] Fichier map.html généré avec succès : {map_html_path}")
 
 
 if __name__ == "__main__":
