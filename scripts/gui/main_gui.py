@@ -1,9 +1,5 @@
 import sys
 import os
-
-# ✅ On ajoute ici le chemin racine du projet pour que les imports fonctionnent
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
-
 import json
 import webbrowser
 import csv
@@ -26,42 +22,40 @@ from PyQt5.QtWidgets import (
     QGroupBox,
     QFormLayout,
 )
+from PyQt5.QtCore import QTimer, QUrl
+from PyQt5.QtWebEngineWidgets import QWebEngineView
+
+# ✅ Ajout du chemin racine
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+
+# ✅ Import du traducteur
+from scripts.utils.i18n import Translator
+
+# ✅ Import fonctions de génération de carte
 from scripts.utils.generate_map import (
     generate_airports_map_data,
     generate_airports_map_html,
 )
 
-from PyQt5.QtCore import QTimer, QUrl
-from PyQt5.QtWebEngineWidgets import QWebEngineView
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-
-    def generate_airports_map_data(): ...
-    def generate_airports_map_html(): ...
-
-
-# Chemins relatifs
+# ✅ Constantes de chemin
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 RESULTS_DIR = os.path.join(BASE_DIR, "results")
-DATA_DIR = os.path.join(BASE_DIR, "data")
+DATA_DIR = os.path.join(BASE_DIR, "scripts", "data")
 MAP_DIR = os.path.join(BASE_DIR, "map")
 MAP_HTML_PATH = os.path.join(MAP_DIR, "map.html")
-
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Real Airlines Planner Prototype")
-        self.setGeometry(100, 100, 900, 600)
 
-        # Définition des chemins de base
-        BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        # ✅ Initialisation du traducteur multilingue
+        self.translator = Translator("en")
+
+        # ✅ Définition des chemins principaux
         self.base_dir = BASE_DIR
-        self.results_dir = os.path.join(BASE_DIR, "results")
-        self.data_dir = os.path.join(BASE_DIR, "scripts", "data")
-        self.map_dir = os.path.join(BASE_DIR, "map")
-
+        self.results_dir = RESULTS_DIR
+        self.data_dir = DATA_DIR
+        self.map_dir = MAP_DIR
         self.community_path = os.path.expandvars(
             r"%LOCALAPPDATA%\Packages\Microsoft.Limitless_8wekyb3d8bbwe\LocalCache\Packages\Community"
         )
@@ -69,9 +63,43 @@ class MainWindow(QMainWindow):
             r"%LOCALAPPDATA%\Packages\Microsoft.Limitless_8wekyb3d8bbwe\LocalCache\Packages\StreamedPackages"
         )
 
-        # Création des onglets
+        # ✅ Fenêtre principale
+        self.setWindowTitle(self.translator.t("main_window_title"))
+        self.setGeometry(100, 100, 1200, 800)
+
+        # ✅ Sélecteur de langue (haut de l’interface)
+        self.language_selector = QComboBox()
+        self.language_selector.addItem("English", "en")
+        self.language_selector.addItem("Français", "fr")
+        self.language_selector.addItem("Deutsch", "de")
+        self.language_selector.addItem("Español", "es")
+        self.language_selector.setCurrentIndex(0)
+        self.language_selector.currentIndexChanged.connect(
+            lambda _: self.change_language(self.language_selector.currentData())
+)
+
+
+        # ✅ Initialisation des onglets
         self.tabs = QTabWidget()
-        self.setCentralWidget(self.tabs)
+
+        # ✅ Layout principal de la fenêtre
+        top_layout = QVBoxLayout()
+        top_layout.addWidget(self.language_selector)
+        top_layout.addWidget(self.tabs)
+
+        central_widget = QWidget()
+        central_widget.setLayout(top_layout)
+        self.setCentralWidget(central_widget)
+
+        # ✅ Construction initiale des onglets
+        self.build_tabs()
+
+        # ✅ Génération automatique de map_data.json au lancement
+        generate_airports_map_data()
+        QTimer.singleShot(500, self.refresh_scan_tab)
+
+    def build_tabs(self):
+        self.tabs.clear()
 
         self.dashboard_tab = self.build_dashboard_tab()
         self.scan_tab = self.build_scan_tab()
@@ -79,18 +107,11 @@ class MainWindow(QMainWindow):
         self.flightplan_tab = self.build_flightplan_tab()
         self.realflight_tab = self.build_realflight_tab()
 
-        self.tabs.addTab(self.dashboard_tab, "Dashboard")
-        self.tabs.addTab(self.scan_tab, "Scan")
-        self.tabs.addTab(self.settings_tab, "Settings")
-        self.tabs.addTab(self.flightplan_tab, "Flight Plan")
-        self.tabs.addTab(self.realflight_tab, "Vol réel")
-
-        # Générer map_data.json automatiquement au démarrage
-        generate_airports_map_data()
-
-        # Rafraîchir le visuel de Scan une fois l’interface chargée
-        QTimer.singleShot(500, self.refresh_scan_tab)
-
+        self.tabs.addTab(self.dashboard_tab, self.translator.t("dashboard_tab"))
+        self.tabs.addTab(self.scan_tab, self.translator.t("scan_tab"))
+        self.tabs.addTab(self.settings_tab, self.translator.t("settings_tab"))
+        self.tabs.addTab(self.flightplan_tab, self.translator.t("flight_plan_tab"))
+        self.tabs.addTab(self.realflight_tab, self.translator.t("real_flight_tab"))
 
     def build_dashboard_tab(self):
         """
@@ -106,7 +127,7 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.map_view, stretch=1)
 
         # 🔁 Bouton de rafraîchissement manuel
-        btn_refresh_map = QPushButton("Rafraîchir la carte")
+        btn_refresh_map = QPushButton(self.translator.t("refresh_map"))
         btn_refresh_map.clicked.connect(self.refresh_map)
         layout.addWidget(btn_refresh_map)
 
@@ -262,24 +283,33 @@ class MainWindow(QMainWindow):
 
     def build_settings_tab(self):
         tab = QWidget()
-        layout = QVBoxLayout(tab)
+        layout = QVBoxLayout()
 
-        self.input_community = QLineEdit(self.community_path)
-        btn_browse_community = QPushButton("Parcourir Community")
-        btn_browse_community.clicked.connect(self.browse_community)
+        # 🔤 Titre de l'onglet Paramètres
+        title = QLabel(self.translator.t("settings_title"))
+        title.setStyleSheet("font-size: 18px; font-weight: bold;")
+        layout.addWidget(title)
 
-        self.input_streamed = QLineEdit(self.streamed_path)
-        btn_browse_streamed = QPushButton("Parcourir StreamedPackages")
-        btn_browse_streamed.clicked.connect(self.browse_streamed)
+        # 🌍 Choix de la langue
+        lang_label = QLabel(self.translator.t("select_language"))
+        self.lang_combo = QComboBox()
+        self.lang_combo.addItem("English", "en")
+        self.lang_combo.addItem("Français", "fr")
+        self.lang_combo.addItem("Deutsch", "de")
+        self.lang_combo.addItem("Español", "es")
 
-        layout.addWidget(QLabel("Dossier Community"))
-        layout.addWidget(self.input_community)
-        layout.addWidget(btn_browse_community)
+        # Pré-sélectionner la langue actuelle
+        current_lang_index = self.lang_combo.findData(self.translator.language)
+        if current_lang_index != -1:
+            self.lang_combo.setCurrentIndex(current_lang_index)
 
-        layout.addWidget(QLabel("Dossier StreamedPackages"))
-        layout.addWidget(self.input_streamed)
-        layout.addWidget(btn_browse_streamed)
+         # ✅ Connexion corrigée : déclenchement sur le texte affiché
+        self.lang_combo.currentTextChanged.connect(self.on_language_selected)
 
+        layout.addWidget(lang_label)
+        layout.addWidget(self.lang_combo)
+
+        tab.setLayout(layout)
         return tab
 
     def browse_community(self):
@@ -572,6 +602,31 @@ class MainWindow(QMainWindow):
         self.map_view.load(QUrl.fromLocalFile(map_path))
         print("[INFO] Carte rechargée dans le dashboard.")
 
+    def change_language(self, lang_code):
+        self.translator.set_language(lang_code)
+        self.rebuild_ui()
+
+    def on_language_selected(self, text):
+        code = self.lang_combo.currentData()
+        if code:
+            self.change_language(code)
+
+    def rebuild_ui(self):
+        self.tabs.clear()
+        self.dashboard_tab = self.build_dashboard_tab()
+        self.scan_tab = self.build_scan_tab()
+        self.settings_tab = self.build_settings_tab()
+        self.flightplan_tab = self.build_flightplan_tab()
+        self.realflight_tab = self.build_realflight_tab()
+
+        self.tabs.addTab(self.dashboard_tab, self.translator.t("dashboard_tab"))
+        self.tabs.addTab(self.scan_tab, self.translator.t("scan_tab"))
+        self.tabs.addTab(self.settings_tab, self.translator.t("settings_tab"))
+        self.tabs.addTab(self.flightplan_tab, self.translator.t("flight_plan_tab"))
+        self.tabs.addTab(self.realflight_tab, self.translator.t("real_flight_tab"))
+
+
+            # Tu peux ajouter d’autres rafraîchissements ici plus tard
 
 def generate_airports_map_html():
     """
