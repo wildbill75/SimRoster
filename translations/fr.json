@@ -25,5 +25,6 @@
     "flight_saved": "Vol enregistré avec succès !",
     "simbrief_error": "Impossible de générer SimBrief sans vol sélectionné.",
     "settings_title": "Paramètres",
-    "select_language": "Choisir la langue"
+    "select_language": "Choisir la langue",
+    "devbuild_tab": "Outils Développeur"
 }

@@ -25,5 +25,6 @@
     "flight_saved": "Flug erfolgreich gespeichert!",
     "simbrief_error": "SimBrief kann ohne ausgewählten Flug nicht generiert werden.",
     "settings_title": "Einstellungen",
-    "select_language": "Sprache auswählen"
+    "select_language": "Sprache auswählen",
+    "devbuild_tab": "Entwickler-Werkzeuge"
 }

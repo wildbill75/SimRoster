@@ -1,44 +1,30 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <title>Carte des Aéroports</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <style>
-        html, body { height: 100%; margin: 0; }
-        #map { width: 100%; height: 100%; }
-    </style>
-</head>
-<body>
-    <div id="map"></div>
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    <script>
-        const map = L.map('map').setView([46.5, 2.5], 6);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
 
-        const airportData = [
-  {
-    "icao": "LFMN",
-    "name": "Nice-Côte d'Azur Airport",
-    "lat": 43.658401,
-    "lon": 7.21587
-  },
-  {
-    "icao": "LFPO",
-    "name": "Paris-Orly Airport",
-    "lat": 48.72333,
-    "lon": 2.37944
-  }
-];
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Carte des aéroports</title>
+        <meta charset="utf-8" />
+        <style>
+            #map { height: 100vh; width: 100%; }
+        </style>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+        <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    </head>
+    <body>
+        <div id="map"></div>
+        <script>
+            var map = L.map('map').setView([47.0, 2.0], 6);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
 
-        airportData.forEach(airport => {
-            L.marker([airport.lat, airport.lon])
-             .addTo(map)
-             .bindPopup(`<strong>${airport.icao}</strong><br>${airport.name}`);
-        });
-    </script>
-</body>
-</html>
+            var airports = [{"icao": "LFMN", "name": "Nice-C\u00f4te d'Azur Airport", "lat": 43.658401, "lon": 7.21587}, {"icao": "LFPO", "name": "Paris-Orly Airport", "lat": 48.72333, "lon": 2.37944}];
+
+            airports.forEach(function(a) {
+                L.marker([a.lat, a.lon]).addTo(map)
+                    .bindPopup("<b>" + a.icao + "</b><br>" + a.name);
+            });
+        </script>
+    </body>
+    </html>
+    

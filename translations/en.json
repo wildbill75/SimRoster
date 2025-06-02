@@ -25,5 +25,6 @@
     "flight_saved": "Flight successfully saved!",
     "simbrief_error": "Cannot generate SimBrief without a selected flight.",
     "settings_title": "Settings",
-    "select_language": "Select language"
+    "select_language": "Select language",
+    "devbuild_tab": "Developer Tools"
 }

@@ -1,73 +1,69 @@
 import sys
 import os
+os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-gpu"
 import json
 import webbrowser
-import csv
+# import qt_material
 
 from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
     QWidget,
     QVBoxLayout,
-    QTabWidget,
+    QHBoxLayout,
     QLabel,
     QPushButton,
-    QFileDialog,
-    QHBoxLayout,
-    QLineEdit,
-    QMessageBox,
     QComboBox,
     QCheckBox,
     QScrollArea,
     QGroupBox,
+    QMessageBox,
+    QSizePolicy,
     QFormLayout,
+    QStyle,
+ 
 )
-from PyQt5.QtCore import QTimer, QUrl
+from PyQt5.QtCore import QUrl, Qt
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 
-# ✅ Ajout du chemin racine
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
-
-# ✅ Import du traducteur
-from scripts.utils.i18n import Translator
-
-# ✅ Import fonctions de génération de carte
-from scripts.utils.generate_map import (
-    generate_airports_map_data,
-    generate_airports_map_html,
-)
-
-# ✅ Constantes de chemin
+# === Chemins (à adapter si besoin) ===
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 RESULTS_DIR = os.path.join(BASE_DIR, "results")
 DATA_DIR = os.path.join(BASE_DIR, "scripts", "data")
 MAP_DIR = os.path.join(BASE_DIR, "map")
 MAP_HTML_PATH = os.path.join(MAP_DIR, "map.html")
 
+try:
+    from scripts.utils.i18n import Translator
+except ImportError:
+    from ..utils.i18n import Translator
+
+try:
+    from scripts.utils.generate_map import (
+        generate_airports_map_data,
+        generate_airports_map_html,
+    )
+except ImportError:
+    from ..utils.generate_map import (
+        generate_airports_map_data,
+        generate_airports_map_html,
+    )
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-
-        # ✅ Initialisation du traducteur multilingue
         self.translator = Translator("en")
+        self.setWindowTitle(self.translator.t("main_window_title"))
+        self.setGeometry(100, 100, 1200, 800)
 
-        # ✅ Définition des chemins principaux
+        # CHEMINS (ajoute ces lignes pour avoir accès partout dans la classe)
         self.base_dir = BASE_DIR
         self.results_dir = RESULTS_DIR
         self.data_dir = DATA_DIR
         self.map_dir = MAP_DIR
-        self.community_path = os.path.expandvars(
-            r"%LOCALAPPDATA%\Packages\Microsoft.Limitless_8wekyb3d8bbwe\LocalCache\Packages\Community"
-        )
-        self.streamed_path = os.path.expandvars(
-            r"%LOCALAPPDATA%\Packages\Microsoft.Limitless_8wekyb3d8bbwe\LocalCache\Packages\StreamedPackages"
-        )
+        ...
 
-        # ✅ Fenêtre principale
-        self.setWindowTitle(self.translator.t("main_window_title"))
-        self.setGeometry(100, 100, 1200, 800)
-
-        # ✅ Sélecteur de langue (haut de l’interface)
+        # Sélecteur de langue
         self.language_selector = QComboBox()
         self.language_selector.addItem("English", "en")
         self.language_selector.addItem("Français", "fr")
@@ -76,87 +72,175 @@ class MainWindow(QMainWindow):
         self.language_selector.setCurrentIndex(0)
         self.language_selector.currentIndexChanged.connect(
             lambda _: self.change_language(self.language_selector.currentData())
-)
+        )
 
+        # --- Barre de navigation ---
+        nav_bar = QHBoxLayout()
+        self.btn_dashboard = QPushButton("Dashboard")
+        self.btn_fleet = QPushButton("Fleet & Airports")
+        self.btn_setup = QPushButton("Flight Setup")
+        self.btn_ops = QPushButton("Flight Ops")
+        self.btn_settings = QPushButton("Settings")
+        self.btn_profile = QPushButton("Profile")
+        self.btn_devbuild = QPushButton("DevBuild")
 
-        # ✅ Initialisation des onglets
-        self.tabs = QTabWidget()
+        self.menu_buttons = [
+            self.btn_dashboard,
+            self.btn_fleet,
+            self.btn_setup,
+            self.btn_ops,
+            self.btn_settings,
+            self.btn_profile,
+            self.btn_devbuild,
+        ]
+        for btn in self.menu_buttons:
+            btn.setCheckable(True)
+            btn.setStyleSheet("padding:10px 18px; font-size:1em;")
+            nav_bar.addWidget(btn)
+        nav_bar.addStretch()
 
-        # ✅ Layout principal de la fenêtre
-        top_layout = QVBoxLayout()
-        top_layout.addWidget(self.language_selector)
-        top_layout.addWidget(self.tabs)
+        nav_bar_widget = QWidget()
+        nav_bar_widget.setLayout(nav_bar)
+        nav_bar_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
-        central_widget = QWidget()
-        central_widget.setLayout(top_layout)
-        self.setCentralWidget(central_widget)
-
-        # ✅ Construction initiale des onglets
-        self.build_tabs()
-
-        # ✅ Génération automatique de map_data.json au lancement
-        generate_airports_map_data()
-        QTimer.singleShot(500, self.refresh_scan_tab)
-
-    def build_tabs(self):
-        self.tabs.clear()
-
-        self.dashboard_tab = self.build_dashboard_tab()
-        self.scan_tab = self.build_scan_tab()
-        self.settings_tab = self.build_settings_tab()
-        self.flightplan_tab = self.build_flightplan_tab()
-        self.realflight_tab = self.build_realflight_tab()
-
-        self.tabs.addTab(self.dashboard_tab, self.translator.t("dashboard_tab"))
-        self.tabs.addTab(self.scan_tab, self.translator.t("scan_tab"))
-        self.tabs.addTab(self.settings_tab, self.translator.t("settings_tab"))
-        self.tabs.addTab(self.flightplan_tab, self.translator.t("flight_plan_tab"))
-        self.tabs.addTab(self.realflight_tab, self.translator.t("real_flight_tab"))
-
-    def build_dashboard_tab(self):
-        """
-        Onglet Dashboard : affiche la carte interactive avec les aéroports sélectionnés,
-        et un bouton pour recharger manuellement la carte.
-        """
-        tab = QWidget()
-        layout = QVBoxLayout()
-
-        # 🔁 Agrandissement de la carte
+        # --- Carte centrale ---
         self.map_view = QWebEngineView()
-        self.map_view.setMinimumHeight(500)  # Ajuste ici si besoin (ex : 600, 700...)
-        layout.addWidget(self.map_view, stretch=1)
+        self.map_view.setMinimumHeight(500)
+        self.refresh_map()
 
-        # 🔁 Bouton de rafraîchissement manuel
-        btn_refresh_map = QPushButton(self.translator.t("refresh_map"))
-        btn_refresh_map.clicked.connect(self.refresh_map)
-        layout.addWidget(btn_refresh_map)
+        # --- Panels contextuels ---
+        self.panels = [
+            self.build_dashboard_panel(),
+            self.build_fleet_panel(),
+            None, # Flight Setup overlay géré à part
+            self.build_flightops_panel(),
+            self.build_settings_panel(),
+            self.build_profile_panel(),
+            self.build_devbuild_panel(),
+        ]
 
-        # ❌ Labels supprimés pour libérer de l'espace
-        # layout.addWidget(QLabel("Infos"))
-        # layout.addWidget(QLabel("Envol"))
-        # layout.addWidget(QLabel("Préparation"))
-        # layout.addWidget(QLabel("Dernier scan"))
-        # layout.addWidget(QLabel("Statistiques à venir"))
+        # --- Layout principal ---
+        self.main_layout = QVBoxLayout()
+        self.main_layout.addWidget(self.language_selector)
+        self.main_layout.addWidget(nav_bar_widget)
+        self.main_layout.addWidget(self.map_view, stretch=10)
+        # Pas d'ajout du context_panel ici : voir switch_panel()
 
-        # Appliquer le layout
-        tab.setLayout(layout)
+        self.panel_container = QWidget()
+        self.panel_layout = QVBoxLayout(self.panel_container)
+        self.panel_layout.setContentsMargins(0, 0, 0, 0)
+        self.panel_layout.setSpacing(0)
+        self.panel_layout.addWidget(self.panels[0])  # Par défaut, dashboard (invisible)
 
-        # 🔁 Génération initiale des fichiers map
-        generate_airports_map_data()
-        generate_airports_map_html()
+        self.central = QWidget()
+        self.central.setLayout(self.main_layout)
+        self.setCentralWidget(self.central)
 
-        return tab
+        self.flightsetup_overlay = self.build_flightsetup_panel()  # Panel overlay flottant
+        self.flightsetup_overlay.setVisible(False)
+        self.flightsetup_overlay.setParent(self.central)  # parent = central widget pour overlay
 
-    def build_scan_tab(self):
-        tab = QWidget()
-        layout = QVBoxLayout(tab)
+        self.dashboard_overlay = self.build_dashboard_panel()
+        self.dashboard_overlay.setVisible(False)
+        self.dashboard_overlay.setParent(self.central)
 
-        # Groupes pour aéroports et avions
-        self.aircraft_checkboxes = []
-        self.airport_checkboxes = []
+        self.fleet_overlay = self.build_fleet_panel()
+        self.fleet_overlay.setVisible(False)
+        self.fleet_overlay.setParent(self.central)
 
-        # Scroll area pour les avions
-        aircraft_group = QGroupBox("Avions détectés")
+        self.airport_overlay = self.build_airport_panel()
+        self.airport_overlay.setVisible(False)
+        self.airport_overlay.setParent(self.central)
+
+        self.flightops_overlay = self.build_flightops_panel()
+        self.flightops_overlay.setVisible(False)
+        self.flightops_overlay.setParent(self.central)
+
+        self.settings_overlay = self.build_settings_panel()
+        self.settings_overlay.setVisible(False)
+        self.settings_overlay.setParent(self.central)
+
+        self.profile_overlay = self.build_profile_panel()
+        self.profile_overlay.setVisible(False)
+        self.profile_overlay.setParent(self.central)
+
+        self.devbuild_overlay = self.build_devbuild_panel()
+        self.devbuild_overlay.setVisible(False)
+        self.devbuild_overlay.setParent(self.central)
+
+        # --- Connexions des boutons ---
+        self.btn_dashboard.clicked.connect(lambda: self.switch_panel(0))
+        self.btn_fleet.clicked.connect(lambda: self.switch_panel(1))
+        self.btn_setup.clicked.connect(lambda: self.switch_panel(2))
+        self.btn_ops.clicked.connect(lambda: self.switch_panel(3))
+        self.btn_settings.clicked.connect(lambda: self.switch_panel(4))
+        self.btn_profile.clicked.connect(lambda: self.switch_panel(5))
+        self.btn_devbuild.clicked.connect(lambda: self.switch_panel(6))
+
+        self.btn_dashboard.setChecked(True)
+        self.switch_panel(0)
+
+    def switch_panel(self, idx):
+        # Masque tous les overlays
+        overlays = [
+            self.dashboard_overlay,
+            self.fleet_overlay,
+            self.flightsetup_overlay,
+            self.flightops_overlay,
+            self.settings_overlay,
+            self.profile_overlay,
+            self.devbuild_overlay,
+            self.airport_overlay,
+        ]
+        for panel in overlays:
+            panel.setVisible(False)
+
+        # Retire le panel classique du layout s'il est là
+        if self.main_layout.indexOf(self.panel_container) != -1:
+            self.main_layout.removeWidget(self.panel_container)
+            self.panel_container.setParent(None)
+
+        # Affiche l'overlay correspondant à l'onglet actif (par convention, même ordre que tes boutons)
+        if 0 <= idx < len(overlays):
+            self.position_overlay(overlays[idx])
+            overlays[idx].setVisible(True)
+
+        # Met à jour l'état visuel des boutons
+        for i, btn in enumerate(self.menu_buttons):
+            btn.setChecked(i == idx)
+
+    def build_dashboard_panel(self):
+        panel = QWidget()
+        panel.setMinimumHeight(320)
+        panel.setMaximumWidth(520)
+        panel.setStyleSheet("""
+            background: #fff;
+            border-radius: 18px;
+            border: 1.5px solid #dde;
+        """)
+        layout = QVBoxLayout(panel)
+        label = QLabel("Dashboard panel (à remplir)")
+        label.setAlignment(Qt.AlignCenter)
+        label.setStyleSheet("font-size: 18px; color: #3b4252; margin-top: 80px;")
+        layout.addWidget(label)
+        return panel
+
+    def build_fleet_panel(self):
+        panel = QWidget()
+        panel.setMinimumHeight(320)
+        panel.setMaximumWidth(520)
+        panel.setStyleSheet("""
+            background: #fff;
+            border-radius: 18px;
+            border: 1.5px solid #dde;
+        """)
+        layout = QVBoxLayout(panel)
+        label = QLabel("Fleet panel (à remplir)")
+        label.setAlignment(Qt.AlignCenter)
+        label.setStyleSheet("font-size: 18px; color: #3b4252; margin-top: 80px;")
+        layout.addWidget(label)
+
+        aircraft_group = QGroupBox("Detected Aircraft")
         aircraft_layout = QVBoxLayout()
         self.scroll_aircraft = QScrollArea()
         self.scroll_aircraft.setWidgetResizable(True)
@@ -166,8 +250,7 @@ class MainWindow(QMainWindow):
         aircraft_group.setLayout(QVBoxLayout())
         aircraft_group.layout().addWidget(self.scroll_aircraft)
 
-        # Scroll area pour les aéroports
-        airport_group = QGroupBox("Aéroports détectés")
+        airport_group = QGroupBox("Detected Airports")
         airport_layout = QVBoxLayout()
         self.scroll_airport = QScrollArea()
         self.scroll_airport.setWidgetResizable(True)
@@ -177,35 +260,248 @@ class MainWindow(QMainWindow):
         airport_group.setLayout(QVBoxLayout())
         airport_group.layout().addWidget(self.scroll_airport)
 
-        # Boutons de sauvegarde
-        btn_save_aircraft = QPushButton("Sauvegarder les avions sélectionnés")
-        btn_save_airports = QPushButton("Sauvegarder les aéroports sélectionnés")
+        btn_save_aircraft = QPushButton("Save selected aircraft")
+        btn_save_airports = QPushButton("Save selected airports")
         btn_save_aircraft.clicked.connect(self.save_aircraft_selection)
         btn_save_airports.clicked.connect(self.save_airport_selection)
 
-        # Ajoute tout au layout principal
         layout.addWidget(aircraft_group)
         layout.addWidget(btn_save_aircraft)
         layout.addSpacing(20)
         layout.addWidget(airport_group)
         layout.addWidget(btn_save_airports)
 
-        tab.setLayout(layout)
-
+        panel.setLayout(layout)
         # Chargement initial
         self.load_aircraft_list()
         self.load_airport_list()
+        return panel
 
-        return tab
+    def build_flightsetup_panel(self):
+        # --- PANEL CENTRAL (overlay, pas dans layout !) ---
+        panel = QWidget()
+        panel.setMinimumHeight(370)
+        panel.setMaximumWidth(720)
+        panel.setStyleSheet("""
+            background: #fff;
+            border-radius: 22px;
+            border: 1.5px solid #dde;
+            box-shadow: 0 8px 40px 0 rgba(80,90,110,0.10);
+        """)
+
+        form_layout = QFormLayout(panel)
+        form_layout.setContentsMargins(42, 38, 42, 34)
+        form_layout.setSpacing(18)
+
+        btn_reload = QPushButton("Reload aircraft/airport selection")
+        btn_reload.setFixedWidth(400)
+        btn_reload.setStyleSheet("""
+            QPushButton {
+                background-color: #f4f6fa;
+                border: 1.3px solid #a8b6c8;
+                border-radius: 7px;
+                padding: 8px 20px;
+                font-size: 15px;
+                font-weight: 500;
+                color: #4a5568;
+            }
+            QPushButton:hover {
+                background-color: #e7f1ff;
+                border-color: #406fd1;
+                color: #223466;
+            }
+            QPushButton:pressed {
+                background-color: #d7e9ff;
+                border-color: #2856a1;
+                color: #1a2332;
+            }
+        """)
+        btn_reload.clicked.connect(self.load_selected_data)
+
+        self.combo_departure = QComboBox()
+        self.combo_arrival = QComboBox()
+        self.combo_aircraft = QComboBox()
+
+        for combo in [self.combo_departure, self.combo_arrival, self.combo_aircraft]:
+            combo.setMinimumWidth(420)
+            combo.setMaximumWidth(660)
+
+        label_style = "color: #233; font-size: 13px; font-weight:500; min-width:120px;"
+
+        lbl_departure = QLabel("Departure airport")
+        lbl_departure.setStyleSheet(label_style)
+        lbl_arrival = QLabel("Arrival airport")
+        lbl_arrival.setStyleSheet(label_style)
+        lbl_aircraft = QLabel("Aircraft used")
+        lbl_aircraft.setStyleSheet(label_style)
+
+        self.label_summary = QLabel("Flight summary")
+        self.label_summary.setStyleSheet("""
+            background: #f4f6fa;
+            border: 1.3px solid #a8b6c8;
+            border-radius: 8px;   /* <- beaucoup moins arrondi */
+            padding: 10px 18px;
+            margin-top: 8px;
+            color: #444;
+            font-size: 12px;
+        """)
+
+        btn_save = QPushButton("Save flight plan")
+        btn_save.setFixedWidth(220)
+        btn_save.setStyleSheet(btn_reload.styleSheet())
+        btn_save.clicked.connect(self.save_flightplan)
+
+        form_layout.addRow("", btn_reload)
+        form_layout.addRow(lbl_departure, self.combo_departure)
+        form_layout.addRow(lbl_arrival, self.combo_arrival)
+        form_layout.addRow(lbl_aircraft, self.combo_aircraft)
+        form_layout.addRow("", btn_save)
+        form_layout.addRow("", self.label_summary)
+
+        # --- Chargement initial & connexions ---
+        self.load_selected_data()
+        self.combo_departure.currentIndexChanged.connect(self.update_summary)
+        self.combo_arrival.currentIndexChanged.connect(self.update_summary)
+        self.combo_aircraft.currentIndexChanged.connect(self.update_summary)
+
+        return panel
+
+    def build_flightops_panel(self):
+        panel = QWidget()
+        panel.setMinimumHeight(320)
+        panel.setMaximumWidth(520)
+        panel.setStyleSheet(
+            """
+            background: #fff;
+            border-radius: 18px;
+            border: 1.5px solid #dde;
+        """
+        )
+        layout = QVBoxLayout(panel)
+        label = QLabel("Flight Ops panel (à remplir)")
+        label.setAlignment(Qt.AlignCenter)
+        label.setStyleSheet("font-size: 18px; color: #3b4252; margin-top: 80px;")
+        layout.addWidget(label)
+
+        # Exemple de bouton à titre de placeholder
+        btn_save = QPushButton("Save this flight (placeholder)")
+        # Ne connecte rien pour l’instant (tu pourras ajouter la connexion plus tard)
+        layout.addWidget(btn_save)
+
+        # Placeholder ComboBox, non connecté (à compléter plus tard si besoin)
+        self.combo_realflights = QComboBox()
+        self.combo_realflights.addItem("No real flights available yet")
+        layout.addWidget(self.combo_realflights)
+        # Pas de connexion .currentIndexChanged ici pour éviter les erreurs
+
+        # Placeholder SimBrief (désactivé)
+        self.btn_simbrief = QPushButton("Generate in SimBrief (placeholder)")
+        self.btn_simbrief.setEnabled(False)
+        layout.addWidget(self.btn_simbrief)
+
+        panel.setLayout(layout)
+        return panel
+
+    def build_settings_panel(self):
+        panel = QWidget()
+        panel.setMinimumHeight(320)
+        panel.setMaximumWidth(520)
+        panel.setStyleSheet("""
+            background: #fff;
+            border-radius: 18px;
+            border: 1.5px solid #dde;
+    """)
+        layout = QVBoxLayout(panel)
+        label = QLabel("Settings panel (à remplir)")
+        label.setAlignment(Qt.AlignCenter)
+        label.setStyleSheet("font-size: 18px; color: #3b4252; margin-top: 80px;")
+        layout.addWidget(label)
+
+        lang_label = QLabel(self.translator.t("select_language"))
+        self.lang_combo = QComboBox()
+        self.lang_combo.addItem("English", "en")
+        self.lang_combo.addItem("Français", "fr")
+        self.lang_combo.addItem("Deutsch", "de")
+        self.lang_combo.addItem("Español", "es")
+        current_lang_index = self.lang_combo.findData(self.translator.language)
+        if current_lang_index != -1:
+            self.lang_combo.setCurrentIndex(current_lang_index)
+        self.lang_combo.currentTextChanged.connect(self.on_language_selected)
+        layout.addWidget(lang_label)
+        layout.addWidget(self.lang_combo)
+        panel.setLayout(layout)
+        return panel
+
+    def build_profile_panel(self):
+        panel = QWidget()
+        panel.setMinimumHeight(320)
+        panel.setMaximumWidth(520)
+        panel.setStyleSheet("""
+            background: #fff;
+            border-radius: 18px;
+            border: 1.5px solid #dde;
+    """)
+        layout = QVBoxLayout(panel)
+        label = QLabel("Profile panel (à remplir)")
+        label.setAlignment(Qt.AlignCenter)
+        label.setStyleSheet("font-size: 18px; color: #3b4252; margin-top: 80px;")
+        layout.addWidget(label)
+        return panel
+
+    def build_devbuild_panel(self):
+        panel = QWidget()
+        panel.setMinimumHeight(320)
+        panel.setMaximumWidth(520)
+        panel.setStyleSheet("""
+            background: #fff;
+            border-radius: 18px;
+            border: 1.5px solid #dde;
+    """)
+        layout = QVBoxLayout(panel)
+        label = QLabel("DevBuild panel (à remplir)")
+        label.setAlignment(Qt.AlignCenter)
+        label.setStyleSheet("font-size: 18px; color: #3b4252; margin-top: 80px;")
+        layout.addWidget(label)
+
+        btn_generate_html = QPushButton("Regenerate map HTML")
+        btn_generate_html.clicked.connect(generate_airports_map_html)
+        layout.addWidget(btn_generate_html)
+        layout.addStretch()
+        panel.setLayout(layout)
+        return panel
+
+    def build_airport_panel(self):
+        panel = QWidget()
+        panel.setMinimumHeight(320)
+        panel.setMaximumWidth(520)
+        panel.setStyleSheet("""
+            background: #fff;
+            border-radius: 18px;
+            border: 1.5px solid #dde;
+        """)
+        layout = QVBoxLayout(panel)
+        label = QLabel("Airports panel (à remplir)")
+        label.setAlignment(Qt.AlignCenter)
+        label.setStyleSheet("font-size: 18px; color: #3b4252; margin-top: 80px;")
+        layout.addWidget(label)
+        return panel 
+    # ---------- LOGIQUE METIER : inchangée ----------
+    def refresh_map(self):
+        map_path = os.path.abspath(os.path.join(self.map_dir, "map.html"))
+        print("[DEBUG] refresh_map path:", map_path)
+        self.map_view.load(QUrl.fromLocalFile(map_path))
+
+    def refresh_fleet_panel(self):
+        self.load_airport_list()
+        self.load_aircraft_list()
 
     def load_aircraft_list(self):
-        self.aircraft_checkboxes.clear()
+        self.aircraft_checkboxes = []
         layout = self.container_aircraft.layout()
         while layout.count():
             child = layout.takeAt(0)
             if child.widget():
                 child.widget().deleteLater()
-
         path = os.path.join(RESULTS_DIR, "aircraft_scanresults.json")
         try:
             with open(path, "r", encoding="utf-8") as f:
@@ -220,13 +516,12 @@ class MainWindow(QMainWindow):
             print(f"[ERREUR] Chargement des avions : {e}")
 
     def load_airport_list(self):
-        self.airport_checkboxes.clear()
+        self.airport_checkboxes = []
         layout = self.container_airport.layout()
         while layout.count():
             child = layout.takeAt(0)
             if child.widget():
                 child.widget().deleteLater()
-
         path = os.path.join(RESULTS_DIR, "airport_scanresults.json")
         try:
             with open(path, "r", encoding="utf-8") as f:
@@ -239,17 +534,6 @@ class MainWindow(QMainWindow):
                 layout.addWidget(cb)
         except Exception as e:
             print(f"[ERREUR] Chargement des aéroports : {e}")
-            try:
-                path = os.path.join(RESULTS_DIR, "airport_scanresults.json")
-                with open(path, "r", encoding="utf-8") as f:
-                    airports = json.load(f)
-                self.label_airports.setText(f"{len(airports)} aéroport(s) sélectionné(s).")
-                self.label_airports.repaint()
-                print(f"[DEBUG] Chargement aéroports depuis : {path}")
-                print(f"[DEBUG] Nombre d'aéroports : {len(airports)}")
-            except Exception as e:
-                self.label_airports.setText("Erreur lors du chargement des aéroports.")
-                print(f"[ERREUR] load_selected_airports : {e}")
 
     def save_aircraft_selection(self):
         selected = []
@@ -260,11 +544,9 @@ class MainWindow(QMainWindow):
         try:
             with open(path, "w", encoding="utf-8") as f:
                 json.dump(selected, f, indent=4, ensure_ascii=False)
-            QMessageBox.information(
-                self, "Succès", f"{len(selected)} avion(s) sauvegardé(s) !"
-            )
+            QMessageBox.information(self, "Success", f"{len(selected)} aircraft saved!")
         except Exception as e:
-            QMessageBox.critical(self, "Erreur", f"Erreur sauvegarde avions : {e}")
+            QMessageBox.critical(self, "Error", f"Aircraft save error: {e}")
 
     def save_airport_selection(self):
         selected = []
@@ -275,96 +557,18 @@ class MainWindow(QMainWindow):
         try:
             with open(path, "w", encoding="utf-8") as f:
                 json.dump(selected, f, indent=4, ensure_ascii=False)
-            QMessageBox.information(
-                self, "Succès", f"{len(selected)} aéroport(s) sauvegardé(s) !"
-            )
+            QMessageBox.information(self, "Success", f"{len(selected)} airports saved!")
         except Exception as e:
-            QMessageBox.critical(self, "Erreur", f"Erreur sauvegarde aéroports : {e}")
-
-    def build_settings_tab(self):
-        tab = QWidget()
-        layout = QVBoxLayout()
-
-        # 🔤 Titre de l'onglet Paramètres
-        title = QLabel(self.translator.t("settings_title"))
-        title.setStyleSheet("font-size: 18px; font-weight: bold;")
-        layout.addWidget(title)
-
-        # 🌍 Choix de la langue
-        lang_label = QLabel(self.translator.t("select_language"))
-        self.lang_combo = QComboBox()
-        self.lang_combo.addItem("English", "en")
-        self.lang_combo.addItem("Français", "fr")
-        self.lang_combo.addItem("Deutsch", "de")
-        self.lang_combo.addItem("Español", "es")
-
-        # Pré-sélectionner la langue actuelle
-        current_lang_index = self.lang_combo.findData(self.translator.language)
-        if current_lang_index != -1:
-            self.lang_combo.setCurrentIndex(current_lang_index)
-
-         # ✅ Connexion corrigée : déclenchement sur le texte affiché
-        self.lang_combo.currentTextChanged.connect(self.on_language_selected)
-
-        layout.addWidget(lang_label)
-        layout.addWidget(self.lang_combo)
-
-        tab.setLayout(layout)
-        return tab
-
-    def browse_community(self):
-        folder = QFileDialog.getExistingDirectory(
-            self, "Sélectionner le dossier Community"
-        )
-        if folder:
-            self.input_community.setText(folder)
-
-    def browse_streamed(self):
-        folder = QFileDialog.getExistingDirectory(
-            self, "Sélectionner le dossier StreamedPackages"
-        )
-        if folder:
-            self.input_streamed.setText(folder)
-
-    def build_flightplan_tab(self):
-        tab = QWidget()
-        layout = QVBoxLayout(tab)
-
-        btn_reload = QPushButton("Recharger la sélection avion/aéroport")
-        btn_reload.clicked.connect(self.load_selected_data)
-        layout.addWidget(btn_reload)
-
-        self.combo_departure = QComboBox()
-        self.combo_arrival = QComboBox()
-        self.combo_aircraft = QComboBox()
-
-        layout.addWidget(QLabel("Aéroport de départ"))
-        layout.addWidget(self.combo_departure)
-        layout.addWidget(QLabel("Aéroport d'arrivée"))
-        layout.addWidget(self.combo_arrival)
-        layout.addWidget(QLabel("Avion utilisé"))
-        layout.addWidget(self.combo_aircraft)
-
-        self.label_summary = QLabel("Résumé du vol")
-        layout.addWidget(self.label_summary)
-
-        btn_save = QPushButton("Enregistrer le plan de vol")
-        btn_save.clicked.connect(self.save_flightplan)
-        layout.addWidget(btn_save)
-
-        self.load_selected_data()
-        self.combo_departure.currentIndexChanged.connect(self.update_summary)
-        self.combo_arrival.currentIndexChanged.connect(self.update_summary)
-        self.combo_aircraft.currentIndexChanged.connect(self.update_summary)
-
-        return tab
+            QMessageBox.critical(self, "Error", f"Airport save error: {e}")
 
     def load_selected_data(self):
+        """Remplit les combos avec la sélection JSON, ou fallback test si vide."""
         self.selected_airports = []
         self.selected_aircraft = []
-        ap_path = os.path.join(RESULTS_DIR, "airport_scanresults.json")
-        ac_path = os.path.join(RESULTS_DIR, "aircraft_scanresults.json")
+        ap_path = os.path.join(self.results_dir, "selected_airports.json")
+        ac_path = os.path.join(self.results_dir, "selected_aircraft.json")
 
+        # --- Chargement des JSON ---
         if os.path.exists(ap_path):
             with open(ap_path, "r", encoding="utf-8") as f:
                 self.selected_airports = json.load(f)
@@ -372,18 +576,31 @@ class MainWindow(QMainWindow):
             with open(ac_path, "r", encoding="utf-8") as f:
                 self.selected_aircraft = json.load(f)
 
+        # --- Remplir les combos ---
         self.combo_departure.clear()
         self.combo_arrival.clear()
         self.combo_aircraft.clear()
 
-        for ap in self.selected_airports:
-            label = f"{ap['icao']} | {ap['name']}"
-            self.combo_departure.addItem(label, ap)
-            self.combo_arrival.addItem(label, ap)
+        # Remplir seulement si data, sinon valeur test
+        if self.selected_airports:
+            for ap in self.selected_airports:
+                label = f"{ap['icao']} | {ap['name']}"
+                self.combo_departure.addItem(label, ap)
+                self.combo_arrival.addItem(label, ap)
+        else:
+            self.combo_departure.addItem("No airport found")
+            self.combo_arrival.addItem("No airport found")
+        if self.selected_aircraft:
+            for ac in self.selected_aircraft:
+                label = f"{ac['model']} | {ac['company']} | {ac['registration']}"
+                self.combo_aircraft.addItem(label, ac)
+        else:
+            self.combo_aircraft.addItem("No aircraft found")
 
-        for ac in self.selected_aircraft:
-            label = f"{ac['model']} | {ac['company']} | {ac['registration']}"
-            self.combo_aircraft.addItem(label, ac)
+        # DEBUG : affiche dans la console le résultat
+        print("[DEBUG] load_selected_data :", 
+            "airports:", self.combo_departure.count(), 
+            "aircraft:", self.combo_aircraft.count())
 
         self.update_summary()
 
@@ -393,9 +610,7 @@ class MainWindow(QMainWindow):
             or self.combo_arrival.count() < 1
             or self.combo_aircraft.count() < 1
         ):
-            self.label_summary.setText(
-                "Merci de charger au moins 2 aéroports et 1 avion."
-            )
+            self.label_summary.setText("Load at least 2 airports and 1 aircraft.")
             return
 
         dep = self.combo_departure.currentData()
@@ -403,13 +618,16 @@ class MainWindow(QMainWindow):
         ac = self.combo_aircraft.currentData()
 
         if dep["icao"] == arr["icao"]:
-            self.label_summary.setText("Départ et arrivée doivent être différents.")
+            self.label_summary.setText("Departure and arrival must be different.")
             return
 
+        # ------- Remplace ici la ligne suivante -------
         self.label_summary.setText(
-            f"<b>Départ :</b> {dep['icao']} ({dep['name']})<br>"
-            f"<b>Arrivée :</b> {arr['icao']} ({arr['name']})<br>"
-            f"<b>Avion :</b> {ac['model']} {ac['company']} ({ac['registration']})"
+            f"<span style='font-size:12px;'>"
+            f"<b>Departure:</b> {dep['icao']} ({dep['name']})<br>"
+            f"<b>Arrival:</b> {arr['icao']} ({arr['name']})<br>"
+            f"<b>Aircraft:</b> {ac['model']} {ac['company']} ({ac['registration']})"
+            f"</span>"
         )
 
     def save_flightplan(self):
@@ -419,7 +637,7 @@ class MainWindow(QMainWindow):
 
         if dep["icao"] == arr["icao"]:
             QMessageBox.warning(
-                self, "Erreur", "Départ et arrivée doivent être différents."
+                self, "Error", "Departure and arrival must be different."
             )
             return
 
@@ -427,53 +645,15 @@ class MainWindow(QMainWindow):
         outpath = os.path.join(RESULTS_DIR, "selected_flight_plan.json")
         with open(outpath, "w", encoding="utf-8") as f:
             json.dump(plan, f, indent=4, ensure_ascii=False)
-
-        QMessageBox.information(
-            self, "Plan enregistré", f"Enregistré dans :\n{outpath}"
-        )
-
-    def build_realflight_tab(self):
-        tab = QWidget()
-        layout = QVBoxLayout(tab)
-
-        # Combo pour la liste des vols simulés
-        self.combo_realflights = QComboBox()
-        layout.addWidget(QPushButton("Charger les vols simulés"))
-        btn = layout.itemAt(layout.count() - 1).widget()
-        btn.clicked.connect(self.load_mock_flights)
-
-        layout.addWidget(self.combo_realflights)
-
-        # Zone d'affichage des infos de vol
-        self.label_flightinfo = QLabel("Aucun vol sélectionné.")
-        self.label_flightinfo.setWordWrap(True)
-        layout.addWidget(self.label_flightinfo)
-
-        # Bouton Enregistrer
-        btn_save = QPushButton("Enregistrer ce vol")
-        btn_save.clicked.connect(self.save_selected_realflight)
-        layout.addWidget(btn_save)
-
-        # Bouton SimBrief avec self.
-        self.btn_simbrief = QPushButton("Générer dans SimBrief")
-        self.btn_simbrief.setEnabled(False)  # désactivé par défaut
-        self.btn_simbrief.clicked.connect(self.launch_simbrief)
-        layout.addWidget(self.btn_simbrief)
-
-        # Mise à jour des infos quand un vol est sélectionné
-        self.combo_realflights.currentIndexChanged.connect(self.update_flightinfo)
-
-        return tab
+        QMessageBox.information(self, "Plan saved", f"Saved to:\n{outpath}")
 
     def load_mock_flights(self):
         path = os.path.join(RESULTS_DIR, "mock_fr24_flights.json")
         if not os.path.exists(path):
-            QMessageBox.critical(self, "Erreur", f"Fichier introuvable :\n{path}")
+            QMessageBox.critical(self, "Error", f"File not found:\n{path}")
             return
-
         with open(path, "r", encoding="utf-8") as f:
             flights = json.load(f)
-
         self.combo_realflights.clear()
         for f in flights:
             label = f"{f['flight_number']} | {f['airline']} | {f['departure_icao']} -> {f['arrival_icao']}"
@@ -482,20 +662,17 @@ class MainWindow(QMainWindow):
     def update_flightinfo(self):
         idx = self.combo_realflights.currentIndex()
         if idx < 0:
-            self.label_flightinfo.setText("Aucun vol sélectionné.")
+            self.label_flightinfo.setText("No flight selected.")
             self.btn_simbrief.setEnabled(False)
             return
-
         flight = self.combo_realflights.itemData(idx)
         self.label_flightinfo.setText(
             f"<b>{flight['flight_number']}</b><br>"
-            f"De {flight['departure_icao']} à {flight['arrival_icao']}<br>"
-            f"Départ prévu : {flight['scheduled_departure']}<br>"
-            f"Arrivée prévue : {flight['scheduled_arrival']}<br>"
-            f"Avion : {flight['aircraft_model']} ({flight['registration']})"
+            f"From {flight['departure_icao']} to {flight['arrival_icao']}<br>"
+            f"Scheduled departure: {flight['scheduled_departure']}<br>"
+            f"Scheduled arrival: {flight['scheduled_arrival']}<br>"
+            f"Aircraft: {flight['aircraft_model']} ({flight['registration']})"
         )
-
-        # Activation intelligente du bouton SimBrief
         fields = [
             "aircraft_model",
             "registration",
@@ -509,22 +686,19 @@ class MainWindow(QMainWindow):
     def save_selected_realflight(self):
         idx = self.combo_realflights.currentIndex()
         if idx < 0:
-            QMessageBox.warning(self, "Erreur", "Aucun vol sélectionné.")
+            QMessageBox.warning(self, "Error", "No flight selected.")
             return
         f = self.combo_realflights.itemData(idx)
         path = os.path.join(RESULTS_DIR, "selected_fr24_flight.json")
         with open(path, "w", encoding="utf-8") as out:
             json.dump(f, out, indent=4, ensure_ascii=False)
-        QMessageBox.information(
-            self, "Vol enregistré", f"Vol enregistré dans :\n{path}"
-        )
+        QMessageBox.information(self, "Flight saved", f"Saved in:\n{path}")
 
     def launch_simbrief(self):
         idx = self.combo_realflights.currentIndex()
         if idx < 0:
-            QMessageBox.warning(self, "Erreur", "Aucun vol sélectionné.")
+            QMessageBox.warning(self, "Error", "No flight selected.")
             return
-
         flight = self.combo_realflights.itemData(idx)
         simbrief_userid = "25756"
         url = (
@@ -539,159 +713,51 @@ class MainWindow(QMainWindow):
         )
         webbrowser.open(url)
 
-    def refresh_scan_tab(self):
-        print("[DEBUG] Rafraîchissement visuel forcé des listes Scan.")
-        self.load_airport_list()
-        self.load_aircraft_list()
-
-    def refresh_map(self):
-        """
-        Rafraîchit la carte interactive affichée dans le dashboard.
-        Cette méthode génère le fichier map_data.json à partir de la sélection,
-        vérifie l'existence de map.html et recharge la carte.
-        """
-        # Générer le fichier map_data.json à partir de la sélection
-        generate_airports_map_data()
-
-        # Déterminer le chemin absolu vers map.html
-        map_path = os.path.abspath(os.path.join(self.map_dir, "map.html"))
-        print(f"[DEBUG] Chemin absolu vers la carte : {map_path}")
-
-        # Vérifier l’existence de la carte
-        if not os.path.exists(map_path):
-            print(f"[ERREUR] Le fichier map.html est introuvable à ce chemin.")
-            return
-        else:
-            print(f"[DEBUG] Le fichier map.html a été trouvé correctement.")
-
-        # Vérifier l’existence de map_data.json
-        map_data_path = os.path.abspath(os.path.join(self.map_dir, "map_data.json"))
-        if not os.path.exists(map_data_path):
-            print(f"[ERREUR] Le fichier map_data.json est introuvable.")
-        else:
-            print(f"[DEBUG] Le fichier map_data.json a été généré correctement.")
-
-        # Charger le contenu du fichier JSON (aéroports)
-        mapdata_path = os.path.join(self.map_dir, "map_data.json")
-        airports_data = []
-        if os.path.exists(mapdata_path):
-            try:
-                with open(mapdata_path, "r", encoding="utf-8") as f:
-                    airports_data = json.load(f)
-                    print(f"[DEBUG] Le fichier map_data.json a été chargé correctement.")
-            except Exception as e:
-                print(f"[ERREUR] Lecture de map_data.json : {e}")
-        else:
-            print(f"[ERREUR] Le fichier map_data.json est introuvable.")
-
-        # Injecter les données dans le HTML (remplacement de la variable spéciale)
-        html_template_path = os.path.join(self.map_dir, "map.html")
-        try:
-            with open(html_template_path, "r", encoding="utf-8") as f:
-                html_content = f.read()
-                html_with_data = html_content.replace(
-                    "__AIRPORTS_DATA__", json.dumps(airports_data, ensure_ascii=False, indent=2)
-                )
-            with open(html_template_path, "w", encoding="utf-8") as f:
-                f.write(html_with_data)
-            print("[DEBUG] Données injectées dans map.html avec succès.")
-        except Exception as e:
-            print(f"[ERREUR] Injection dans map.html : {e}")
-
-        # Charger la carte dans le composant QWebEngineView
-        self.map_view.load(QUrl.fromLocalFile(map_path))
-        print("[INFO] Carte rechargée dans le dashboard.")
-
     def change_language(self, lang_code):
         self.translator.set_language(lang_code)
-        self.rebuild_ui()
+        self.setWindowTitle(self.translator.t("main_window_title"))
+        idx = [btn.isChecked() for btn in self.menu_buttons].index(True)
+        self.switch_panel(idx)
 
     def on_language_selected(self, text):
         code = self.lang_combo.currentData()
         if code:
             self.change_language(code)
 
-    def rebuild_ui(self):
-        self.tabs.clear()
-        self.dashboard_tab = self.build_dashboard_tab()
-        self.scan_tab = self.build_scan_tab()
-        self.settings_tab = self.build_settings_tab()
-        self.flightplan_tab = self.build_flightplan_tab()
-        self.realflight_tab = self.build_realflight_tab()
+    # === OVERLAY POSITIONNEMENT ===
 
-        self.tabs.addTab(self.dashboard_tab, self.translator.t("dashboard_tab"))
-        self.tabs.addTab(self.scan_tab, self.translator.t("scan_tab"))
-        self.tabs.addTab(self.settings_tab, self.translator.t("settings_tab"))
-        self.tabs.addTab(self.flightplan_tab, self.translator.t("flight_plan_tab"))
-        self.tabs.addTab(self.realflight_tab, self.translator.t("real_flight_tab"))
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        # Pour chaque overlay, s'il est visible, on le repositionne
+        for panel in [
+            self.dashboard_overlay,
+            self.fleet_overlay,
+            self.flightsetup_overlay,
+            self.flightops_overlay,
+            self.settings_overlay,
+            self.profile_overlay,
+            self.devbuild_overlay,
+            self.airport_overlay,
+        ]:
+            if panel.isVisible():
+                self.position_overlay(panel)
 
-
-            # Tu peux ajouter d’autres rafraîchissements ici plus tard
-
-def generate_airports_map_html():
-    """
-    Génère un fichier HTML `map.html` à partir de `map_data.json`,
-    avec les données injectées directement dans le JavaScript.
-    """
-    map_json_path = os.path.join(MAP_DIR, "map_data.json")
-    map_html_path = os.path.join(MAP_DIR, "map.html")
-
-    if not os.path.exists(map_json_path):
-        print(f"[ERREUR] map_data.json introuvable : {map_json_path}")
-        return
-
-    # Charger les données JSON des aéroports
-    with open(map_json_path, "r", encoding="utf-8") as f:
-        airports_data = json.load(f)
-
-    # HTML avec variable spéciale __AIRPORTS_DATA__
-    html_template = f"""<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <title>Carte des Aéroports</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <style>
-        html, body {{ height: 100%; margin: 0; }}
-        #map {{ width: 100%; height: 100%; }}
-    </style>
-</head>
-<body>
-    <div id="map"></div>
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    <script>
-        const map = L.map('map').setView([46.5, 2.5], 6);
-        L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png', {{
-            attribution: '© OpenStreetMap contributors'
-        }}).addTo(map);
-
-        const airportData = __AIRPORTS_DATA__;
-
-        airportData.forEach(airport => {{
-            L.marker([airport.lat, airport.lon])
-             .addTo(map)
-             .bindPopup(`<strong>${{airport.icao}}</strong><br>${{airport.name}}`);
-        }});
-    </script>
-</body>
-</html>
-"""
-
-    # Injecter les données dans le HTML
-    html_final = html_template.replace(
-        "__AIRPORTS_DATA__", json.dumps(airports_data, ensure_ascii=False, indent=2)
-    )
-
-    # Écrire le fichier final
-    with open(map_html_path, "w", encoding="utf-8") as f:
-        f.write(html_final)
-
-    print(f"[INFO] Fichier map.html généré avec succès : {map_html_path}")
-
+    def position_overlay(self, panel):
+        if panel is not None:
+            W = panel.sizeHint().width()
+            H = panel.sizeHint().height()
+            parentW = self.central.width()
+            parentH = self.central.height()
+            margin_bottom = 32
+            x = max((parentW - W) // 2, 8)
+            y = max(parentH - H - margin_bottom, 8)
+            panel.setGeometry(
+                x, y, min(W, parentW - 16), min(H, parentH - margin_bottom - 8)
+            )
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    #qt_material.apply_stylesheet(app, theme='light_blue.xml')
     window = MainWindow()
     window.show()
     sys.exit(app.exec_())
