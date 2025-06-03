@@ -1,30 +1,111 @@
+<!DOCTYPE html>
+<html>
 
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Carte des aéroports</title>
-        <meta charset="utf-8" />
-        <style>
-            #map { height: 100vh; width: 100%; }
-        </style>
-        <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-        <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    </head>
-    <body>
-        <div id="map"></div>
-        <script>
-            var map = L.map('map').setView([47.0, 2.0], 6);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(map);
+<head>
+    <meta charset="utf-8" />
+    <title>Carte Overlay Leaflet + Panel HTML</title>
+    <style>
+        html,
+        body,
+        #map {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
 
-            var airports = [{"icao": "LFMN", "name": "Nice-C\u00f4te d'Azur Airport", "lat": 43.658401, "lon": 7.21587}, {"icao": "LFPO", "name": "Paris-Orly Airport", "lat": 48.72333, "lon": 2.37944}];
+        /* Overlay panel stylé, flottant, centré */
+        #custom-overlay {
+            display: none;
+            position: absolute;
+            left: 50%;
+            bottom: 48px;
+            transform: translateX(-50%);
+            min-width: 340px;
+            max-width: 96vw;
+            min-height: 180px;
+            max-height: 60vh;
+            background: #fff;
+            border-radius: 22px;
+            border: 2px solid #dde;
+            box-shadow: 0 8px 40px 0 rgba(80, 90, 110, 0.10);
+            padding: 40px 30px;
+            z-index: 9999;
+            text-align: center;
+            font-size: 1.2em;
+            color: #333;
+        }
 
-            airports.forEach(function(a) {
-                L.marker([a.lat, a.lon]).addTo(map)
-                    .bindPopup("<b>" + a.icao + "</b><br>" + a.name);
-            });
-        </script>
-    </body>
-    </html>
+        #open-overlay-btn {
+            position: absolute;
+            right: 28px;
+            bottom: 48px;
+            z-index: 9999;
+            padding: 12px 28px;
+            background: #458afc;
+            color: #fff;
+            border: none;
+            border-radius: 18px;
+            font-size: 1em;
+            box-shadow: 0 2px 16px rgba(80, 90, 110, 0.11);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        #close-overlay-btn {
+            margin-top: 32px;
+            padding: 10px 24px;
+            background: #eee;
+            color: #333;
+            border: none;
+            border-radius: 12px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        #close-overlay-btn:hover {
+            background: #e55;
+            color: #fff;
+        }
+
+        #open-overlay-btn:hover {
+            background: #2263b8;
+        }
+    </style>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+</head>
+
+<body>
+    <div id="map"></div>
+    <!-- Panel overlay -->
+    <div id="custom-overlay">
+        <b>Overlay contextuel en HTML/CSS !</b><br>
+        Tu peux piloter ce panneau <u>depuis Python</u>.<br>
+        <button id="close-overlay-btn" onclick="hideOverlay()">Fermer</button>
+    </div>
     
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        // Carte Leaflet de base
+        var map = L.map('map').setView([48.85, 2.35], 6);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: ''
+        }).addTo(map);
+
+        // Fonctions JS accessibles depuis Python (via runJavaScript)
+        function showOverlay(content) {
+            var overlay = document.getElementById('custom-overlay');
+            if (content) overlay.innerHTML = content + '<br><button id="close-overlay-btn" onclick="hideOverlay()">Fermer</button>';
+            overlay.style.display = 'block';
+        }
+        function hideOverlay() {
+            document.getElementById('custom-overlay').style.display = 'none';
+        }
+        // Exposer showOverlay/hideOverlay globalement
+        window.showOverlay = showOverlay;
+        window.hideOverlay = hideOverlay;
+    </script>
+</body>
+
+</html>

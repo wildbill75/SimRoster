@@ -1,21 +1,17 @@
 {
     "departure": {
         "icao": "LFPO",
-        "name": "Paris-Orly",
-        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community/LFPO",
-        "source": "community"
+        "name": "Paris Orly"
     },
     "arrival": {
-        "icao": "LFMN",
-        "name": "Nice-Côte d'Azur",
-        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages/fs24-microsoft-airport-lfmn-nice",
-        "source": "official"
+        "icao": "EGLL",
+        "name": "London Heathrow"
     },
     "aircraft": {
-        "company": "Air France",
-        "engine_type": "CFM",
-        "icao": "AFR",
-        "model": "A319",
-        "registration": "F-GRHB"
+        "company": "",
+        "model": "Fenix A321",
+        "name": "Fenix A321",
+        "registration": "",
+        "type": "A321"
     }
 }

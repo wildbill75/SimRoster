@@ -1,11 +1,5 @@
 [
     {
-        "icao": "LFMN",
-        "name": "Nice-Côte d'Azur Airport",
-        "lat": 43.658401,
-        "lon": 7.21587
-    },
-    {
         "icao": "LFPO",
         "name": "Paris-Orly Airport",
         "lat": 48.72333,

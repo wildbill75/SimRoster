@@ -1,23 +1,19 @@
 [
-    {
-        "model": "A319",
-        "registration": "F-GRHB",
-        "company": "Air France",
-        "icao": "AFR",
-        "engine_type": "CFM"
-    },
-    {
-        "model": "A320",
-        "registration": "F-GKXS",
-        "company": "Air France",
-        "icao": "AFR",
-        "engine_type": "CFM"
-    },
-    {
-        "model": "A321",
-        "registration": "F-GTAT",
-        "company": "Air France",
-        "icao": "AFR",
-        "engine_type": "CFM"
-    }
+  {
+    "callsign": "",
+    "company": "Air France",
+    "engine": "",
+    "iata": "",
+    "icao": "",
+    "manufacturer": "Airbus",
+    "model": "Fenix A319",
+    "msfs_id": "",
+    "name": "Fenix A319",
+    "owner_type": "",
+    "radio": "",
+    "registration": "F-HXKB",
+    "remark": "",
+    "type": "A319",
+    "variant": ""
+  }
 ]
