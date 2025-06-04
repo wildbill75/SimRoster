@@ -9,3 +9,4 @@ __pycache__/
 Thumbs.db
 *.old
 tools/
+sandbox/

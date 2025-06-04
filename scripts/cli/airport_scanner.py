@@ -1,61 +1,74 @@
-#!/usr/bin/env python3
-# coding: utf-8
-
 import os
+import re
 import json
-import argparse
 
-# Aéroports connus — dictionnaire ICAO → nom + source
-HARDCODED_AIRPORTS = {
-    "LFPO": {
-        "name": "Paris-Orly",
-        "source": "community",
-        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community/LFPO"
-    },
-    "LFMN": {
-        "name": "Nice-Côte d'Azur",
-        "source": "official",
-        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages/fs24-microsoft-airport-lfmn-nice"
-    }
-}
+# === CHEMINS ABSOLUS — MODIFIE SI TU CHANGES DE PC/UTILISATEUR ===
+MSFS_BASE = r"C:\Users\Bertrand\AppData\Local\Packages\Microsoft.Limitless_8wekyb3d8bbwe\LocalCache\Packages"
+COMMUNITY = os.path.join(MSFS_BASE, "Community")
+OFFICIAL = os.path.join(MSFS_BASE, "Official", "OneStore")
+STREAMED = os.path.join(MSFS_BASE, "StreamedPackages")
 
-def scan_airports(verbose=False):
+# Dossier results dans ton repo projet
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+RESULTS = os.path.join(BASE_DIR, "results")
+os.makedirs(RESULTS, exist_ok=True)
+
+
+def is_airport_folder(folder_name):
+    # Reconnaît tous les dossiers avec un ICAO (4 lettres) et 'airport'
+    # Ex: 'fs24-asobo-airport-klax-losangeles'
+    m = re.search(r"(fs2[04]|fs20)?-?asobo-?airport-([a-z0-9]{4})", folder_name, re.I)
+    if m:
+        return m.group(2).upper()
+    # Autre méthode: tout dossier contenant 'airport' + 4 lettres
+    m = re.search(r"([a-z0-9]{4}).*airport", folder_name, re.I)
+    if m:
+        return m.group(1).upper()
+    # Certains payware/freeware: juste ICAO au début
+    m = re.match(r"^([a-z0-9]{4})", folder_name, re.I)
+    if m:
+        return m.group(1).upper()
+    return None
+
+
+def scan_dir(root, source):
     results = []
-    for icao, info in HARDCODED_AIRPORTS.items():
-        if os.path.exists(info["path"]):
-            result = {
-                "icao": icao,
-                "name": info["name"],
-                "path": info["path"],
-                "source": info["source"]
-            }
-            results.append(result)
-            if verbose:
-                print(f"→ {icao} | {info['name']}")
-        else:
-            if verbose:
-                print(f"[WARNING] Dossier introuvable pour {icao} : {info['path']}")
+    if not os.path.exists(root):
+        print(f"[INFO] Dossier introuvable : {root}")
+        return results
+    for folder in os.listdir(root):
+        folder_path = os.path.join(root, folder)
+        if not os.path.isdir(folder_path):
+            continue
+        icao = is_airport_folder(folder)
+        if icao:
+            results.append(
+                {"icao": icao, "name": folder, "path": folder_path, "source": source}
+            )
     return results
 
+
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--verbose", action="store_true")
-    args = parser.parse_args()
+    airports = []
+    airports += scan_dir(COMMUNITY, "community")
+    airports += scan_dir(OFFICIAL, "official")
+    airports += scan_dir(STREAMED, "streamed")
 
-    if args.verbose:
-        print("[Scanner] Lancement du scanner d'aéroports...")
+    # Filtre unique par ICAO (évite doublons si plusieurs sources)
+    seen = set()
+    uniq_airports = []
+    for apt in airports:
+        if apt["icao"] not in seen:
+            uniq_airports.append(apt)
+            seen.add(apt["icao"])
 
-    results = scan_airports(verbose=args.verbose)
+    out_json = os.path.join(RESULTS, "airport_scanresults.json")
+    with open(out_json, "w", encoding="utf-8") as f:
+        json.dump(uniq_airports, f, ensure_ascii=False, indent=2)
 
-    results_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'results'))
-    os.makedirs(results_dir, exist_ok=True)
-    output_file = os.path.join(results_dir, "airport_scanresults.json")
-    with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(results, f, indent=4, ensure_ascii=False)
+    print(f"[OK] Scanné {len(uniq_airports)} aéroports.")
+    print(f"[Scanner] Fichier JSON généré avec succès : {out_json}")
 
-
-    if args.verbose:
-        print("[Scanner] Fichier JSON généré avec succès : airport_scanresults.json")
 
 if __name__ == "__main__":
     main()
