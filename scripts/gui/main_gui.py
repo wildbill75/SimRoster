@@ -1,607 +1,408 @@
 import sys
 import os
-
-os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--enable-gpu"
-import json
-import webbrowser
-
 from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
     QWidget,
+    QPushButton,
+    QLabel,
+    QListWidget,
     QVBoxLayout,
     QHBoxLayout,
-    QPushButton,
-    QComboBox,
+    QStackedWidget,
+    QFrame,
     QSizePolicy,
+    
 )
-from PyQt5.QtCore import QUrl, Qt, pyqtSlot, QObject
+from PyQt5.QtCore import Qt, QUrl
+from PyQt5.QtGui import QFont
 from PyQt5.QtWebEngineWidgets import QWebEngineView
-from PyQt5.QtWebChannel import QWebChannel
 
 
-class Bridge(QObject):
-    def __init__(self, results_dir):
-        super().__init__()
-        self.results_dir = results_dir
+# ==================== FleetManagerPanel ====================
+class FleetManagerPanel(QWidget):
+    def __init__(
+        self,
+        available_aircraft=None,
+        selected_aircraft=None,
+        available_airports=None,
+        selected_airports=None,
+        parent=None,
+    ):
+        super().__init__(parent)
+        self.available_aircraft = available_aircraft or []
+        self.selected_aircraft = selected_aircraft or []
+        self.available_airports = available_airports or []
+        self.selected_airports = selected_airports or []
 
-    @pyqtSlot("QVariant", "QVariant")
-    def saveSelections(self, aircraft_list, airport_list):
-        selected_aircraft_path = os.path.join(
-            self.results_dir, "selected_aircraft.json"
+        # Fond blanc, tout carré
+        self.setStyleSheet(
+            """
+            background: #fff;
+            border-radius: 0px;
+        """
         )
-        selected_airport_path = os.path.join(self.results_dir, "selected_airports.json")
-        try:
-            with open(selected_aircraft_path, "w", encoding="utf-8") as f:
-                json.dump(list(aircraft_list), f, ensure_ascii=False, indent=2)
-            with open(selected_airport_path, "w", encoding="utf-8") as f:
-                json.dump(list(airport_list), f, ensure_ascii=False, indent=2)
-            print("[OK] Sélections enregistrées :", aircraft_list, airport_list)
-        except Exception as e:
-            print("[ERREUR] Sauvegarde sélections :", e)
 
-    @pyqtSlot()
-    def runScan(self):
-        import subprocess
-        import sys
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(22, 22, 22, 18)  # Marge top plus raisonnable !
+        main_layout.setSpacing(12)
 
-        # Chemins relatifs depuis le projet
-        base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-        aircraft_cli = os.path.join(base_dir, "scripts", "cli", "aircraft_scanner.py")
-        airport_cli = os.path.join(base_dir, "scripts", "cli", "airport_scanner.py")
-        try:
-            subprocess.run([sys.executable, aircraft_cli], check=True)
-            subprocess.run([sys.executable, airport_cli], check=True)
-            print("[OK] Scan terminé.")
-        except Exception as e:
-            print("[ERREUR] Scan échoué:", e)
+        # Titre Fleet Manager
+        title = QLabel("Fleet Manager")
+        title.setStyleSheet(
+            """
+            font-size: 22px;
+            font-weight: 600;
+            color: #ffffff;
+            background: none;
+            """
+        )
+        title.setAlignment(Qt.AlignCenter)
+        main_layout.addSpacing(-10)  # Mets -10, -5, 0 ou même +8 pour descendre, teste la valeur !
+        main_layout.addWidget(title)
+        main_layout.addSpacing(50)
 
-    @pyqtSlot()
-    def showFleetPanel(self):
-        mw = QApplication.instance().activeWindow()
-        if mw and hasattr(mw, "show_fleet_panel"):
-            mw.show_fleet_panel()
+        # Bouton Scan Now sous le titre
+        self.btn_scan = QPushButton("Scan Now")
+        self.btn_scan.setStyleSheet(
+            """
+            background: #8d9099;
+            color: #212226;
+            border-radius: 0px;
+            font-weight: bold;
+            font-size: 15px;
+            padding: 8px 22px;
+            margin-bottom: 10px;
+        """
+        )
+        main_layout.addWidget(self.btn_scan, alignment=Qt.AlignHCenter)
+
+        # --- Aircraft section ---
+        lbl_aircraft_avail = QLabel("Available Aircraft")
+        lbl_aircraft_avail.setStyleSheet(
+            "font-size: 15px; color: #fff; background: none; font-weight: bold;"
+        )
+        lbl_aircraft_avail.setContentsMargins(0, 10, 0, 0)
+        main_layout.addWidget(lbl_aircraft_avail)
+
+        self.list_aircraft_available = QListWidget()
+        self.list_aircraft_available.addItems(
+            [f"{ac['reg']} – {ac['model']}" for ac in self.available_aircraft]
+        )
+        self.list_aircraft_available.setSelectionMode(QListWidget.MultiSelection)
+        self.list_aircraft_available.setStyleSheet(
+            "background: #343842; color: #fff; font-size: 14px; border: none; border-radius: 0;"
+        )
+        main_layout.addWidget(self.list_aircraft_available)
+
+        aircraft_btns_layout = QHBoxLayout()
+        self.btn_aircraft_add = QPushButton("↓ Add Aircraft")
+        self.btn_aircraft_remove = QPushButton("↑ Remove Aircraft")
+        for b in [self.btn_aircraft_add, self.btn_aircraft_remove]:
+            b.setStyleSheet(
+                """
+                background: #8d9099;
+                color: #222;
+                border: none;
+                border-radius: 0px;
+                font-weight: 600;
+                padding: 8px 10px;
+                font-size: 13px;
+            """
+            )
+        aircraft_btns_layout.addWidget(self.btn_aircraft_add)
+        aircraft_btns_layout.addWidget(self.btn_aircraft_remove)
+        main_layout.addLayout(aircraft_btns_layout)
+
+        lbl_aircraft_sel = QLabel("Selected Aircraft")
+        lbl_aircraft_sel.setStyleSheet(
+            "font-size: 15px; color: #fff; background: none; font-weight: bold;"
+        )
+        main_layout.addWidget(lbl_aircraft_sel)
+
+        self.list_aircraft_selected = QListWidget()
+        self.list_aircraft_selected.addItems(
+            [f"{ac['reg']} – {ac['model']}" for ac in self.selected_aircraft]
+        )
+        self.list_aircraft_selected.setSelectionMode(QListWidget.MultiSelection)
+        self.list_aircraft_selected.setStyleSheet(
+            "background: #343842; color: #fff; font-size: 14px; border: none; border-radius: 0;"
+        )
+        main_layout.addWidget(self.list_aircraft_selected)
+
+        # --- Airport section ---
+        lbl_airport_avail = QLabel("Available Airports")
+        lbl_airport_avail.setStyleSheet(
+            "font-size: 15px; color: #fff; background: none; font-weight: bold;"
+        )
+        main_layout.addWidget(lbl_airport_avail)
+
+        self.list_airport_available = QListWidget()
+        self.list_airport_available.addItems(
+            [f"{ap['icao']} – {ap['name']}" for ap in self.available_airports]
+        )
+        self.list_airport_available.setSelectionMode(QListWidget.MultiSelection)
+        self.list_airport_available.setStyleSheet(
+            "background: #343842; color: #fff; font-size: 14px; border: none; border-radius: 0;"
+        )
+        main_layout.addWidget(self.list_airport_available)
+
+        airport_btns_layout = QHBoxLayout()
+        self.btn_airport_add = QPushButton("↓ Add Airport")
+        self.btn_airport_remove = QPushButton("↑ Remove Airport")
+        for b in [self.btn_airport_add, self.btn_airport_remove]:
+            b.setStyleSheet(
+                """
+                background: #8d9099;
+                color: #222;
+                border: none;
+                border-radius: 0px;
+                font-weight: 600;
+                padding: 8px 10px;
+                font-size: 13px;
+            """
+            )
+        airport_btns_layout.addWidget(self.btn_airport_add)
+        airport_btns_layout.addWidget(self.btn_airport_remove)
+        main_layout.addLayout(airport_btns_layout)
+
+        lbl_airport_sel = QLabel("Selected Airports")
+        lbl_airport_sel.setStyleSheet(
+            "font-size: 15px; color: #fff; background: none; font-weight: bold;"
+        )
+        main_layout.addWidget(lbl_airport_sel)
+
+        self.list_airport_selected = QListWidget()
+        self.list_airport_selected.addItems(
+            [f"{ap['icao']} – {ap['name']}" for ap in self.selected_airports]
+        )
+        self.list_airport_selected.setSelectionMode(QListWidget.MultiSelection)
+        self.list_airport_selected.setStyleSheet(
+            "background: #343842; color: #fff; font-size: 14px; border: none; border-radius: 0;"
+        )
+        main_layout.addWidget(self.list_airport_selected)
+
+        # --- Reset bouton ---
+        self.btn_reset = QPushButton("Reset All")
+        self.btn_reset.setStyleSheet(
+            "margin-top: 14px; padding: 9px 26px; background: #8d9099; color: #222; border: none; border-radius: 0px; font-weight: bold;"
+        )
+        main_layout.addWidget(self.btn_reset, alignment=Qt.AlignCenter)
+
+        # --- Connexions
+        self.btn_aircraft_add.clicked.connect(self.add_aircraft)
+        self.btn_aircraft_remove.clicked.connect(self.remove_aircraft)
+        self.btn_airport_add.clicked.connect(self.add_airport)
+        self.btn_airport_remove.clicked.connect(self.remove_airport)
+        self.btn_reset.clicked.connect(self.reset_all)
+
+    def add_aircraft(self):
+        selected = self.list_aircraft_available.selectedItems()
+        for item in selected:
+            idx = self.list_aircraft_available.row(item)
+            ac_str = self.list_aircraft_available.takeItem(idx).text()
+            self.list_aircraft_selected.addItem(ac_str)
+
+    def remove_aircraft(self):
+        selected = self.list_aircraft_selected.selectedItems()
+        for item in selected:
+            idx = self.list_aircraft_selected.row(item)
+            ac_str = self.list_aircraft_selected.takeItem(idx).text()
+            self.list_aircraft_available.addItem(ac_str)
+
+    def add_airport(self):
+        selected = self.list_airport_available.selectedItems()
+        for item in selected:
+            idx = self.list_airport_available.row(item)
+            ap_str = self.list_airport_available.takeItem(idx).text()
+            self.list_airport_selected.addItem(ap_str)
+
+    def remove_airport(self):
+        selected = self.list_airport_selected.selectedItems()
+        for item in selected:
+            idx = self.list_airport_selected.row(item)
+            ap_str = self.list_airport_selected.takeItem(idx).text()
+            self.list_airport_available.addItem(ap_str)
+
+    def reset_all(self):
+        # Aircraft
+        all_sel_ac = []
+        while self.list_aircraft_selected.count():
+            all_sel_ac.append(self.list_aircraft_selected.takeItem(0).text())
+        self.list_aircraft_available.addItems(all_sel_ac)
+        # Airports
+        all_sel_ap = []
+        while self.list_airport_selected.count():
+            all_sel_ap.append(self.list_airport_selected.takeItem(0).text())
+        self.list_airport_available.addItems(all_sel_ap)
 
 
-# === Chemins (à adapter si besoin) ===
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-DATA_DIR = os.path.join(BASE_DIR, "scripts", "data")
-MAP_DIR = os.path.join(BASE_DIR, "map")
-MAP_HTML_PATH = os.path.join(MAP_DIR, "map.html")
-
-try:
-    from scripts.utils.i18n import Translator
-except ImportError:
-    from ..utils.i18n import Translator
-
-
+# ==================== MAIN WINDOW ====================
 class MainWindow(QMainWindow):
-
     def __init__(self):
         super().__init__()
-        self.translator = Translator("en")
-        self.setWindowTitle("RealAirlinesPlanner")
-        self.setGeometry(100, 100, 1200, 800)
-        self.base_dir = BASE_DIR
-        self.results_dir = os.path.join(self.base_dir, "results")  # ← mets bien cette ligne !
-        self.data_dir = DATA_DIR
-        self.map_dir = MAP_DIR
+        self.setWindowTitle("SimRoster")
+        self.resize(1440, 900)
+        self.showMaximized()  # Plein écran au lancement
 
-        # Crée le QWebChannel et le bridge
-        self.channel = QWebChannel()
-        self.bridge = Bridge(self.results_dir)
-        self.channel.registerObject("bridge", self.bridge)
+        # === Sidebar (gauche) ===
+        nav_widget = QWidget()
+        nav_layout = QVBoxLayout(nav_widget)
+        nav_layout.setContentsMargins(0, 0, 0, 0)
+        nav_layout.setSpacing(0)
+        nav_widget.setStyleSheet("background: #181818;")
 
-        # === 1. Barre de navigation (onglets du haut) ===
-        nav_bar = QHBoxLayout()
+        # Logo ou nom appli
+        title = QLabel("SimRoster")
+        title.setStyleSheet(
+            "font-size: 24px; font-weight: bold; color: #ffffff; padding: 24px 8px 24px 16px; letter-spacing: 2px;"
+        )
+        nav_layout.addWidget(title, alignment=Qt.AlignTop)
+
+        # Boutons de navigation
         self.btn_dashboard = QPushButton("Dashboard")
-        self.btn_fleet = QPushButton("Fleet & Airport Manager")
-        self.btn_setup = QPushButton("Flight Setup")
-        self.btn_ops = QPushButton("Flight Ops")
+        self.btn_fleetmanager = QPushButton("Fleet Manager")
         self.btn_settings = QPushButton("Settings")
-        self.btn_profile = QPushButton("Profile")
-        self.btn_devbuild = QPushButton("DevBuild")
-        self.menu_buttons = [
-        self.btn_dashboard,
-        self.btn_fleet,
-        self.btn_setup,
-        self.btn_ops,
-        self.btn_settings,
-        self.btn_profile,
-        self.btn_devbuild,
-        ]
-        btn_style = """
-        QPushButton {
-            background: transparent;
-            color: #2b3147;
-            border: none;
-            font-size: 1.06em;
-            padding: 10px 18px;
-        }
-        QPushButton:hover {
-            background: #f2f6fc;
-            color: #204ba7;
-            border-radius: 8px;
-        }
-        QPushButton:pressed {
-            background: #dde6fa;
-        }
-        QPushButton:checked {
-            background: transparent;
-            color: #2b3147;
-        }
-        """
+        self.btn_quit = QPushButton("Quit")
 
-        for btn in self.menu_buttons:
-            btn.setCheckable(False)      # NE PAS garder le bouton "coché" après clic
-            btn.setStyleSheet(btn_style) # Applique le style clean
-            nav_bar.addWidget(btn)  # ← AJOUT OBLIGATOIRE POUR AFFICHER LES BOUTONS
-
-        nav_bar.addStretch()
-        nav_bar_widget = QWidget()
-        nav_bar_widget.setLayout(nav_bar)
-        nav_bar_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-
-        # === 2. Carte interactive (plein écran, Leaflet dans QWebEngineView) ===
-        self.map_view = QWebEngineView()
-        self.map_view.setMinimumHeight(500)
-        self.map_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.refresh_map()
-
-        # === 3. Layout principal vertical ===
-        self.central = QWidget()
-        self.setCentralWidget(self.central)
-        central_layout = QVBoxLayout(self.central)
-        central_layout.setContentsMargins(0, 0, 0, 0)
-        central_layout.setSpacing(0)
-        central_layout.addWidget(nav_bar_widget)
-        central_layout.addWidget(
-            self.map_view, stretch=10
-        )  # Seule la carte, pas de stack/overlay Qt
-
-        # === 4. Connexions des boutons du menu => show_xxx_overlay
-        self.btn_dashboard.clicked.connect(self.show_dashboard_panel)
-        self.btn_fleet.clicked.connect(self.show_fleet_panel)
-        self.btn_setup.clicked.connect(self.show_flightsetup_panel)
-        self.btn_ops.clicked.connect(self.show_flightops_panel)
-        self.btn_settings.clicked.connect(self.show_settings_panel)
-        self.btn_profile.clicked.connect(self.show_profile_panel)
-        self.btn_devbuild.clicked.connect(self.show_devbuild_panel)
-
-        self.btn_dashboard.setChecked(True)      # Marquer le dashboard comme sélectionné au démarrage
-
-        # === 5. Afficher le dashboard (APPEL FINAL, absolument dernier !) ===
-        self.map_view.loadFinished.connect(self._on_map_loaded)
-
-        # Connecte le QWebChannel à la page
-        self.map_view.page().setWebChannel(self.channel)
-
-    def _on_map_loaded(self):
-        # Injection du QWebChannel JS après le chargement de la page
-        self.map_view.page().runJavaScript(
+        for btn in [
+            self.btn_dashboard,
+            self.btn_fleetmanager,
+            self.btn_settings,
+            self.btn_quit,
+        ]:
+            btn.setCheckable(True)
+            btn.setStyleSheet(
+                """
+                QPushButton {
+                    color: #ffffff; font-size: 17px; padding: 14px 18px; background: none; border: none; text-align: left;
+                }
+                QPushButton:checked, QPushButton:pressed {
+                    color: #ffffff;
+                }
+                QPushButton:hover {
+                    color: #ffffff;
+                    border: none;   
+                    border-radius: 0px;         
+                    background: #2f2f2f;
+                }
             """
-            if (!window.QWebChannel) {
-            var script = document.createElement('script');
-            script.src = 'qrc:///qtwebchannel/qwebchannel.js';
-            document.head.appendChild(script);
-            }
+            )
+            nav_layout.addWidget(btn)
+
+        nav_layout.addStretch(1)
+        nav_widget.setFixedWidth(210)
+
+        # === Zone centrale (QStackedWidget) ===
+        self.central_stack = QStackedWidget()
+
+        # ================= DASHBOARD : Carte interactive plein écran =================
+        dashboard_panel = QWidget()
+        dashboard_layout = QVBoxLayout(dashboard_panel)
+        dashboard_layout.setContentsMargins(0, 0, 0, 0)
+        dashboard_layout.setSpacing(0)
+
+        self.web_view = QWebEngineView()
+        map_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "../../results/map.html")
+        )
+        self.web_view.load(QUrl.fromLocalFile(map_path))
+        self.web_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        dashboard_layout.addWidget(self.web_view)
+
+        self.central_stack.addWidget(dashboard_panel)
+        # ================= END DASHBOARD ============================================
+
+        # =================== FLEET MANAGER : Panel vertical à gauche + carte ===================
+        fleet_panel_container = QWidget()
+        fleet_panel_layout = QHBoxLayout(fleet_panel_container)
+        fleet_panel_layout.setContentsMargins(0, 0, 0, 0)
+        fleet_panel_layout.setSpacing(0)
+
+        # -- Panel vertical gauche, 46% largeur, carré, fond blanc
+        fleet_panel_widget = QWidget()
+        fleet_panel_widget.setFixedWidth(int(self.width() * 0.46))  # 46% de la fenêtre
+        fleet_panel_widget.setStyleSheet(
+            """
+            background: #212121;
+            border-radius: 0px;
+            box-shadow: 0 4px 24px 0 rgba(16,18,23,0.08);
         """
         )
-        # (puis le reste de ta méthode, comme avant)
-        cleanup_script = """
-        var toRemove = document.querySelectorAll('#fleet-airport-panel, #dashboard-panel');
-        toRemove.forEach(e => e.parentNode.removeChild(e));
-        """
-        self.map_view.page().runJavaScript(cleanup_script)
-        self.show_dashboard_panel()
+        vbox = QVBoxLayout(fleet_panel_widget)
+        vbox.setContentsMargins(0, 0, 0, 0)
+        vbox.setSpacing(0)
 
-    def show_overlay_panel(self, panel_id, inner_html):
-        """
-        Affiche un overlay unifié, en bas de la carte.
-        - panel_id : id HTML unique (ex : 'dashboard-panel')
-        - inner_html : HTML à injecter dans le cadre
-        """
-        style = """
-        <style>
-        #fleet-airport-overlay-bg { display: none !important; }
-        .unified-panel {
-            position: fixed;
-            left: 50%;
-            transform: translateX(-50%);
-            bottom: 12px;
-            z-index: 9999;
-            min-width: 1050px;
-            max-width: 98vw;
-            background: #fff;
-            border-radius: 20px;
-            border: 1.5px solid #dde;
-            box-shadow: 0 8px 32px 0 rgba(80,90,110,0.10);
-            padding: 16px 22px 16px 22px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        </style>
-        """
-        html = f"""
-        {style}
-        <div id="{panel_id}" class="unified-panel">
-        {inner_html}
-        </div>
-        """
-        cleanup_script = """
-        var toRemove = document.querySelectorAll('.unified-panel, #fleet-airport-panel, #dashboard-panel');
-        toRemove.forEach(e => e.parentNode && e.parentNode.removeChild(e));
-        """
-        self.map_view.page().runJavaScript(cleanup_script)
-        self.map_view.page().runJavaScript(
-            f"document.body.insertAdjacentHTML('beforeend', `{html}`);"
+        # -- FleetManagerPanel avec Scan Now en haut --
+        aircraft_sample = [
+            {"reg": "F-HBJB", "model": "A320neo Air France"},
+            {"reg": "D-AIZC", "model": "A320 Lufthansa"},
+        ]
+        airports_sample = [
+            {"icao": "LFPG", "name": "Paris Charles de Gaulle"},
+            {"icao": "LHR", "name": "London Heathrow"},
+            {"icao": "JFK", "name": "New York JFK"},
+            {"icao": "CDG", "name": "Charles de Gaulle Alt"},
+        ]
+        fleet_manager_core = FleetManagerPanel(
+            available_aircraft=aircraft_sample,
+            selected_aircraft=[],
+            available_airports=airports_sample,
+            selected_airports=[],
         )
+        vbox.addWidget(fleet_manager_core)
+        vbox.addStretch(1)
 
-    # ============ INJECTION HTML/CSS OVERLAY DANS LA CARTE ============
-
-    def show_dashboard_panel(self):
-        inner_html = '''
-        <div style="width: 100%; min-height: 82px; display: flex; align-items: center; justify-content: center;">
-            <div style="font-size: 1.20rem; font-weight: 600; color: #263959; letter-spacing: 0.03em; text-align: center; width: 100%;">
-            Dashboard
-            </div>
-        </div>
-        '''
-        self.show_overlay_panel("dashboard-panel", inner_html)
-
-    def show_fleet_panel(self):
-        """
-        Affiche le Fleet & Airport Manager en pleine page, responsive, et injecte les handlers JS.
-        Récupère dynamiquement les avions et aéroports depuis les JSON scannés.
-        """
-
-        import json
-
-        aircraft_path = os.path.join(self.results_dir, "aircraft_scanresults.json")
-        airport_path = os.path.join(self.results_dir, "airport_scanresults.json")
-        available_aircraft = []
-        available_airports = []
-
-        # === 1. Lecture JSON, robustesse ===
-        if os.path.exists(aircraft_path):
-            with open(aircraft_path, encoding="utf-8") as f:
-                try:
-                    available_aircraft = json.load(f)
-                except Exception as e:
-                    print("[FleetPanel] Erreur de lecture aircraft_scanresults.json :", e)
-        if os.path.exists(airport_path):
-            with open(airport_path, encoding="utf-8") as f:
-                try:
-                    available_airports = json.load(f)
-                except Exception as e:
-                    print("[FleetPanel] Erreur de lecture airport_scanresults.json :", e)
-
-        # === 2. Génération <option> dynamiques, labels humains ===
-        def build_aircraft_option(ac):
-            # Si ac est dict, utilise un label lisible, sinon juste str
-            if isinstance(ac, dict):
-                label = f"{ac.get('model', '')} {ac.get('registration', '')} {ac.get('company', '')}".strip()
-                value = json.dumps(ac).replace('"', "&quot;")  # Pour usage futur
-            else:
-                label = str(ac)
-                value = str(ac)
-            return f'<option value="{value}">{label}</option>'
-
-        def build_airport_option(ap):
-            if isinstance(ap, dict):
-                label = f"{ap.get('icao', '')} {ap.get('name', '')}".strip()
-                value = json.dumps(ap).replace('"', "&quot;")
-            else:
-                label = str(ap)
-                value = str(ap)
-            return f'<option value="{value}">{label}</option>'
-
-        aircraft_options = "\n".join(
-            [build_aircraft_option(ac) for ac in available_aircraft]
+        # -- Carte à droite du panel --
+        fleet_map_view = QWebEngineView()
+        fleet_map_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "../../results/map.html")
         )
-        airport_options = "\n".join([build_airport_option(ap) for ap in available_airports])
+        fleet_map_view.load(QUrl.fromLocalFile(fleet_map_path))
+        fleet_map_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        fleet_panel_layout.addWidget(fleet_panel_widget)
+        fleet_panel_layout.addWidget(fleet_map_view)
 
-        # === 3. Génére le HTML du panel (responsive, full-screen) ===
-        html = f"""
-        <style>
-        .unified-panel {{
-            position: fixed;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            width: 96vw;
-            height: 88vh;
-            max-width: 1800px;
-            max-height: 900px;
-            background: #fff;
-            border-radius: 20px;
-            border: 1.5px solid #dde;
-            box-shadow: 0 8px 32px 0 rgba(80,90,110,0.10);
-            padding: 26px 38px 24px 38px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            overflow: auto;
-        }}
-        .panel-title {{
-            font-size: 2.2rem;
-            font-weight: 700;
-            margin-bottom: 18px;
-            letter-spacing: 0.01em;
-            color: #263959;
-            text-align: center;
-            width: 100%;
-        }}
-        .panel-row {{
-            display: flex;
-            align-items: flex-start;
-            justify-content: center;
-            gap: 26px;
-            width: 100%;
-            height: 60vh;
-            max-height: 620px;
-        }}
-        .panel-group {{
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-width: 220px;
-            width: 23vw;
-            height: 100%;
-        }}
-        .panel-label {{
-            font-size: 1.18rem;
-            font-weight: 500;
-            margin-bottom: 7px;
-            color: #455;
-            text-align: center;
-        }}
-        .panel-list {{
-            width: 99%;
-            height: 60vh;
-            border-radius: 7px;
-            border: 1px solid #ccd;
-            background: #f9fafc;
-            font-size: 1.12rem;
-            padding: 4px;
-            resize: none;
-        }}
-        .panel-transfer {{
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-        }}
-        .panel-transfer button {{
-            width: 38px;
-            height: 38px;
-            font-size: 1.32rem;
-            border-radius: 9px;
-            border: 1.2px solid #bdd;
-            background: #f2f4f7;
-            cursor: pointer;
-            margin-bottom: 3px;
-            transition: background 0.15s;
-        }}
-        .panel-transfer button:hover {{
-            background: #e7f1ff;
-        }}
-        .panel-action {{
-            margin-top: 22px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            gap: 38px;
-        }}
-        </style>
-        <div id="fleet-airport-panel" class="unified-panel">
-        <div class="panel-title">Fleet & Airport Manager</div>
-        <div class="panel-row">
-            <div class="panel-group">
-            <div class="panel-label">Available Aircraft</div>
-            <select multiple class="panel-list" id="available-aircraft">
-                {aircraft_options}
-            </select>
-            </div>
-            <div class="panel-transfer">
-            <button id="add-aircraft" title="Ajouter Aircraft">→</button>
-            <button id="remove-aircraft" title="Retirer Aircraft">←</button>
-            </div>
-            <div class="panel-group">
-            <div class="panel-label">Selected Aircraft</div>
-            <select multiple class="panel-list" id="selected-aircraft"></select>
-            </div>
-            <div class="panel-group">
-            <div class="panel-label">Available Airports</div>
-            <select multiple class="panel-list" id="available-airports">
-                {airport_options}
-            </select>
-            </div>
-            <div class="panel-transfer">
-            <button id="add-airport" title="Ajouter Airport">→</button>
-            <button id="remove-airport" title="Retirer Airport">←</button>
-            </div>
-            <div class="panel-group">
-            <div class="panel-label">Selected Airports</div>
-            <select multiple class="panel-list" id="selected-airports"></select>
-            </div>
-        </div>
-        <div class="panel-action">
-            <button id="save-selection-btn">Apply</button>
-            <button id="scan-now-btn">Scan Now</button>
-        </div>
-        </div>
-        """
+        self.central_stack.addWidget(fleet_panel_container)
+        # ================= END FLEET MANAGER =========================================
 
-        # === 4. Injection HTML dans le WebView ===
-        cleanup_script = """
-            var toRemove = document.querySelectorAll('.unified-panel, #fleet-airport-panel, #dashboard-panel');
-            toRemove.forEach(e => e.parentNode && e.parentNode.removeChild(e));
-        """
-        self.map_view.page().runJavaScript(cleanup_script)
-        self.map_view.page().runJavaScript(
-            f"document.body.insertAdjacentHTML('beforeend', `{html}`);"
+        # ================= SETTINGS PANEL =====================
+        settings_panel = QWidget()
+        settings_layout = QVBoxLayout(settings_panel)
+        settings_label = QLabel("Settings (à venir)")
+        settings_label.setStyleSheet("font-size: 24px; color: #bbb;")
+        settings_layout.addWidget(settings_label, alignment=Qt.AlignCenter)
+        self.central_stack.addWidget(settings_panel)
+        # ================= END SETTINGS =======================
+
+        # === Layout principal ===
+        main_widget = QWidget()
+        main_layout = QHBoxLayout(main_widget)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
+        main_layout.addWidget(nav_widget)
+        main_layout.addWidget(self.central_stack)
+        self.setCentralWidget(main_widget)
+
+        # === Connexions navigation ===
+        self.btn_dashboard.clicked.connect(
+            lambda: self.central_stack.setCurrentIndex(0)
         )
-
-        # === 5. Injection JS pour handlers QWebChannel et transferts ===
-        js = """
-        // QWebChannel auto-load
-        if (typeof QWebChannel === "undefined") {
-            var script = document.createElement("script");
-            script.src = "qrc:///qtwebchannel/qwebchannel.js";
-            script.onload = function() {
-                new QWebChannel(qt.webChannelTransport, function(channel) {
-                    window.bridge = channel.objects.bridge;
-                    attachFleetManagerHandlers();
-                });
-            };
-            document.head.appendChild(script);
-        } else {
-            new QWebChannel(qt.webChannelTransport, function(channel) {
-                window.bridge = channel.objects.bridge;
-                attachFleetManagerHandlers();
-            });
-        }
-        function attachFleetManagerHandlers() {
-            function moveOptions(fromId, toId) {
-                var from = document.getElementById(fromId);
-                var to = document.getElementById(toId);
-                Array.from(from.selectedOptions).forEach(opt => {
-                    to.appendChild(opt);
-                });
-            }
-            document.getElementById('add-aircraft').onclick = function() {
-                moveOptions('available-aircraft', 'selected-aircraft');
-            };
-            document.getElementById('remove-aircraft').onclick = function() {
-                moveOptions('selected-aircraft', 'available-aircraft');
-            };
-            document.getElementById('add-airport').onclick = function() {
-                moveOptions('available-airports', 'selected-airports');
-            };
-            document.getElementById('remove-airport').onclick = function() {
-                moveOptions('selected-airports', 'available-airports');
-            };
-            document.getElementById('save-selection-btn').onclick = function() {
-                var selectedAircraft = [];
-                Array.from(document.getElementById('selected-aircraft').options).forEach(opt => {
-                    selectedAircraft.push(opt.value);
-                });
-                var selectedAirports = [];
-                Array.from(document.getElementById('selected-airports').options).forEach(opt => {
-                    selectedAirports.push(opt.value);
-                });
-                if (window.bridge && window.bridge.saveSelections) {
-                    window.bridge.saveSelections(selectedAircraft, selectedAirports);
-                    alert("Selections saved!");
-                } else {
-                    alert("Bridge not available.");
-                }
-            };
-            document.getElementById('scan-now-btn').onclick = function() {
-                if (window.bridge && window.bridge.runScan) {
-                    window.bridge.runScan();
-                    setTimeout(function() {
-                        if (window.bridge && window.bridge.showFleetPanel) {
-                            window.bridge.showFleetPanel();
-                        }
-                    }, 1200);
-                } else {
-                    alert("Scan bridge not available!");
-                }
-            };
-        }
-        """
-        self.map_view.page().runJavaScript(js)
-
-    def show_flightsetup_panel(self):
-        inner_html = '''
-            <div style="width: 100%; min-height: 82px; display: flex; align-items: center; justify-content: center;">
-                <div style="font-size: 1.20rem; font-weight: 600; color: #263959; letter-spacing: 0.03em; text-align: center; width: 100%;">
-                Flight Setup
-                </div>
-            </div>
-            '''
-        self.show_overlay_panel("flightsetup-panel", inner_html)
-
-    def show_flightops_panel(self):
-        inner_html = '''
-            <div style="width: 100%; min-height: 82px; display: flex; align-items: center; justify-content: center;">
-                <div style="font-size: 1.20rem; font-weight: 600; color: #263959; letter-spacing: 0.03em; text-align: center; width: 100%;">
-                Flight Operations
-                </div>
-            </div>
-            '''
-        self.show_overlay_panel("flightops-panel", inner_html)
-
-    def show_settings_panel(self):
-        inner_html = """
-        <div style="width: 100%; min-height: 82px; display: flex; align-items: center; justify-content: center;">
-            <div style="font-size: 1.20rem; font-weight: 600; color: #263959; letter-spacing: 0.03em; text-align: center; width: 100%;">
-            Settings
-            </div>
-        </div>
-        """
-        self.show_overlay_panel("settings-panel", inner_html)
-
-    def show_profile_panel(self):
-        inner_html = """
-        <div style="width: 100%; min-height: 82px; display: flex; align-items: center; justify-content: center;">
-            <div style="font-size: 1.20rem; font-weight: 600; color: #263959; letter-spacing: 0.03em; text-align: center; width: 100%;">
-            Profile
-            </div>
-        </div>
-        """
-        self.show_overlay_panel("profile-panel", inner_html)
-
-    def show_devbuild_panel(self):
-        inner_html = '''
-            <div style="width: 100%; min-height: 82px; display: flex; align-items: center; justify-content: center;">
-                <div style="font-size: 1.20rem; font-weight: 600; color: #263959; letter-spacing: 0.03em; text-align: center; width: 100%;">
-                DevBuild
-                </div>
-            </div>
-            '''
-        self.show_overlay_panel("devbuild-panel", inner_html)
-
-    def inject_overlay(self, html_content):
-        """
-        Injecte l'HTML (panel overlay) dans la carte via JS.
-        """
-        js_code = """
-        if (window.hideCustomOverlay) window.hideCustomOverlay();
-        var tmp = document.createElement('div');
-        tmp.innerHTML = %s;
-        document.body.appendChild(tmp.firstChild);
-        """ % (
-            json.dumps(html_content)
+        self.btn_fleetmanager.clicked.connect(
+            lambda: self.central_stack.setCurrentIndex(1)
         )
-        self.map_view.page().runJavaScript(js_code)
+        self.btn_settings.clicked.connect(lambda: self.central_stack.setCurrentIndex(2))
+        self.btn_quit.clicked.connect(self.close)
 
-    def set_menu_checked(self, btn):
-        # Uncheck all, then check only the right one
-        for b in self.menu_buttons:
-            b.setChecked(False)
-        btn.setChecked(True)
-
-    def refresh_map(self):
-        map_path = os.path.abspath(os.path.join(self.map_dir, "map.html"))
-        self.map_view.load(QUrl.fromLocalFile(map_path))
-
-    def change_language(self, lang_code):
-        self.translator.set_language(lang_code)
-        self.setWindowTitle(self.translator.t("main_window_title"))
-        # Optionnel : rafraîchir le texte des overlays selon la langue
+        # Dashboard par défaut
+        self.btn_dashboard.setChecked(True)
+        self.central_stack.setCurrentIndex(0)
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    font = QFont("Roboto", 12)
+    app.setFont(font)
     window = MainWindow()
     window.show()
     sys.exit(app.exec_())

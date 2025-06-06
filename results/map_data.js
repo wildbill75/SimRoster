@@ -1,0 +1,1 @@
+window.AIRPORT_MARKERS = [];
