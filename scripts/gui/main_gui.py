@@ -1,5 +1,6 @@
 import sys
 import os
+import csv
 from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -12,7 +13,8 @@ from PyQt5.QtWidgets import (
     QStackedWidget,
     QFrame,
     QSizePolicy,
-    
+    QLineEdit,
+    QListWidgetItem,
 )
 from PyQt5.QtCore import Qt, QUrl
 from PyQt5.QtGui import QFont
@@ -21,6 +23,7 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView
 
 # ==================== FleetManagerPanel ====================
 class FleetManagerPanel(QWidget):
+
     def __init__(
         self,
         available_aircraft=None,
@@ -35,7 +38,6 @@ class FleetManagerPanel(QWidget):
         self.available_airports = available_airports or []
         self.selected_airports = selected_airports or []
 
-        # Fond blanc, tout carré
         self.setStyleSheet(
             """
             background: #fff;
@@ -44,7 +46,7 @@ class FleetManagerPanel(QWidget):
         )
 
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(22, 22, 22, 18)  # Marge top plus raisonnable !
+        main_layout.setContentsMargins(22, 22, 22, 18)
         main_layout.setSpacing(12)
 
         # Titre Fleet Manager
@@ -58,7 +60,7 @@ class FleetManagerPanel(QWidget):
             """
         )
         title.setAlignment(Qt.AlignCenter)
-        main_layout.addSpacing(-10)  # Mets -10, -5, 0 ou même +8 pour descendre, teste la valeur !
+        main_layout.addSpacing(-10)
         main_layout.addWidget(title)
         main_layout.addSpacing(50)
 
@@ -85,10 +87,39 @@ class FleetManagerPanel(QWidget):
         lbl_aircraft_avail.setContentsMargins(0, 10, 0, 0)
         main_layout.addWidget(lbl_aircraft_avail)
 
-        self.list_aircraft_available = QListWidget()
-        self.list_aircraft_available.addItems(
-            [f"{ac['reg']} – {ac['model']}" for ac in self.available_aircraft]
+        # === Champ de recherche Aircraft stylisé, avec loupe blanche PNG et fond gris ===
+        self.aircraft_search = QLineEdit()
+        self.aircraft_search.setPlaceholderText("Search Aircraft...")
+
+        self.aircraft_search.setStyleSheet(
+            """
+        QLineEdit {
+            background-color: #343842;
+            background-image: url(assets/search_white.png);
+            background-repeat: no-repeat;
+            background-position: 6px left center;
+            color: #fff;
+            font-size: 14px;
+            padding-left: 32px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            margin-bottom: 8px;
+            selection-background-color: #555;
+        }
+        QLineEdit:focus {
+            border: 1.5px solid #bbb;
+            outline: none;
+        }
+        QLineEdit::placeholder {
+            color: #aaa;
+        }
+        """
         )
+
+        main_layout.addWidget(self.aircraft_search)
+        self.aircraft_search.textChanged.connect(self.filter_aircraft)
+
+        self.list_aircraft_available = QListWidget()
         self.list_aircraft_available.setSelectionMode(QListWidget.MultiSelection)
         self.list_aircraft_available.setStyleSheet(
             "background: #343842; color: #fff; font-size: 14px; border: none; border-radius: 0;"
@@ -121,9 +152,6 @@ class FleetManagerPanel(QWidget):
         main_layout.addWidget(lbl_aircraft_sel)
 
         self.list_aircraft_selected = QListWidget()
-        self.list_aircraft_selected.addItems(
-            [f"{ac['reg']} – {ac['model']}" for ac in self.selected_aircraft]
-        )
         self.list_aircraft_selected.setSelectionMode(QListWidget.MultiSelection)
         self.list_aircraft_selected.setStyleSheet(
             "background: #343842; color: #fff; font-size: 14px; border: none; border-radius: 0;"
@@ -137,10 +165,47 @@ class FleetManagerPanel(QWidget):
         )
         main_layout.addWidget(lbl_airport_avail)
 
-        self.list_airport_available = QListWidget()
-        self.list_airport_available.addItems(
-            [f"{ap['icao']} – {ap['name']}" for ap in self.available_airports]
+        # === Champ de recherche aéroports ===
+        self.airport_search = QLineEdit()
+        self.airport_search.setPlaceholderText("Search ICAO or name...")
+
+        loupe_svg = (
+            "data:image/svg+xml;utf8,"
+            "<svg width='16' height='16' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'>"
+            "<circle cx='9' cy='9' r='7' stroke='white' stroke-width='2' fill='none'/>"
+            "<line x1='15' y1='15' x2='12.5' y2='12.5' stroke='white' stroke-width='2'/>"
+            "</svg>"
         )
+
+        self.airport_search.setStyleSheet(
+            f"""
+        QLineEdit {{
+            background-color: #343842;
+            background-image: url(assets/search_white.png);
+            background-repeat: no-repeat;
+            background-position: left center;
+            color: #fff;
+            font-size: 14px;
+            padding-left: 32px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            margin-bottom: 8px;
+            selection-background-color: #555;
+        }}
+        QLineEdit:focus {{
+            border: 1.5px solid #bbb;
+            outline: none;
+        }}
+        QLineEdit::placeholder {{
+            color: #aaa;
+        }}
+        """
+        )
+
+        main_layout.addWidget(self.airport_search)
+        self.airport_search.textChanged.connect(self.filter_airports)
+
+        self.list_airport_available = QListWidget()
         self.list_airport_available.setSelectionMode(QListWidget.MultiSelection)
         self.list_airport_available.setStyleSheet(
             "background: #343842; color: #fff; font-size: 14px; border: none; border-radius: 0;"
@@ -173,9 +238,6 @@ class FleetManagerPanel(QWidget):
         main_layout.addWidget(lbl_airport_sel)
 
         self.list_airport_selected = QListWidget()
-        self.list_airport_selected.addItems(
-            [f"{ap['icao']} – {ap['name']}" for ap in self.selected_airports]
-        )
         self.list_airport_selected.setSelectionMode(QListWidget.MultiSelection)
         self.list_airport_selected.setStyleSheet(
             "background: #343842; color: #fff; font-size: 14px; border: none; border-radius: 0;"
@@ -189,52 +251,224 @@ class FleetManagerPanel(QWidget):
         )
         main_layout.addWidget(self.btn_reset, alignment=Qt.AlignCenter)
 
-        # --- Connexions
+        # --- Connexions boutons
         self.btn_aircraft_add.clicked.connect(self.add_aircraft)
         self.btn_aircraft_remove.clicked.connect(self.remove_aircraft)
         self.btn_airport_add.clicked.connect(self.add_airport)
         self.btn_airport_remove.clicked.connect(self.remove_airport)
         self.btn_reset.clicked.connect(self.reset_all)
+        self.btn_scan.clicked.connect(self.scan_airports)
 
+        # --- Affichage initial ---
+        self._refresh_aircraft_list()
+        self._refresh_selected_aircraft_list()
+        self._refresh_airport_list()
+        self._refresh_selected_airport_list()
+
+    # === Aircraft list helpers ===
+
+    def _refresh_aircraft_list(self):
+        self.list_aircraft_available.clear()
+        for ac in self.available_aircraft:
+            item = QListWidgetItem(f"{ac['reg']} – {ac['model']}")
+            item.setFlags(item.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
+            item.setCheckState(Qt.Unchecked)
+            self.list_aircraft_available.addItem(item)
+
+    def _refresh_selected_aircraft_list(self):
+        self.list_aircraft_selected.clear()
+        for ac in self.selected_aircraft:
+            item = QListWidgetItem(f"{ac['reg']} – {ac['model']}")
+            item.setFlags(item.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
+            item.setCheckState(Qt.Unchecked)
+            self.list_aircraft_selected.addItem(item)
+    # === Airport list helpers ===
+
+    def _refresh_airport_list(self):
+        self.list_airport_available.clear()
+        for ap in self.available_airports:
+            item = QListWidgetItem(f"{ap['icao']} – {ap['name']}")
+            item.setFlags(item.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
+            item.setCheckState(Qt.Unchecked)
+            self.list_airport_available.addItem(item)
+
+    def _refresh_selected_airport_list(self):
+        self.list_airport_selected.clear()
+        for ap in self.selected_airports:
+            item = QListWidgetItem(f"{ap['icao']} – {ap['name']}")
+            item.setFlags(item.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
+            item.setCheckState(Qt.Unchecked)
+            self.list_airport_selected.addItem(item)
+
+    # === Fonctions de déplacement
     def add_aircraft(self):
-        selected = self.list_aircraft_available.selectedItems()
-        for item in selected:
-            idx = self.list_aircraft_available.row(item)
-            ac_str = self.list_aircraft_available.takeItem(idx).text()
-            self.list_aircraft_selected.addItem(ac_str)
+        to_move = []
+        for i in range(self.list_aircraft_available.count()):
+            item = self.list_aircraft_available.item(i)
+            # Tickbox uniquement (checkstate) pour Aircraft
+            if (
+                item.flags() & Qt.ItemIsUserCheckable
+                and item.checkState() == Qt.Checked
+            ):
+                ac_text = item.text()
+                ac = next(
+                    (
+                        a
+                        for a in self.available_aircraft
+                        if f"{a['reg']} – {a['model']}" == ac_text
+                    ),
+                    None,
+                )
+                if ac:
+                    self.selected_aircraft.append(ac)
+                    to_move.append(ac)
+        for ac in to_move:
+            self.available_aircraft.remove(ac)
+        self._refresh_aircraft_list()
+        self._refresh_selected_aircraft_list()
 
     def remove_aircraft(self):
-        selected = self.list_aircraft_selected.selectedItems()
-        for item in selected:
-            idx = self.list_aircraft_selected.row(item)
-            ac_str = self.list_aircraft_selected.takeItem(idx).text()
-            self.list_aircraft_available.addItem(ac_str)
+        to_move = []
+        for i in range(self.list_aircraft_selected.count()):
+            item = self.list_aircraft_selected.item(i)
+            # Tickbox uniquement pour Aircraft sélectionnés
+            if (
+                item.flags() & Qt.ItemIsUserCheckable
+                and item.checkState() == Qt.Checked
+            ):
+                ac_text = item.text()
+                ac = next(
+                    (
+                        a
+                        for a in self.selected_aircraft
+                        if f"{a['reg']} – {a['model']}" == ac_text
+                    ),
+                    None,
+                )
+                if ac:
+                    self.available_aircraft.append(ac)
+                    to_move.append(ac)
+        for ac in to_move:
+            self.selected_aircraft.remove(ac)
+        self._refresh_aircraft_list()
+        self._refresh_selected_aircraft_list()
 
     def add_airport(self):
-        selected = self.list_airport_available.selectedItems()
-        for item in selected:
-            idx = self.list_airport_available.row(item)
-            ap_str = self.list_airport_available.takeItem(idx).text()
-            self.list_airport_selected.addItem(ap_str)
+        to_move = []
+        for i in range(self.list_airport_available.count()):
+            item = self.list_airport_available.item(i)
+            # Tickbox uniquement (checkstate)
+            if (
+                item.flags() & Qt.ItemIsUserCheckable
+                and item.checkState() == Qt.Checked
+            ):
+                text = item.text()
+                ap = next(
+                    (
+                        a
+                        for a in self.available_airports
+                        if f"{a['icao']} – {a['name']}" == text
+                    ),
+                    None,
+                )
+                if ap:
+                    self.selected_airports.append(ap)
+                    to_move.append(ap)
+        for ap in to_move:
+            self.available_airports.remove(ap)
+        self._refresh_airport_list()
+        self._refresh_selected_airport_list()
 
     def remove_airport(self):
-        selected = self.list_airport_selected.selectedItems()
-        for item in selected:
-            idx = self.list_airport_selected.row(item)
-            ap_str = self.list_airport_selected.takeItem(idx).text()
-            self.list_airport_available.addItem(ap_str)
+        to_move = []
+        for i in range(self.list_airport_selected.count()):
+            item = self.list_airport_selected.item(i)
+            # Tickbox uniquement (checkstate)
+            if item.flags() & Qt.ItemIsUserCheckable and item.checkState() == Qt.Checked:
+                text = item.text()
+                ap = next(
+                    (a for a in self.selected_airports if f"{a['icao']} – {a['name']}" == text),
+                    None,
+                )
+                if ap:
+                    self.available_airports.append(ap)
+                    to_move.append(ap)
+        for ap in to_move:
+            self.selected_airports.remove(ap)
+        self._refresh_airport_list()
+        self._refresh_selected_airport_list()
 
     def reset_all(self):
-        # Aircraft
-        all_sel_ac = []
-        while self.list_aircraft_selected.count():
-            all_sel_ac.append(self.list_aircraft_selected.takeItem(0).text())
-        self.list_aircraft_available.addItems(all_sel_ac)
-        # Airports
-        all_sel_ap = []
-        while self.list_airport_selected.count():
-            all_sel_ap.append(self.list_airport_selected.takeItem(0).text())
-        self.list_airport_available.addItems(all_sel_ap)
+        self.available_aircraft += self.selected_aircraft
+        self.selected_aircraft = []
+        self.available_airports += self.selected_airports
+        self.selected_airports = []
+        self._refresh_aircraft_list()
+        self._refresh_selected_aircraft_list()
+        self._refresh_airport_list()
+        self._refresh_selected_airport_list()
+
+    # === SCAN depuis le CSV (airports.csv dans "data/") ===
+    def scan_airports(self):
+        airports = []
+        path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "../../data/airports.csv")
+        )
+        try:
+            with open(path, encoding="utf-8-sig") as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    if row.get("icao", "") and row.get("name", ""):
+                        airports.append({"icao": row["icao"], "name": row["name"]})
+        except Exception as e:
+            print("Erreur chargement CSV aéroports :", e)
+            airports = []
+
+        self.available_airports = airports
+        self.selected_airports = []
+        self._refresh_airport_list()
+        self._refresh_selected_airport_list()
+        print(f"[INFO] {len(airports)} aéroports chargés depuis {path}")
+
+    # === FILTRE DE RECHERCHE (Search) ===
+    def filter_airports(self, text):
+        self.list_airport_available.clear()
+        if not text.strip():
+            for ap in self.available_airports:
+                self.list_airport_available.addItem(f"{ap['icao']} – {ap['name']}")
+        else:
+            txt = text.lower().strip()
+            for ap in self.available_airports:
+                if txt in ap["icao"].lower() or txt in ap["name"].lower():
+                    self.list_airport_available.addItem(f"{ap['icao']} – {ap['name']}")
+
+    def filter_aircraft(self, text):
+        self.list_aircraft_available.clear()
+        if not text.strip():
+            for ac in self.available_aircraft:
+                item = QListWidgetItem(f"{ac['reg']} – {ac['model']}")
+                item.setFlags(item.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
+                item.setCheckState(Qt.Unchecked)
+                self.list_aircraft_available.addItem(item)
+        else:
+            txt = text.lower().strip()
+            for ac in self.available_aircraft:
+                if txt in ac["reg"].lower() or txt in ac["model"].lower():
+                    item = QListWidgetItem(f"{ac['reg']} – {ac['model']}")
+                    item.setFlags(item.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
+                    item.setCheckState(Qt.Unchecked)
+                    self.list_aircraft_available.addItem(item)
+
+            # Aircraft
+            all_sel_ac = []
+            while self.list_aircraft_selected.count():
+                all_sel_ac.append(self.list_aircraft_selected.takeItem(0).text())
+            self.list_aircraft_available.addItems(all_sel_ac)
+            # Airports
+            all_sel_ap = []
+            while self.list_airport_selected.count():
+                all_sel_ap.append(self.list_airport_selected.takeItem(0).text())
+            self.list_airport_available.addItems(all_sel_ap)
 
 
 # ==================== MAIN WINDOW ====================
@@ -334,24 +568,47 @@ class MainWindow(QMainWindow):
         vbox.setSpacing(0)
 
         # -- FleetManagerPanel avec Scan Now en haut --
-        aircraft_sample = [
-            {"reg": "F-HBJB", "model": "A320neo Air France"},
-            {"reg": "D-AIZC", "model": "A320 Lufthansa"},
-        ]
-        airports_sample = [
-            {"icao": "LFPG", "name": "Paris Charles de Gaulle"},
-            {"icao": "LHR", "name": "London Heathrow"},
-            {"icao": "JFK", "name": "New York JFK"},
-            {"icao": "CDG", "name": "Charles de Gaulle Alt"},
-        ]
+
+        def load_airports_from_csv():
+            airports = []
+            path = os.path.abspath(
+                os.path.join(os.path.dirname(__file__), "../../data/airports.csv")
+            )
+            print(f"[DEBUG] CSV path: {path}")
+            print("[DEBUG] CSV exists?", os.path.exists(path))
+            try:
+                with open(path, encoding="utf-8-sig") as f:   # <--- LA différence CLEF
+                    lines = f.readlines()
+                    print(f"[DEBUG] Nb lignes dans CSV: {len(lines)}")
+                    f.seek(0)
+                    reader = csv.DictReader(lines)
+                    for row in reader:
+                        print("[DEBUG] Première ligne CSV:", row)
+                        if row.get("icao", "") and row.get("name", ""):
+                            airports.append({"icao": row["icao"], "name": row["name"]})
+            except Exception as e:
+                print("Erreur chargement CSV aéroports (init FleetManager):", e)
+            return airports
+
+        def load_aircraft_sample():
+            # Remplace par ton scan réel d'avions dès que prêt !
+            return [
+                {"reg": "F-HBJB", "model": "A320neo Air France"},
+                {"reg": "D-AIZC", "model": "A320 Lufthansa"},
+            ]
+
+        aircraft_init = load_aircraft_sample()
+        airports_init = load_airports_from_csv()
         fleet_manager_core = FleetManagerPanel(
-            available_aircraft=aircraft_sample,
+            available_aircraft=aircraft_init,
             selected_aircraft=[],
-            available_airports=airports_sample,
+            available_airports=airports_init,
             selected_airports=[],
         )
+
         vbox.addWidget(fleet_manager_core)
         vbox.addStretch(1)
+
 
         # -- Carte à droite du panel --
         fleet_map_view = QWebEngineView()
