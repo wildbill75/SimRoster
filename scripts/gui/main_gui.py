@@ -1,6 +1,8 @@
 import sys
 import os
 import csv
+import json
+import subprocess
 from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -15,10 +17,280 @@ from PyQt5.QtWidgets import (
     QSizePolicy,
     QLineEdit,
     QListWidgetItem,
+    QToolButton,
+    QFileDialog,
+
 )
 from PyQt5.QtCore import Qt, QUrl
 from PyQt5.QtGui import QFont
 from PyQt5.QtWebEngineWidgets import QWebEngineView
+
+CONFIG_PATH = "data/settings_paths.json"
+
+def get_default_paths():
+    import os
+
+    home = os.path.expanduser("~")
+    return {
+        "community": os.path.join(
+            home,
+            "AppData/Local/Packages/Microsoft.FlightSimulator_8wekyb3d8bbwe/LocalCache/Packages/Community",
+        ),
+        "streamed": os.path.join(
+            home,
+            "AppData/Local/Packages/Microsoft.FlightSimulator_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages",
+        ),
+        "onestore": os.path.join(
+            home,
+            "AppData/Local/Packages/Microsoft.FlightSimulator_8wekyb3d8bbwe/LocalCache/Packages/Official/OneStore",
+        ),
+    }
+
+def load_paths():
+    try:
+        with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return get_default_paths()
+
+def save_paths(paths):
+    import os
+
+    os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)
+    with open(CONFIG_PATH, "w", encoding="utf-8") as f:
+        json.dump(paths, f, indent=2, ensure_ascii=False)
+
+def load_airports_from_json_or_csv():
+    """Charge la liste des aéroports depuis le scan (JSON) si dispo, sinon le CSV de base."""
+    airports = []
+    results_path = os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__), "../../results/airport_scanresults.json"
+        )
+    )
+    if os.path.exists(results_path):
+        try:
+            with open(results_path, encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, list) and data:
+                    for entry in data:
+                        if "icao" in entry and "name" in entry:
+                            airports.append(
+                                {"icao": entry["icao"], "name": entry["name"]}
+                            )
+            print(f"[INFO] {len(airports)} aéroports chargés depuis {results_path}")
+            return airports
+        except Exception as e:
+            print("[WARN] Erreur lecture du JSON scan results :", e)
+
+    # Fallback sur le CSV classique si pas de JSON ou erreur
+    csv_path = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "../../data/airports.csv")
+    )
+    try:
+        with open(csv_path, encoding="utf-8-sig") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if row.get("icao", "") and row.get("name", ""):
+                    airports.append({"icao": row["icao"], "name": row["name"]})
+        print(f"[INFO] {len(airports)} aéroports chargés depuis {csv_path}")
+    except Exception as e:
+        print("Erreur chargement CSV aéroports (fallback) :", e)
+    return airports
+
+
+# ================= SETTINGS PANEL =====================
+class SettingsPanel(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setStyleSheet("background: #23242a; border-radius: 8px; color: #fff;")
+        vbox = QVBoxLayout(self)
+        vbox.setContentsMargins(30, 28, 30, 28)
+        vbox.setSpacing(28)
+
+        label_style = """
+            font-size: 14px;
+            color: #fff;
+            font-weight: bold;
+            background: none;
+            padding: 0;
+            min-width: 190px;
+            max-width: 250px;
+        """
+        field_style = """
+            background: #343842;
+            color: #fff;
+            font-size: 14px;
+            border: 1px solid #444;
+            border-radius: 0px;
+            padding: 5px 8px;
+            min-width: 250px; max-width: 390px;
+            selection-background-color: #555;
+        """
+        btn_style = """
+            background: #8d9099;
+            color: #222;
+            font-size: 15px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            margin: 0;
+            padding: 0;
+            min-width: 24px; min-height: 24px; max-width: 24px; max-height: 24px;
+        """
+
+        self.paths = load_paths()
+
+        def make_row(label_text, lineedit, browse_func):
+            row = QHBoxLayout()
+            row.setSpacing(8)
+            lbl = QLabel(label_text)
+            lbl.setStyleSheet(label_style)
+            lbl.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+            lbl.setFixedWidth(210)
+            row.addWidget(lbl, 0)
+
+            lineedit.setStyleSheet(field_style)
+            lineedit.setMinimumHeight(24)
+            lineedit.setMaximumHeight(24)
+            lineedit.setMaximumWidth(390)
+            lineedit.setAlignment(Qt.AlignLeft)
+            row.addWidget(lineedit, 1)
+
+            btn = QToolButton()
+            btn.setText("⋯")
+            btn.setStyleSheet(btn_style)
+            btn.setFixedSize(24, 24)
+            btn.clicked.connect(lambda: browse_func(lineedit))
+            row.addWidget(btn, 0)
+
+            return row
+
+        # Community
+        self.edit_community = QLineEdit(self.paths["community"])
+        vbox.addLayout(
+            make_row("Community Folder:", self.edit_community, self.select_folder)
+        )
+
+        # Streamed
+        self.edit_streamed = QLineEdit(self.paths["streamed"])
+        vbox.addLayout(
+            make_row("StreamedPackages Folder:", self.edit_streamed, self.select_folder)
+        )
+
+        # OneStore
+        self.edit_onestore = QLineEdit(self.paths["onestore"])
+        vbox.addLayout(
+            make_row(
+                "Official\\OneStore Folder:", self.edit_onestore, self.select_folder
+            )
+        )
+
+        # =========== ROW Save + Scan ==============
+        btns_row = QHBoxLayout()
+        btns_row.setSpacing(20)
+
+        # Save button
+        self.btn_save = QToolButton()
+        self.btn_save.setText("Save")
+        self.btn_save.setStyleSheet(
+            """
+            background: #8d9099;
+            color: #222;
+            border: none;
+            border-radius: 0px;
+            font-weight: bold;
+            font-size: 15px;
+            padding: 8px 32px;
+            min-width: 80px;
+            min-height: 26px;
+        """
+        )
+        self.btn_save.clicked.connect(self.save_paths)
+        btns_row.addWidget(self.btn_save)
+
+        # Scan button
+        self.btn_scan = QToolButton()
+        self.btn_scan.setText("Scan")
+        self.btn_scan.setStyleSheet(
+            """
+            background: #55bb77;
+            color: #fff;
+            border: none;
+            border-radius: 0px;
+            font-weight: bold;
+            font-size: 15px;
+            padding: 8px 32px;
+            min-width: 80px;
+            min-height: 26px;
+        """
+        )
+        self.btn_scan.clicked.connect(self.scan_now)
+        btns_row.addWidget(self.btn_scan)
+
+        vbox.addSpacing(14)
+        vbox.addLayout(btns_row)
+        vbox.addStretch(1)
+        # =========== END ROW =============
+
+    def select_folder(self, lineedit):
+        folder = QFileDialog.getExistingDirectory(
+            self, "Choose Folder", lineedit.text()
+        )
+        if folder:
+            lineedit.setText(folder)
+
+    def save_paths(self):
+        paths = {
+            "community": self.edit_community.text(),
+            "streamed": self.edit_streamed.text(),
+            "onestore": self.edit_onestore.text(),
+        }
+        save_paths(paths)
+        self.paths = paths
+
+    def scan_now(self):
+        import os
+        import sys
+        import json
+        import subprocess
+
+        # 1. Récupère les chemins de l'UI
+        community = self.edit_community.text()
+        streamed = self.edit_streamed.text()
+        onestore = self.edit_onestore.text()
+
+        config_data = {
+            "community_dir": community,
+            "official_onestore_dir": onestore,
+            "streamedpackages_dir": streamed,
+        }
+
+        # 2. Ecrit dans scripts/cli/config.json (toujours relatif à main_gui.py)
+        config_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "../cli/config.json")
+        )
+        os.makedirs(os.path.dirname(config_path), exist_ok=True)
+        with open(config_path, "w", encoding="utf-8") as f:
+            json.dump(config_data, f, indent=2, ensure_ascii=False)
+        print(f"[INFO] Config saved at: {config_path}")
+
+        # 3. Lance le scanner Python (aucun argument)
+        script_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "../cli/airport_scanner.py")
+        )
+        print(f"[INFO] Running scanner: {script_path}")
+        try:
+            result = subprocess.run(
+                [sys.executable, script_path], capture_output=True, text=True, check=True
+            )
+            print("[SCAN] Scanner output:\n", result.stdout)
+            if result.stderr.strip():
+                print("[SCAN] Scanner errors:\n", result.stderr)
+        except subprocess.CalledProcessError as e:
+            print("[ERROR] Scanner failed:", e)
+            print("[ERROR] Output:", e.stdout)
+            print("[ERROR] Stderr:", e.stderr)
 
 
 # ==================== FleetManagerPanel ====================
@@ -470,7 +742,6 @@ class FleetManagerPanel(QWidget):
                 all_sel_ap.append(self.list_airport_selected.takeItem(0).text())
             self.list_airport_available.addItems(all_sel_ap)
 
-
 # ==================== MAIN WINDOW ====================
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -598,7 +869,7 @@ class MainWindow(QMainWindow):
             ]
 
         aircraft_init = load_aircraft_sample()
-        airports_init = load_airports_from_csv()
+        airports_init = load_airports_from_json_or_csv()
         fleet_manager_core = FleetManagerPanel(
             available_aircraft=aircraft_init,
             selected_aircraft=[],
@@ -608,7 +879,6 @@ class MainWindow(QMainWindow):
 
         vbox.addWidget(fleet_manager_core)
         vbox.addStretch(1)
-
 
         # -- Carte à droite du panel --
         fleet_map_view = QWebEngineView()
@@ -624,13 +894,64 @@ class MainWindow(QMainWindow):
         # ================= END FLEET MANAGER =========================================
 
         # ================= SETTINGS PANEL =====================
-        settings_panel = QWidget()
-        settings_layout = QVBoxLayout(settings_panel)
-        settings_label = QLabel("Settings (à venir)")
-        settings_label.setStyleSheet("font-size: 24px; color: #bbb;")
-        settings_layout.addWidget(settings_label, alignment=Qt.AlignCenter)
-        self.central_stack.addWidget(settings_panel)
-        # ================= END SETTINGS =======================
+        settings_panel_container = QWidget()
+        settings_panel_layout = QHBoxLayout(settings_panel_container)
+        settings_panel_layout.setContentsMargins(0, 0, 0, 0)
+        settings_panel_layout.setSpacing(0)
+
+        # Panel vertical gauche, 46% largeur, fond sombre (identique Fleet Manager)
+        settings_panel_widget = QWidget()
+        settings_panel_widget.setFixedWidth(int(self.width() * 0.46))
+        settings_panel_widget.setStyleSheet(
+            """
+            background: #212121;
+            border-radius: 0px;
+            box-shadow: 0 4px 24px 0 rgba(16,18,23,0.08);
+            """
+        )
+        vbox_settings = QVBoxLayout(settings_panel_widget)
+        vbox_settings.setContentsMargins(0, 0, 0, 0)
+        vbox_settings.setSpacing(0)
+
+        # Titre en haut (identique Fleet Manager, PAS DE DOUBLON)
+        title = QLabel("Settings")
+        title.setStyleSheet(
+            """
+            font-size: 22px;
+            font-weight: 600;
+            color: #ffffff;
+            background: none;
+            """
+        )
+        title.setAlignment(Qt.AlignCenter)
+        vbox_settings.addSpacing(18)
+        vbox_settings.addWidget(title)
+        vbox_settings.addSpacing(20)
+
+        # Panel core settings harmonisé (fond gris très clair)
+        settings_core = SettingsPanel(self)
+        settings_core.setStyleSheet(
+            """
+            background: #23242a;
+            border-radius: 8px;
+            padding: 18px 20px 22px 20px;
+            color: #fff;
+            """
+        )
+        vbox_settings.addWidget(settings_core)
+        vbox_settings.addStretch(1)
+
+        # Carte à droite du panel Settings
+        settings_map_view = QWebEngineView()
+        settings_map_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "../../results/map.html")
+        )
+        settings_map_view.load(QUrl.fromLocalFile(settings_map_path))
+        settings_map_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        settings_panel_layout.addWidget(settings_panel_widget)
+        settings_panel_layout.addWidget(settings_map_view)
+
+        self.central_stack.addWidget(settings_panel_container)
 
         # === Layout principal ===
         main_widget = QWidget()
