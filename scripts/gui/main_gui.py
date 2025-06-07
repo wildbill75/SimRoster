@@ -237,28 +237,31 @@ class SettingsPanel(QWidget):
 
     def scan_now(self):
         import sys
-        import json
+        import subprocess  # <== à ajouter si absent en haut du fichier
 
+        # 1. Importe le vrai helper de config, pas de gestion maison !
+        from scripts.utils.config_helper import load_config, save_config
+
+        # 2. Récupère les valeurs des chemins depuis les widgets
         community = self.edit_community.text()
         streamed = self.edit_streamed.text()
         onestore = self.edit_onestore.text()
 
-        config_data = {
-            "community_dir": community,
-            "official_onestore_dir": onestore,
-            "streamedpackages_dir": streamed,
-        }
-
-        config_path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "../cli/config.json")
+        # 3. Charge l'ancienne config (si existante)
+        config = load_config()
+        config["community_dir"] = community
+        config["official_onestore_dir"] = onestore
+        config["streamedpackages_dir"] = streamed
+        save_config(config)
+        print(
+            f"[INFO] Config saved at (unique): {__import__('os').path.abspath(__import__('os').path.join(__import__('os').path.dirname(__file__), '../../config/paths.json'))}"
         )
-        os.makedirs(os.path.dirname(config_path), exist_ok=True)
-        with open(config_path, "w", encoding="utf-8") as f:
-            json.dump(config_data, f, indent=2, ensure_ascii=False)
-        print(f"[INFO] Config saved at: {config_path}")
 
-        script_path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "../cli/airport_scanner.py")
+        # 4. Lance le scanner normalement (ne change rien ici)
+        script_path = __import__("os").path.abspath(
+            __import__("os").path.join(
+                __import__("os").path.dirname(__file__), "../cli/airport_scanner.py"
+            )
         )
         print(f"[INFO] Running scanner: {script_path}")
         try:
@@ -419,43 +422,101 @@ class FleetManagerPanel(QWidget):
         self._refresh_airport_list()
         self._refresh_selected_airport_list()
 
-    # ========== MÉTHODES AFFICHAGE & FONCTIONNEMENT ==========
+        # --- PATCH anti-double ICAO ---
+
+    def clean_airport_label(self, icao, name):
+        """
+        Retourne un label unique de type ICAO – Nom.
+        Si le nom commence déjà par l’ICAO, ne le double pas.
+        """
+        if name.strip().upper().startswith(icao):
+            return name.strip()
+        else:
+            return f"{icao} – {name.strip()}"
+
+    def clean_aircraft_label(self, reg, model):
+        """
+        Retourne un label unique pour un avion, de type REG – Modèle.
+        Si le modèle commence déjà par la REG, ne le double pas.
+        """
+        if model.strip().upper().startswith(reg):
+            return model.strip()
+        else:
+            return f"{reg} – {model.strip()}"
+
     def _refresh_aircraft_list(self):
         self.list_aircraft_available.clear()
         for ac in self.available_aircraft:
-            self.list_aircraft_available.addItem(f"{ac['reg']} – {ac['model']}")
+            label = self.clean_aircraft_label(ac["reg"], ac["model"])
+            item = QListWidgetItem(label)
+            item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
+            item.setCheckState(Qt.Unchecked)
+            self.list_aircraft_available.addItem(item)
 
     def _refresh_selected_aircraft_list(self):
         self.list_aircraft_selected.clear()
         for ac in self.selected_aircraft:
-            self.list_aircraft_selected.addItem(f"{ac['reg']} – {ac['model']}")
+            label = self.clean_aircraft_label(ac["reg"], ac["model"])
+            item = QListWidgetItem(label)
+            item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
+            item.setCheckState(Qt.Unchecked)
+            self.list_aircraft_selected.addItem(item)
 
     def _refresh_airport_list(self):
         self.list_airport_available.clear()
         for ap in self.available_airports:
-            self.list_airport_available.addItem(f"{ap['icao']} – {ap['name']}")
+            label = self.clean_airport_label(ap["icao"], ap["name"])
+            item = QListWidgetItem(label)
+            # Active la case à cocher (checked = non coché par défaut)
+            item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
+            item.setCheckState(Qt.Unchecked)
+            self.list_airport_available.addItem(item)
 
     def _refresh_selected_airport_list(self):
         self.list_airport_selected.clear()
         for ap in self.selected_airports:
-            self.list_airport_selected.addItem(f"{ap['icao']} – {ap['name']}")
+            label = self.clean_airport_label(ap["icao"], ap["name"])
+            item = QListWidgetItem(label)
+            # Ajoute la case à cocher pour chaque aéroport sélectionné
+            item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
+            item.setCheckState(Qt.Unchecked)
+            self.list_airport_selected.addItem(item)
 
-    # ========== AJOUT / RETRAIT ==========
     def add_aircraft(self):
-        for idx in reversed(range(self.list_aircraft_available.count())):
-            if self.list_aircraft_available.item(idx).isSelected():
-                ac = self.available_aircraft.pop(idx)
+        to_add = []
+        for i in range(self.list_aircraft_available.count()):
+            item = self.list_aircraft_available.item(i)
+            if item.checkState() == Qt.Checked:
+                label = item.text()
+                for ac in self.available_aircraft:
+                    ref_label = self.clean_aircraft_label(ac["reg"], ac["model"])
+                    if ref_label == label:
+                        to_add.append(ac)
+                        break
+        for ac in to_add:
+            if ac not in self.selected_aircraft:
                 self.selected_aircraft.append(ac)
-        self.save_selection()
+            if ac in self.available_aircraft:
+                self.available_aircraft.remove(ac)
         self._refresh_aircraft_list()
         self._refresh_selected_aircraft_list()
 
     def remove_aircraft(self):
-        for idx in reversed(range(self.list_aircraft_selected.count())):
-            if self.list_aircraft_selected.item(idx).isSelected():
-                ac = self.selected_aircraft.pop(idx)
+        to_remove = []
+        for i in range(self.list_aircraft_selected.count()):
+            item = self.list_aircraft_selected.item(i)
+            if item.checkState() == Qt.Checked:
+                label = item.text()
+                for ac in self.selected_aircraft:
+                    ref_label = self.clean_aircraft_label(ac["reg"], ac["model"])
+                    if ref_label == label:
+                        to_remove.append(ac)
+                        break
+        for ac in to_remove:
+            if ac in self.selected_aircraft:
+                self.selected_aircraft.remove(ac)
+            if ac not in self.available_aircraft:
                 self.available_aircraft.append(ac)
-        self.save_selection()
         self._refresh_aircraft_list()
         self._refresh_selected_aircraft_list()
 
@@ -469,11 +530,23 @@ class FleetManagerPanel(QWidget):
         self._refresh_selected_airport_list()
 
     def remove_airport(self):
-        for idx in reversed(range(self.list_airport_selected.count())):
-            if self.list_airport_selected.item(idx).isSelected():
-                ap = self.selected_airports.pop(idx)
+
+        to_remove = []
+        for i in range(self.list_airport_selected.count()):
+            item = self.list_airport_selected.item(i)
+            if item.checkState() == Qt.Checked:
+                label = item.text()
+                for ap in self.selected_airports:
+                    if self.clean_airport_label(ap["icao"], ap["name"]) == label:
+                        to_remove.append(ap)
+                        break
+        # Retire tous les aéroports cochés de la sélection
+        for ap in to_remove:
+            if ap in self.selected_airports:
+                self.selected_airports.remove(ap)
+            # (Optionnel) On le remet dans la liste disponible s'il n'y est pas déjà
+            if ap not in self.available_airports:
                 self.available_airports.append(ap)
-        self.save_selection()
         self._refresh_airport_list()
         self._refresh_selected_airport_list()
 
@@ -488,7 +561,6 @@ class FleetManagerPanel(QWidget):
         self._refresh_airport_list()
         self._refresh_selected_airport_list()
 
-    # ========== RECHERCHE ==========
     def filter_aircraft(self, text):
         self.list_aircraft_available.clear()
         for ac in self.available_aircraft:
@@ -501,7 +573,6 @@ class FleetManagerPanel(QWidget):
             if text.lower() in ap["icao"].lower() or text.lower() in ap["name"].lower():
                 self.list_airport_available.addItem(f"{ap['icao']} – {ap['name']}")
 
-    # ========== PERSISTENCE ==========
     def save_selection(self):
         os.makedirs(os.path.dirname(self.AIRPORTS_SELECTION_PATH), exist_ok=True)
         os.makedirs(os.path.dirname(self.AIRCRAFT_SELECTION_PATH), exist_ok=True)
@@ -538,8 +609,7 @@ class FleetManagerPanel(QWidget):
         except Exception:
             self.selected_aircraft = []
 
-    # ========== SCAN ET RECHARGEMENT ==========
-    def scan_and_reload(self):
+    def scan_and_reload(self): 
         # Appel de la fonction de scan réel si besoin (sinon à implémenter)
         # Pour l’instant : placeholder
         print("[DEBUG] Scan lancé. Rafraîchir la liste après le scan réel.")
@@ -575,10 +645,19 @@ class FleetManagerPanel(QWidget):
         except Exception:
             self.selected_aircraft = []
 
-    # Méthodes scan, persistence, add/remove identiques à ce que tu avais (je ne réécris pas tout ici, mais reprends les tiennes du fichier précédent)
+    def validate_airport_selection(self):
+        selected = []
+        for i in range(self.list_airport_available.count()):
+            item = self.list_airport_available.item(i)
+            if item.checkState() == Qt.Checked:
+                label = item.text()
+                for ap in self.available_airports:
+                    if self.clean_airport_label(ap["icao"], ap["name"]) == label:
+                        selected.append(ap)
+                        break
+        self.selected_airports = selected
+        self._refresh_selected_airport_list()
 
-    # ... (copie tes méthodes : scan_and_reload, save_selection, restore_selection, add_aircraft, remove_aircraft, add_airport, remove_airport, reset_all, _refresh_aircraft_list, etc.)
-    # ... ainsi que le filtre recherche si tu l'utilises
 
 # ==================== MAIN WINDOW ====================
 class MainWindow(QMainWindow):

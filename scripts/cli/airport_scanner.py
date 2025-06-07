@@ -19,14 +19,19 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 RESULTS_DIR = os.path.join(BASE_DIR, "results")
 CSV_PATH = os.path.abspath(os.path.join(BASE_DIR, "data", "airports.csv"))
 
-
 def load_icao_dict_from_csv(csv_path):
     print(f"[DEBUG] Chargement du CSV : {csv_path}")
     icao_dict = {}
     try:
         with open(csv_path, "r", encoding="utf-8") as f:
             header = f.readline()
+            print(
+                f"[DEBUG] Première ligne lue (header brut): {repr(header)}"
+            )  # <== AJOUT POUR DEBUG
             columns = [c.strip().lower() for c in header.split(",")]
+            print(
+                f"[DEBUG] Colonnes détectées après split/strip/lower: {columns}"
+            )  # <== AJOUT POUR DEBUG
             if "icao" in columns and "name" in columns:
                 icao_idx = columns.index("icao")
                 name_idx = columns.index("name")
@@ -48,7 +53,6 @@ def load_icao_dict_from_csv(csv_path):
     except Exception as e:
         print(f"[ERREUR] Problème lecture CSV : {e}")
     return icao_dict
-
 
 def extract_airport_info(manifest_path, icao_official=None):
     try:
@@ -88,7 +92,6 @@ def extract_airport_info(manifest_path, icao_official=None):
         pass
     return None, None
 
-
 def find_icao_in_content_info(directory, icao_official, max_depth=3):
     candidates = ["ContentHistory.json", "content_info.json", "contenthistory.json"]
     for root, dirs, files in os.walk(directory):
@@ -122,7 +125,6 @@ def find_icao_in_content_info(directory, icao_official, max_depth=3):
                     print(f"[DEBUG] Erreur lecture {fname}: {e}")
     return None
 
-
 def find_icao_in_bgl(directory, icao_official, max_depth=3):
     """
     Recherche récursive d'un ICAO connu dans le nom des fichiers BGL.
@@ -141,7 +143,6 @@ def find_icao_in_bgl(directory, icao_official, max_depth=3):
                     if upper_file.startswith(known_icao):
                         return known_icao
     return None
-
 
 def scan_airports(directories, csv_path):
     icao_dict = load_icao_dict_from_csv(csv_path)
@@ -304,7 +305,6 @@ def scan_airports(directories, csv_path):
         f"[Scanner] Rapport ignorés généré : {os.path.abspath(os.path.join(RESULTS_DIR, 'scan_report_ignored.csv'))}"
     )
     return found_airports
-
 
 def save_results(results, filename):
     os.makedirs(RESULTS_DIR, exist_ok=True)
