@@ -609,13 +609,19 @@ class FleetManagerPanel(QWidget):
         except Exception:
             self.selected_aircraft = []
 
-    def scan_and_reload(self): 
-        # Appel de la fonction de scan réel si besoin (sinon à implémenter)
-        # Pour l’instant : placeholder
+    def scan_and_reload(self):
         print("[DEBUG] Scan lancé. Rafraîchir la liste après le scan réel.")
-        # Optionnel : recharger available_airports/aircraft à partir du JSON
-        # self.available_airports = ...
-        # self._refresh_airport_list()
+        self.available_airports = self.load_real_airports()
+        # Supprime tout ce qui n’est plus dispo dans la sélection actuelle
+        valid_icaos = {a["icao"] for a in self.available_airports}
+        self.selected_airports = [
+            a for a in self.selected_airports if a["icao"] in valid_icaos
+        ]
+        # Et réactualise la liste visuelle
+        self._refresh_airport_list()
+        self._refresh_selected_airport_list()
+        # Optionnel : sauvegarde la sélection automatiquement
+        self.save_selection()
 
     def save_selection(self):
         os.makedirs(os.path.dirname(self.AIRPORTS_SELECTION_PATH), exist_ok=True)
@@ -657,6 +663,37 @@ class FleetManagerPanel(QWidget):
                         break
         self.selected_airports = selected
         self._refresh_selected_airport_list()
+
+    def load_real_airports(self):
+        """
+            Charge la liste des aéroports réellement détectés lors du scan,
+            à partir du fichier results/airport_scanresults.json.
+            Retourne une liste de dicts {"icao": ..., "name": ...}
+            """
+        path = os.path.abspath(
+                os.path.join(
+                    os.path.dirname(__file__), "../../results/airport_scanresults.json"
+                )
+            )
+        if not os.path.exists(path):
+            print("[ERREUR] Fichier airport_scanresults.json introuvable :", path)
+            return []
+        with open(path, "r", encoding="utf-8") as f:
+            try:
+                data = json.load(f)
+                # Garde uniquement les champs ICAO et Name, ignore les doublons
+                seen = set()
+                airports = []
+                for ap in data:
+                    icao = ap.get("icao")
+                    name = ap.get("name", "")
+                    if icao and icao not in seen:
+                        seen.add(icao)
+                        airports.append({"icao": icao, "name": name})
+                return airports
+            except Exception as e:
+                print("[ERREUR] Problème lecture airport_scanresults.json:", e)
+                return []
 
 
 # ==================== MAIN WINDOW ====================
