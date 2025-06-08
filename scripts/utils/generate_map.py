@@ -10,30 +10,31 @@ MAP_JSON_PATH = os.path.join(RESULTS_DIR, "map_data.json")
 MAP_HTML_PATH = os.path.join(RESULTS_DIR, "map.html")
 
 def generate_airports_map_data():
-    airports = []
-    with open(AIRPORTS_CSV_PATH, encoding="utf-8-sig") as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            try:
-                lat = float(row["latitude"])
-                lon = float(row["longitude"])
-            except Exception:
-                continue
-            airports.append(
-                {
-                    "icao": row["icao"],
-                    "name": row["name"],
-                    "city": row.get("city", ""),
-                    "country": row.get("country", ""),
-                    "latitude": lat,
-                    "longitude": lon,
-                    "type": row.get("type", ""),
-                }
-            )
+    """
+    Génère map_data.json uniquement à partir des aéroports scannés (results/airport_scanresults.json).
+    """
+    import os
+    import json
+
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    RESULTS_DIR = os.path.join(BASE_DIR, "..", "results")
+    AIRPORTS_SCAN_JSON = os.path.join(RESULTS_DIR, "airport_scanresults.json")
+    MAP_JSON_PATH = os.path.join(BASE_DIR, "map_data.json")
+
+    # On charge la liste scannée au lieu du CSV complet
+    if not os.path.exists(AIRPORTS_SCAN_JSON):
+        print("[ERROR] airport_scanresults.json introuvable : pas de markers générés.")
+        with open(MAP_JSON_PATH, "w", encoding="utf-8") as f:
+            json.dump([], f)
+        return
+
+    with open(AIRPORTS_SCAN_JSON, encoding="utf-8") as f:
+        airports = json.load(f)
+
     with open(MAP_JSON_PATH, "w", encoding="utf-8") as f:
         json.dump(airports, f, ensure_ascii=False, indent=2)
-    print(f"[INFO] Carte JSON créée : {MAP_JSON_PATH}")
 
+    print(f"[INFO] Carte JSON créée (aéroports scannés uniquement) : {MAP_JSON_PATH}")
 
 def generate_airports_map_html():
     # Style sombre CartoDB Dark

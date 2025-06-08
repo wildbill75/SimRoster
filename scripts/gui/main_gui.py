@@ -19,12 +19,42 @@ from PyQt5.QtWidgets import (
     QListWidgetItem,
     QToolButton,
     QFileDialog,
+    QSizePolicy
 )
-from PyQt5.QtCore import Qt, QUrl
+from PyQt5.QtCore import Qt, QUrl, QObject, pyqtSlot
 from PyQt5.QtGui import QFont
 from PyQt5.QtWebEngineWidgets import QWebEngineView
+from PyQt5.QtWebChannel import QWebChannel
+
 
 CONFIG_PATH = "data/settings_paths.json"
+
+
+class AirportDataBridge(QObject):
+    def __init__(self, airports, selected_icaos):
+        super().__init__()
+        self._airports = airports
+        self._selected_icaos = selected_icaos
+
+    @pyqtSlot(result="QVariant")
+    def get_airports(self):
+        print(
+            "[BRIDGE] get_airports called. Airports sent (count):", len(self._airports)
+        )
+        if self._airports:
+            print("[BRIDGE] Sample airport:", self._airports[0])
+        else:
+            print("[BRIDGE] No airports available")
+        return self._airports
+
+    @pyqtSlot(result="QVariant")
+    def get_selected_icaos(self):
+        print(
+            "[BRIDGE] get_selected_icaos called. ICAOs (count):",
+            len(self._selected_icaos),
+        )
+        print("[BRIDGE] ICAOs list:", self._selected_icaos)
+        return self._selected_icaos
 
 
 def get_default_paths():
@@ -56,6 +86,14 @@ def save_paths(paths):
     with open(CONFIG_PATH, "w", encoding="utf-8") as f:
         json.dump(paths, f, indent=2, ensure_ascii=False)
 
+
+# --- À placer tel quel dans main_gui.py, après les imports, EN REMPLAÇANT l'existante ---
+def safe_float(val):
+    try:
+        return float(val)
+    except Exception:
+        return None
+
 def load_airports_from_json_or_csv():
     airports = []
     results_path = os.path.abspath(
@@ -63,30 +101,73 @@ def load_airports_from_json_or_csv():
             os.path.dirname(__file__), "../../results/airport_scanresults.json"
         )
     )
+    csv_path = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "../../data/airports.csv")
+    )
+
+    # Index CSV pour enrichissement rapide par ICAO
+    icao_to_csv = {}
+    try:
+        with open(csv_path, encoding="utf-8-sig") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if row.get("icao", ""):
+                    icao_to_csv[row["icao"].upper()] = row
+    except Exception as e:
+        print("Erreur création index CSV :", e)
+
     if os.path.exists(results_path):
         try:
             with open(results_path, encoding="utf-8") as f:
                 data = json.load(f)
                 if isinstance(data, list) and data:
                     for entry in data:
-                        if "icao" in entry and "name" in entry:
+                        icao = entry.get("icao", "").upper()
+                        csv_row = icao_to_csv.get(icao, {})
+                        if (
+                            "icao" in entry
+                            and "name" in entry
+                            and "latitude" in csv_row
+                            and "longitude" in csv_row
+                        ):
                             airports.append(
-                                {"icao": entry["icao"], "name": entry["name"]}
+                                {
+                                    "icao": entry["icao"],
+                                    "name": entry["name"],
+                                    "city": csv_row.get("city", ""),
+                                    "country": csv_row.get("country", ""),
+                                    "latitude": safe_float(csv_row.get("latitude", "")),
+                                    "longitude": safe_float(
+                                        csv_row.get("longitude", "")
+                                    ),
+                                    "type": csv_row.get("type", ""),
+                                }
                             )
-            print(f"[INFO] {len(airports)} aéroports chargés depuis {results_path}")
+            print(
+                f"[INFO] {len(airports)} aéroports enrichis depuis {results_path} + {csv_path}"
+            )
             return airports
         except Exception as e:
             print("[WARN] Erreur lecture du JSON scan results :", e)
 
-    csv_path = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "../../data/airports.csv")
-    )
+    # Fallback : charge tout le CSV (si JSON absent ou invalide)
     try:
         with open(csv_path, encoding="utf-8-sig") as f:
             reader = csv.DictReader(f)
             for row in reader:
                 if row.get("icao", "") and row.get("name", ""):
-                    airports.append({"icao": row["icao"], "name": row["name"]})
+                    airports.append(
+                        {
+                            "icao": row["icao"],
+                            "name": row["name"],
+                            "city": row.get("city", ""),
+                            "country": row.get("country", ""),
+                            "latitude": safe_float(row.get("latitude", "")),
+                            "longitude": safe_float(row.get("longitude", "")),
+                            "type": row.get("type", ""),
+                        }
+                    )
+
         print(f"[INFO] {len(airports)} aéroports chargés depuis {csv_path}")
     except Exception as e:
         print("Erreur chargement CSV aéroports (fallback) :", e)
@@ -282,10 +363,10 @@ class SettingsPanel(QWidget):
 # ==================== FLEET MANAGER PANEL ====================
 class FleetManagerPanel(QWidget):
     AIRPORTS_SELECTION_PATH = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "../../data/selected_airports.json")
+        os.path.join(os.path.dirname(__file__), "../../results/selected_airports.json")
     )
     AIRCRAFT_SELECTION_PATH = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "../../data/selected_aircraft.json")
+        os.path.join(os.path.dirname(__file__), "../../results/selected_aircraft.json")
     )
 
     def __init__(
@@ -294,6 +375,7 @@ class FleetManagerPanel(QWidget):
         selected_aircraft=None,
         available_airports=None,
         selected_airports=None,
+        webview=None,
         parent=None,
     ):
         super().__init__(parent)
@@ -302,6 +384,7 @@ class FleetManagerPanel(QWidget):
         self.selected_aircraft = selected_aircraft or []
         self.available_airports = available_airports or []
         self.selected_airports = selected_airports or []
+        self.webview = webview
         self.restore_selection()  # Persistance
 
         # =========== Layout principal ===========
@@ -521,13 +604,24 @@ class FleetManagerPanel(QWidget):
         self._refresh_selected_aircraft_list()
 
     def add_airport(self):
-        for idx in reversed(range(self.list_airport_available.count())):
-            if self.list_airport_available.item(idx).isSelected():
-                ap = self.available_airports.pop(idx)
+        to_add = []
+        for i in range(self.list_airport_available.count()):
+            item = self.list_airport_available.item(i)
+            if item.checkState() == Qt.Checked:
+                label = item.text()
+                for ap in self.available_airports:
+                    if self.clean_airport_label(ap["icao"], ap["name"]) == label:
+                        to_add.append(ap)
+                        break
+        for ap in to_add:
+            if ap not in self.selected_airports:
                 self.selected_airports.append(ap)
+            if ap in self.available_airports:
+                self.available_airports.remove(ap)
         self.save_selection()
         self._refresh_airport_list()
         self._refresh_selected_airport_list()
+        self.webview.reload()
 
     def remove_airport(self):
 
@@ -549,6 +643,7 @@ class FleetManagerPanel(QWidget):
                 self.available_airports.append(ap)
         self._refresh_airport_list()
         self._refresh_selected_airport_list()
+        self.webview.reload()
 
     def reset_all(self):
         self.available_aircraft += self.selected_aircraft
@@ -573,15 +668,6 @@ class FleetManagerPanel(QWidget):
             if text.lower() in ap["icao"].lower() or text.lower() in ap["name"].lower():
                 self.list_airport_available.addItem(f"{ap['icao']} – {ap['name']}")
 
-    def save_selection(self):
-        os.makedirs(os.path.dirname(self.AIRPORTS_SELECTION_PATH), exist_ok=True)
-        os.makedirs(os.path.dirname(self.AIRCRAFT_SELECTION_PATH), exist_ok=True)
-        with open(self.AIRPORTS_SELECTION_PATH, "w", encoding="utf-8") as f:
-            json.dump(self.selected_airports, f, indent=2, ensure_ascii=False)
-        with open(self.AIRCRAFT_SELECTION_PATH, "w", encoding="utf-8") as f:
-            json.dump(self.selected_aircraft, f, indent=2, ensure_ascii=False)
-
-    def restore_selection(self):
         # Airports
         try:
             with open(self.AIRPORTS_SELECTION_PATH, encoding="utf-8") as f:
@@ -666,34 +752,11 @@ class FleetManagerPanel(QWidget):
 
     def load_real_airports(self):
         """
-            Charge la liste des aéroports réellement détectés lors du scan,
-            à partir du fichier results/airport_scanresults.json.
-            Retourne une liste de dicts {"icao": ..., "name": ...}
-            """
-        path = os.path.abspath(
-                os.path.join(
-                    os.path.dirname(__file__), "../../results/airport_scanresults.json"
-                )
-            )
-        if not os.path.exists(path):
-            print("[ERREUR] Fichier airport_scanresults.json introuvable :", path)
-            return []
-        with open(path, "r", encoding="utf-8") as f:
-            try:
-                data = json.load(f)
-                # Garde uniquement les champs ICAO et Name, ignore les doublons
-                seen = set()
-                airports = []
-                for ap in data:
-                    icao = ap.get("icao")
-                    name = ap.get("name", "")
-                    if icao and icao not in seen:
-                        seen.add(icao)
-                        airports.append({"icao": icao, "name": name})
-                return airports
-            except Exception as e:
-                print("[ERREUR] Problème lecture airport_scanresults.json:", e)
-                return []
+        Charge la liste complète des aéroports détectés avec toutes les infos utiles
+        (ICAO, name, city, country, latitude, longitude, type), en enrichissant le JSON
+        avec le CSV s'il manque des champs.
+        """
+        return load_airports_from_json_or_csv()
 
 
 # ==================== MAIN WINDOW ====================
@@ -779,9 +842,6 @@ class MainWindow(QMainWindow):
             box-shadow: 0 4px 24px 0 rgba(16,18,23,0.08);
         """
         )
-        vbox = QVBoxLayout(fleet_panel_widget)
-        vbox.setContentsMargins(0, 0, 0, 0)
-        vbox.setSpacing(0)
 
         def load_aircraft_sample():
             return [
@@ -789,6 +849,51 @@ class MainWindow(QMainWindow):
                 {"reg": "D-AIZC", "model": "A320 Lufthansa"},
             ]
 
+        # Fleet Manager panel avec QWebChannel pour la carte
+        fleet_map_view = QWebEngineView()
+        fleet_map_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "../../results/map.html")
+        )
+
+        # 1. Charger les data JSON nécessaires
+        try:
+            with open(
+                os.path.join(os.path.dirname(__file__), "../../results/map_data.json"),
+                "r",
+                encoding="utf-8",
+            ) as f:
+                map_data = json.load(f)
+        except Exception as e:
+            print("[DEBUG] Erreur ouverture map_data.json :", e)
+            map_data = []
+        try:
+            with open(
+                os.path.join(
+                    os.path.dirname(__file__), "../../results/selected_airports.json"
+                ),
+                "r",
+                encoding="utf-8",
+            ) as f:
+                selected_icaos = [a["icao"] for a in json.load(f)]
+        except Exception as e:
+            print("[DEBUG] Erreur ouverture selected_airports.json :", e)
+            selected_icaos = []
+
+        # 2. Bridge et QWebChannel
+        print(
+            "[DEBUG] Instanciation du bridge avec",
+            len(map_data),
+            "aéroports et",
+            len(selected_icaos),
+            "ICAOs sélectionnés",
+        )
+        bridge = AirportDataBridge(map_data, selected_icaos)
+        channel = QWebChannel()
+        channel.registerObject("airportBridge", bridge)
+        fleet_map_view.page().setWebChannel(channel)
+        print("[DEBUG] QWebChannel attaché à la page de la carte (avant .load)")
+
+        # 3. Instanciation du FleetManagerPanel avec webview
         aircraft_init = load_aircraft_sample()
         airports_init = load_airports_from_json_or_csv()
         fleet_manager_core = FleetManagerPanel(
@@ -796,16 +901,19 @@ class MainWindow(QMainWindow):
             selected_aircraft=[],
             available_airports=airports_init,
             selected_airports=[],
+            webview=fleet_map_view,
         )
 
+        # 4. Placement du panel + map
+        vbox = QVBoxLayout(fleet_panel_widget)
+        vbox.setContentsMargins(0, 0, 0, 0)
+        vbox.setSpacing(0)
         vbox.addWidget(fleet_manager_core)
         vbox.addStretch(1)
 
-        fleet_map_view = QWebEngineView()
-        fleet_map_path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "../../results/map.html")
-        )
+        print("[DEBUG] Chargement de la page HTML de la carte :", fleet_map_path)
         fleet_map_view.load(QUrl.fromLocalFile(fleet_map_path))
+
         fleet_map_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         fleet_panel_layout.addWidget(fleet_panel_widget)
         fleet_panel_layout.addWidget(fleet_map_view)
