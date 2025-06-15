@@ -1,1022 +1,1416 @@
 [
   {
     "icao": "AGGN",
-    "name": "AGGN – Nusatupe Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-aggn-nusatupe"
+    "name": "Nusatupe Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-aggn-nusatupe",
+    "latitude": -8.09778022766,
+    "longitude": 156.863998413
   },
   {
     "icao": "AYEN",
-    "name": "AYEN – Engati Airstrip",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\SOCA"
+    "name": "Engati Airstrip",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\SOCA",
+    "latitude": -6.9179,
+    "longitude": 146.1053
   },
   {
     "icao": "AYES",
-    "name": "AYES – Meselia Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-mtca-les-cayes"
+    "name": "Meselia Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-mtca-les-cayes",
+    "latitude": -6.1364,
+    "longitude": 149.1183
   },
   {
     "icao": "AYGF",
-    "name": "AYGF – Guari Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-aygf-guari"
+    "name": "Guari Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-aygf-guari",
+    "latitude": -8.1286,
+    "longitude": 146.8722
   },
   {
     "icao": "AYTI",
-    "name": "AYTI – Tapini Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-ayti-tapini"
+    "name": "Tapini Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-ayti-tapini",
+    "latitude": -8.35666666667,
+    "longitude": 146.989166667
   },
   {
     "icao": "BIAR",
-    "name": "BIAR – Akureyri Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-biar-akureyri"
+    "name": "Akureyri Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-biar-akureyri",
+    "latitude": 65.656573,
+    "longitude": -18.072018
   },
   {
     "icao": "BIIS",
-    "name": "BIIS – Ísafjörður Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-biis-isafjordur"
+    "name": "Ísafjörður Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-biis-isafjordur",
+    "latitude": 66.058098,
+    "longitude": -23.1353
+  },
+  {
+    "icao": "BISH",
+    "name": "Stora-Holt Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-cytz-billy-bishop",
+    "latitude": 65.4000015258789,
+    "longitude": -21.933000564575195
   },
   {
     "icao": "CYBD",
-    "name": "CYBD – Bella Coola Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-cybd-bellacoola"
+    "name": "Bella Coola Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-cybd-bellacoola",
+    "latitude": 52.387501,
+    "longitude": -126.596001
   },
   {
     "icao": "CYCG",
-    "name": "CYCG – Castlegar/West Kootenay Regional Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-cycg-castlegar"
+    "name": "Castlegar/West Kootenay Regional Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-cycg-castlegar",
+    "latitude": 49.296398,
+    "longitude": -117.632004
+  },
+  {
+    "icao": "CYCL",
+    "name": "Charlo Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\navigraph-nav-base",
+    "latitude": 47.990799,
+    "longitude": -66.330299
   },
   {
     "icao": "CYDF",
-    "name": "CYDF – Deer Lake Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-cydf-deerlake"
+    "name": "Deer Lake Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-cydf-deerlake",
+    "latitude": 49.2108,
+    "longitude": -57.391399
   },
   {
     "icao": "CYFB",
-    "name": "CYFB – Iqaluit Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-cyfb-iqaluit"
-  },
-  {
-    "icao": "CYTZ",
-    "name": "CYTZ – Billy Bishop Toronto City Centre Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-cytz-billy-bishop"
+    "name": "Iqaluit Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-cyfb-iqaluit",
+    "latitude": 63.756402,
+    "longitude": -68.555801
   },
   {
     "icao": "DAAG",
-    "name": "DAAG – Houari Boumediene Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\DAAG"
+    "name": "Houari Boumediene Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\DAAG",
+    "latitude": 36.693886,
+    "longitude": 3.214531
   },
   {
     "icao": "DTNH",
-    "name": "DTNH – Enfidha - Hammamet International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\DTNH"
+    "name": "Enfidha - Hammamet International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\DTNH",
+    "latitude": 36.075833,
+    "longitude": 10.438611
+  },
+  {
+    "icao": "EBBE",
+    "name": "Beauvechain Air Base",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-huen-entebbe",
+    "latitude": 50.758598,
+    "longitude": 4.76833
   },
   {
     "icao": "EDDB",
-    "name": "EDDB – Berlin Brandenburg Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-aerosoft-airport-eddb-berlin-brandenburg"
+    "name": "Berlin Brandenburg Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-aerosoft-airport-eddb-berlin-brandenburg",
+    "latitude": 52.362247,
+    "longitude": 13.500672
   },
   {
     "icao": "EDDK",
-    "name": "EDDK – Cologne Bonn Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-eddk-cologne-bonn"
+    "name": "Cologne Bonn Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-eddk-cologne-bonn",
+    "latitude": 50.865898,
+    "longitude": 7.14274
   },
   {
     "icao": "EDDM",
-    "name": "EDDM – Munich Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-eddm-munich"
+    "name": "Munich Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-eddm-munich",
+    "latitude": 48.353802,
+    "longitude": 11.7861
   },
   {
     "icao": "EDDP",
-    "name": "EDDP – Leipzig/Halle Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-eddp-leipzig"
+    "name": "Leipzig/Halle Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-eddp-leipzig",
+    "latitude": 51.420657,
+    "longitude": 12.232705
   },
   {
     "icao": "EDDS",
-    "name": "EDDS – Stuttgart Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-edds-stuttgart"
+    "name": "Stuttgart Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-edds-stuttgart",
+    "latitude": 48.689899,
+    "longitude": 9.22196
   },
   {
     "icao": "EDHL",
-    "name": "EDHL – Lübeck Blankensee Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-edhl-luebeck-blankensee"
+    "name": "Lübeck Blankensee Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-edhl-luebeck-blankensee",
+    "latitude": 53.805401,
+    "longitude": 10.7192
   },
   {
     "icao": "EDJA",
-    "name": "EDJA – Memmingen Allgau Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-edja-allgau"
+    "name": "Memmingen Allgau Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-edja-allgau",
+    "latitude": 47.988800048799995,
+    "longitude": 10.2395000458
   },
   {
-    "icao": "EDRI",
-    "name": "EDRI – Linkenheim Airfield",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-edny-friedrichshafen"
+    "icao": "EDNY",
+    "name": "Friedrichshafen Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-edny-friedrichshafen",
+    "latitude": 47.671299,
+    "longitude": 9.51149
+  },
+  {
+    "icao": "EDON",
+    "name": "Neuhardenberg Marxwalde Airfield",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-ksez-sedona",
+    "latitude": 52.613056,
+    "longitude": 14.242778
+  },
+  {
+    "icao": "EDST",
+    "name": "Hahnweide Airfield",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-microsoft-unitedstates-point-of-interest",
+    "latitude": 48.631841,
+    "longitude": 9.429201
   },
   {
     "icao": "EDVK",
-    "name": "EDVK – Kassel Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-edvk-kassel"
+    "name": "Kassel Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-edvk-kassel",
+    "latitude": 51.420699,
+    "longitude": 9.392152
   },
   {
     "icao": "EDXH",
-    "name": "EDXH – Helgoland-Düne Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-edxh-helgoland"
+    "name": "Helgoland-Düne Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-edxh-helgoland",
+    "latitude": 54.185279846200004,
+    "longitude": 7.91583299637
   },
   {
     "icao": "EFIV",
-    "name": "EFIV – Ivalo Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-efiv-ivalo"
+    "name": "Ivalo Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-efiv-ivalo",
+    "latitude": 68.607299804688,
+    "longitude": 27.405300140381
   },
   {
     "icao": "EFVA",
-    "name": "EFVA – Vaasa Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-efva-vaasa"
+    "name": "Vaasa Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-efva-vaasa",
+    "latitude": 63.050701,
+    "longitude": 21.762199
   },
   {
     "icao": "EGCB",
-    "name": "EGCB – Manchester Barton Aerodrome",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-egcb-barton"
+    "name": "Manchester Barton Aerodrome",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-egcb-barton",
+    "latitude": 53.471699,
+    "longitude": -2.38972
   },
   {
     "icao": "EGFF",
-    "name": "EGFF – Cardiff International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-egff-cardiff"
+    "name": "Cardiff International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-egff-cardiff",
+    "latitude": 51.396702,
+    "longitude": -3.34333
   },
   {
     "icao": "EGGD",
-    "name": "EGGD – Bristol Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-pilotplus-airport-eggd-bristolinternational"
+    "name": "Bristol Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-pilotplus-airport-eggd-bristolinternational",
+    "latitude": 51.382702,
+    "longitude": -2.71909
   },
   {
     "icao": "EGHC",
-    "name": "EGHC – Land's End Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-eghc-lands-end"
+    "name": "Land's End Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-eghc-lands-end",
+    "latitude": 50.102798,
+    "longitude": -5.67056
   },
   {
     "icao": "EGKK",
-    "name": "EGKK – London Gatwick Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\EGKK"
+    "name": "London Gatwick Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\EGKK",
+    "latitude": 51.148771,
+    "longitude": -0.192089
   },
   {
     "icao": "EGLF",
-    "name": "EGLF – Farnborough Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-eglf-farnborough"
+    "name": "Farnborough Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-eglf-farnborough",
+    "latitude": 51.275799,
+    "longitude": -0.776333
   },
   {
     "icao": "EGPB",
-    "name": "EGPB – Sumburgh Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-egpb-sumburgh"
+    "name": "Sumburgh Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-egpb-sumburgh",
+    "latitude": 59.878899,
+    "longitude": -1.29556
   },
   {
     "icao": "EGPR",
-    "name": "EGPR – Barra Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-egpr-barra"
+    "name": "Barra Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-egpr-barra",
+    "latitude": 57.0228,
+    "longitude": -7.44306
   },
   {
     "icao": "EGSS",
-    "name": "EGSS – London Stansted Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-egss-stansted"
+    "name": "London Stansted Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-egss-stansted",
+    "latitude": 51.884998,
+    "longitude": 0.235
   },
   {
     "icao": "EHRD",
-    "name": "EHRD – Rotterdam The Hague Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-ehrd-rotterdam"
+    "name": "Rotterdam The Hague Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-ehrd-rotterdam",
+    "latitude": 51.956902,
+    "longitude": 4.43722
   },
   {
     "icao": "EICK",
-    "name": "EICK – Cork Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-eick-cork"
+    "name": "Cork Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-eick-cork",
+    "latitude": 51.841301,
+    "longitude": -8.49111
   },
   {
     "icao": "EIDL",
-    "name": "EIDL – Donegal Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-eidl-donegal"
+    "name": "Donegal Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-eidl-donegal",
+    "latitude": 55.0442008972168,
+    "longitude": -8.340999603271484
   },
   {
     "icao": "EKRN",
-    "name": "EKRN – Bornholm Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-ekrn-bornholm"
+    "name": "Bornholm Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-ekrn-bornholm",
+    "latitude": 55.063301,
+    "longitude": 14.7596
   },
   {
     "icao": "ENEV",
-    "name": "ENEV – \"Harstad/Narvik Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LSGG"
+    "name": "Harstad/Narvik Airport, Evenes",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LSGG",
+    "latitude": 68.491302490234,
+    "longitude": 16.678100585938
   },
   {
     "icao": "ENGM",
-    "name": "ENGM – \"Oslo Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\ENGM"
+    "name": "Oslo Airport, Gardermoen",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\ENGM",
+    "latitude": 60.193901,
+    "longitude": 11.1004
   },
   {
     "icao": "ENLK",
-    "name": "ENLK – Leknes Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-enlk-leknes"
+    "name": "Leknes Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-enlk-leknes",
+    "latitude": 68.152496337891,
+    "longitude": 13.609399795532
   },
   {
     "icao": "ENNO",
-    "name": "ENNO – Notodden Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-eggp-john-lennon"
+    "name": "Notodden Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-eggp-john-lennon",
+    "latitude": 59.565071,
+    "longitude": 9.213152
   },
   {
     "icao": "ENRA",
-    "name": "ENRA – \"Mo i Rana Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-enra-moirana"
+    "name": "Mo i Rana Airport, Røssvoll",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-enra-moirana",
+    "latitude": 66.363899230957,
+    "longitude": 14.301400184631
   },
   {
-    "icao": "ENST",
-    "name": "ENST – \"Sandnessjøen Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-nzqn-queenstown"
+    "icao": "ENSB",
+    "name": "Svalbard Airport, Longyear",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-ensb-svalbard",
+    "latitude": 78.246101379395,
+    "longitude": 15.465600013733
+  },
+  {
+    "icao": "EPKK",
+    "name": "Kraków John Paul II International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-drzewieckidesign-epkk",
+    "latitude": 50.077702,
+    "longitude": 19.7848
   },
   {
     "icao": "EPWA",
-    "name": "EPWA – Warsaw Chopin Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\EPWA"
+    "name": "Warsaw Chopin Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\EPWA",
+    "latitude": 52.165699,
+    "longitude": 20.9671
   },
   {
     "icao": "ESNQ",
-    "name": "ESNQ – Kiruna Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-esnq-kiruna"
+    "name": "Kiruna Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-esnq-kiruna",
+    "latitude": 67.821998596191,
+    "longitude": 20.336799621582
   },
   {
     "icao": "ESSA",
-    "name": "ESSA – Stockholm-Arlanda Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-essa-arlanda"
-  },
-  {
-    "icao": "FALL",
-    "name": "FALL – Lydenburg Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-knfl-nas-fallon"
+    "name": "Stockholm-Arlanda Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-essa-arlanda",
+    "latitude": 59.64849,
+    "longitude": 17.928829
   },
   {
     "icao": "FARO",
-    "name": "FARO – Rooiberg Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lpfr-faro"
+    "name": "Rooiberg Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lpfr-faro",
+    "latitude": -24.7777888889,
+    "longitude": 27.7523361111
   },
   {
     "icao": "GCLA",
-    "name": "GCLA – La Palma Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-aerosoft-airport-gcla-la-palma"
-  },
-  {
-    "icao": "HUEN",
-    "name": "HUEN – Entebbe International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-huen-entebbe"
+    "name": "La Palma Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-aerosoft-airport-gcla-la-palma",
+    "latitude": 28.626499,
+    "longitude": -17.7556
   },
   {
     "icao": "KAIT",
-    "name": "KAIT – Aitkin Municipal Airport Steve Kurtz Field",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-vhhx-kaitak"
+    "name": "Aitkin Municipal Airport Steve Kurtz Field",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-vhhx-kaitak",
+    "latitude": 46.548401,
+    "longitude": -93.676804
   },
   {
     "icao": "KASE",
-    "name": "KASE – Aspen-Pitkin County Airport (Sardy Field)",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-kase-aspen"
+    "name": "Aspen-Pitkin County Airport (Sardy Field)",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-kase-aspen",
+    "latitude": 39.223202,
+    "longitude": -106.869003
   },
   {
     "icao": "KATL",
-    "name": "KATL – Hartsfield Jackson Atlanta International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-katl-atlanta"
+    "name": "Hartsfield Jackson Atlanta International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-katl-atlanta",
+    "latitude": 33.6367,
+    "longitude": -84.428101
   },
   {
     "icao": "KAVX",
-    "name": "KAVX – Catalina Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-kavx-catalina"
+    "name": "Catalina Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-kavx-catalina",
+    "latitude": 33.4049,
+    "longitude": -118.416
+  },
+  {
+    "icao": "KBID",
+    "name": "Block Island State Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-kbid-block-island",
+    "latitude": 41.168446,
+    "longitude": -71.578631
   },
   {
     "icao": "KCOF",
-    "name": "KCOF – Patrick Space Force Base",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-kcof-patrickafb"
+    "name": "Patrick Space Force Base",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-kcof-patrickafb",
+    "latitude": 28.2349,
+    "longitude": -80.6101
   },
   {
     "icao": "KDFW",
-    "name": "KDFW – Dallas Fort Worth International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-kdfw-dallas-fort-worth"
+    "name": "Dallas Fort Worth International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-kdfw-dallas-fort-worth",
+    "latitude": 32.896801,
+    "longitude": -97.038002
+  },
+  {
+    "icao": "KERR",
+    "name": "Errol Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-eg78-outskerries",
+    "latitude": 44.7925,
+    "longitude": -71.1642
   },
   {
     "icao": "KFFA",
-    "name": "KFFA – First Flight Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-kffa-firstflight"
+    "name": "First Flight Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-kffa-firstflight",
+    "latitude": 36.0181999207,
+    "longitude": -75.67130279540001
   },
   {
     "icao": "KFHR",
-    "name": "KFHR – Friday Harbor Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-kfhr-friday-harbor"
+    "name": "Friday Harbor Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-kfhr-friday-harbor",
+    "latitude": 48.523654,
+    "longitude": -123.024645
   },
   {
     "icao": "KGCN",
-    "name": "KGCN – Grand Canyon National Park Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-kgcn-grandcanyon"
+    "name": "Grand Canyon National Park Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-kgcn-grandcanyon",
+    "latitude": 35.9524,
+    "longitude": -112.147003
   },
   {
     "icao": "KIWA",
-    "name": "KIWA – Mesa Gateway Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-at07-davis-plateau-skiway"
+    "name": "Mesa Gateway Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-at07-davis-plateau-skiway",
+    "latitude": 33.3078,
+    "longitude": -111.654999
   },
   {
     "icao": "KJFK",
-    "name": "KJFK – John F Kennedy International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-kjfk-new-york-jfk"
+    "name": "John F Kennedy International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-kjfk-new-york-jfk",
+    "latitude": 40.639447,
+    "longitude": -73.779317
   },
   {
     "icao": "KLAX",
-    "name": "KLAX – Los Angeles International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-klax-losangeles"
+    "name": "Los Angeles International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-klax-losangeles",
+    "latitude": 33.942501,
+    "longitude": -118.407997
   },
   {
     "icao": "KMCO",
-    "name": "KMCO – Orlando International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-kmco-orlando"
+    "name": "Orlando International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-kmco-orlando",
+    "latitude": 28.429399490356445,
+    "longitude": -81.30899810791016
+  },
+  {
+    "icao": "KNFL",
+    "name": "Fallon Naval Air Station",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-knfl-nas-fallon",
+    "latitude": 39.41659927,
+    "longitude": -118.7009964
   },
   {
     "icao": "KNKX",
-    "name": "KNKX – Miramar Marine Corps Air Station - Mitscher Field",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-knkx-miramar-mcas"
-  },
-  {
-    "icao": "KONA",
-    "name": "KONA – Winona Municipal Airport Max Conrad Field",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-phko-kona"
+    "name": "Miramar Marine Corps Air Station - Mitscher Field",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-knkx-miramar-mcas",
+    "latitude": 32.86840057,
+    "longitude": -117.1429977
   },
   {
     "icao": "KROW",
-    "name": "KROW – Roswell Air Center Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-krow-roswell"
+    "name": "Roswell Air Center Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-krow-roswell",
+    "latitude": 33.301601,
+    "longitude": -104.530998
   },
   {
     "icao": "KSEA",
-    "name": "KSEA – Seattle–Tacoma International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-ksea-seattle-tacoma"
-  },
-  {
-    "icao": "KSEZ",
-    "name": "KSEZ – Sedona Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-ksez-sedona"
+    "name": "Seattle–Tacoma International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-ksea-seattle-tacoma",
+    "latitude": 47.447943,
+    "longitude": -122.310276
   },
   {
     "icao": "KTEX",
-    "name": "KTEX – Telluride Regional Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-ktex-telluride"
+    "name": "Telluride Regional Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-ktex-telluride",
+    "latitude": 37.9538,
+    "longitude": -107.907997
   },
   {
     "icao": "KTVL",
-    "name": "KTVL – Lake Tahoe Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-ktvl-lake-tahoe"
+    "name": "Lake Tahoe Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-ktvl-lake-tahoe",
+    "latitude": 38.89390182495117,
+    "longitude": -119.99500274658203
   },
   {
     "icao": "KXMR",
-    "name": "KXMR – Cape Canaveral SFS Skid Strip",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-kxmr-cap-canaveral"
+    "name": "Cape Canaveral SFS Skid Strip",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-kxmr-cap-canaveral",
+    "latitude": 28.4676,
+    "longitude": -80.566597
   },
   {
-    "icao": "LDOR",
-    "name": "LDOR – Slavonski Jelas Airfield",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\EDDL"
+    "icao": "LATI",
+    "name": "Tirana International Airport Mother Teresa",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-gaya-simulations-airport-lirq-florence",
+    "latitude": 41.4147,
+    "longitude": 19.7206
   },
   {
     "icao": "LDRI",
-    "name": "LDRI – Rijeka Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-ldri-rijeka"
+    "name": "Rijeka Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-ldri-rijeka",
+    "latitude": 45.2169,
+    "longitude": 14.5703
   },
   {
-    "icao": "LEAL",
-    "name": "LEAL – Alicante-Elche Miguel Hernández Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LEAL"
+    "icao": "LEBA",
+    "name": "Córdoba Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\heclak-ui-handlebar-mod",
+    "latitude": 37.841999,
+    "longitude": -4.84888
   },
   {
     "icao": "LEBB",
-    "name": "LEBB – Bilbao Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-lebb-bilbao"
+    "name": "Bilbao Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-lebb-bilbao",
+    "latitude": 43.301102,
+    "longitude": -2.91061
   },
   {
     "icao": "LECO",
-    "name": "LECO – A Coruña Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-aerosoft-airport-leco-a-coruna"
-  },
-  {
-    "icao": "LECO",
-    "name": "LECO – A Coruña Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-leco-a-coruna"
+    "name": "A Coruña Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-aerosoft-airport-leco-a-coruna",
+    "latitude": 43.302101,
+    "longitude": -8.37726
   },
   {
     "icao": "LEIB",
-    "name": "LEIB – Ibiza Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LEIB"
+    "name": "Ibiza Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LEIB",
+    "latitude": 38.872898,
+    "longitude": 1.37312
   },
   {
     "icao": "LEMD",
-    "name": "LEMD – Adolfo Suárez Madrid–Barajas Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-lvfr-lemd"
+    "name": "Adolfo Suárez Madrid–Barajas Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-lvfr-lemd",
+    "latitude": 40.471926,
+    "longitude": -3.56264
   },
   {
     "icao": "LEPA",
-    "name": "LEPA – Palma de Mallorca Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LEPA"
+    "name": "Palma de Mallorca Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LEPA",
+    "latitude": 39.551701,
+    "longitude": 2.73881
   },
   {
     "icao": "LERM",
-    "name": "LERM – Robledillo De Mohernando Airfield",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-licj-palermo-punta-raisi"
+    "name": "Robledillo De Mohernando Airfield",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-licj-palermo-punta-raisi",
+    "latitude": 40.865299,
+    "longitude": -3.24778
   },
   {
     "icao": "LESL",
-    "name": "LESL – Sant Lluis Airfield",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\ENBR"
+    "name": "Sant Lluis Airfield",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\ENBR",
+    "latitude": 39.861878,
+    "longitude": 4.251739
   },
   {
     "icao": "LESU",
-    "name": "LESU – Pirineus - la Seu d'Urgel Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lesu-la-seu-d-urgell"
+    "name": "Pirineus - la Seu d'Urgel Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lesu-la-seu-d-urgell",
+    "latitude": 42.3386,
+    "longitude": 1.40917
+  },
+  {
+    "icao": "LETI",
+    "name": "El Tietar Airfield",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-ljza-zletiscezagorjeobsavi",
+    "latitude": 40.2439,
+    "longitude": -4.79444
   },
   {
     "icao": "LFBO",
-    "name": "LFBO – Toulouse-Blagnac Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-flightbeam-airport-lfbo-toulouse"
+    "name": "Toulouse-Blagnac Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-flightbeam-airport-lfbo-toulouse",
+    "latitude": 43.629101,
+    "longitude": 1.36382
   },
   {
     "icao": "LFCS",
-    "name": "LFCS – Aérodrome de Bordeaux-Léognan-Saucats",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-asobo-airport-lfcs-saucats"
+    "name": "Aérodrome de Bordeaux-Léognan-Saucats",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-asobo-airport-lfcs-saucats",
+    "latitude": 44.700298,
+    "longitude": -0.595556
   },
   {
     "icao": "LFHM",
-    "name": "LFHM – Megève Altiport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lfhm-megeve"
+    "name": "Megève Altiport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lfhm-megeve",
+    "latitude": 45.823005,
+    "longitude": 6.649406
+  },
+  {
+    "icao": "LFKB",
+    "name": "Bastia-Poretta Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-orbx-airport-lfkb-bastia",
+    "latitude": 42.55270004272461,
+    "longitude": 9.48373031616211
+  },
+  {
+    "icao": "LFKF",
+    "name": "Figari Sud-Corse Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-fsx3d-lfkf-figari",
+    "latitude": 41.500599,
+    "longitude": 9.09778
   },
   {
     "icao": "LFKJ",
-    "name": "LFKJ – Ajaccio-Napoléon Bonaparte Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-pilotexperiencesim-lfkj"
+    "name": "Ajaccio-Napoléon Bonaparte Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-pilotexperiencesim-lfkj",
+    "latitude": 41.92359924316406,
+    "longitude": 8.8029203414917
   },
   {
     "icao": "LFLJ",
-    "name": "LFLJ – Courchevel Altiport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-lflj-courchevel"
+    "name": "Courchevel Altiport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-lflj-courchevel",
+    "latitude": 45.397531,
+    "longitude": 6.63498
   },
   {
     "icao": "LFML",
-    "name": "LFML – Marseille Provence Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LFML"
+    "name": "Marseille Provence Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LFML",
+    "latitude": 43.438088,
+    "longitude": 5.2125
   },
   {
     "icao": "LFMN",
-    "name": "LFMN – Nice-Côte d'Azur Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lfmn-nice"
+    "name": "Nice-Côte d'Azur Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lfmn-nice",
+    "latitude": 43.658401,
+    "longitude": 7.21587
   },
   {
     "icao": "LFPB",
-    "name": "LFPB – Paris-Le Bourget Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lfpb-le-bourget"
+    "name": "Paris-Le Bourget Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lfpb-le-bourget",
+    "latitude": 48.969398,
+    "longitude": 2.44139
   },
   {
     "icao": "LFPG",
-    "name": "LFPG – Charles de Gaulle International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-lfpg-paris-charles-de-gaulle"
+    "name": "Charles de Gaulle International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LFPG_fix",
+    "latitude": 49.012798,
+    "longitude": 2.55
   },
   {
     "icao": "LFPO",
-    "name": "LFPO – Paris-Orly Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LFPO-Jetstream-Paris Orly"
+    "name": "Paris-Orly Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LFPO-Jetstream-Paris Orly",
+    "latitude": 48.72333,
+    "longitude": 2.37944
   },
   {
     "icao": "LGIR",
-    "name": "LGIR – Heraklion International Nikos Kazantzakis Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LGIR"
-  },
-  {
-    "icao": "LGIR",
-    "name": "LGIR – Heraklion International Nikos Kazantzakis Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LGIR_Base"
+    "name": "Heraklion International Nikos Kazantzakis Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LGIR",
+    "latitude": 35.339699,
+    "longitude": 25.1803
   },
   {
     "icao": "LGKS",
-    "name": "LGKS – Kasos Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LGSK"
+    "name": "Kasos Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LGSK",
+    "latitude": 35.4213981628,
+    "longitude": 26.909999847399998
   },
   {
     "icao": "LGMK",
-    "name": "LGMK – Mykonos Island National Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LGMK"
+    "name": "Mykonos Island National Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LGMK",
+    "latitude": 37.435101,
+    "longitude": 25.348101
   },
   {
     "icao": "LGRP",
-    "name": "LGRP – Diagoras Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-justsim-airport-lgrp-rodos-diagoras"
+    "name": "Diagoras Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-justsim-airport-lgrp-rodos-diagoras",
+    "latitude": 36.405399,
+    "longitude": 28.086201
   },
   {
     "icao": "LGSR",
-    "name": "LGSR – Santorini Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LGSR"
-  },
-  {
-    "icao": "LHBP",
-    "name": "LHBP – Budapest Liszt Ferenc International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-lhsimulations-lhbp-budapest"
+    "name": "Santorini Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LGSR",
+    "latitude": 36.399200439453125,
+    "longitude": 25.479299545288086
   },
   {
     "icao": "LHPP",
-    "name": "LHPP – Pécs-Pogány Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lhpp-pecs-pogani"
+    "name": "Pécs-Pogány Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lhpp-pecs-pogani",
+    "latitude": 45.988891,
+    "longitude": 18.242044
+  },
+  {
+    "icao": "LICA",
+    "name": "Lamezia Terme Sant'Eufemia International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LEAL",
+    "latitude": 38.905197,
+    "longitude": 16.243762
   },
   {
     "icao": "LICR",
-    "name": "LICR – Reggio Calabria Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-aerosoft-airport-licr-reggio-calabria"
+    "name": "Reggio Calabria Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-aerosoft-airport-licr-reggio-calabria",
+    "latitude": 38.071201,
+    "longitude": 15.6516
   },
   {
     "icao": "LILO",
-    "name": "LILO – Caiolo Sondrio Airfield",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lilo-sondrio-caiolo"
+    "name": "Caiolo Sondrio Airfield",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lilo-sondrio-caiolo",
+    "latitude": 46.154448,
+    "longitude": 9.79507
   },
   {
     "icao": "LIMC",
-    "name": "LIMC – Milan Malpensa International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-deimosinc-airport-limc-malpensa"
+    "name": "Milan Malpensa International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-deimosinc-airport-limc-malpensa",
+    "latitude": 45.6306,
+    "longitude": 8.72811
   },
   {
     "icao": "LIMJ",
-    "name": "LIMJ – Genoa Cristoforo Colombo Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-bmw-limj-genoa"
+    "name": "Genoa Cristoforo Colombo Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-bmw-limj-genoa",
+    "latitude": 44.412039,
+    "longitude": 8.840732
   },
   {
     "icao": "LIPB",
-    "name": "LIPB – Bolzano Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lipb-bolzano"
+    "name": "Bolzano Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lipb-bolzano",
+    "latitude": 46.460201,
+    "longitude": 11.3264
   },
   {
     "icao": "LIRA",
-    "name": "LIRA – Ciampino–G. B. Pastine International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-deimosinc-airport-lira-ciampino"
+    "name": "Ciampino–G. B. Pastine International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-deimosinc-airport-lira-ciampino",
+    "latitude": 41.7994,
+    "longitude": 12.5949
   },
   {
     "icao": "LIRF",
-    "name": "LIRF – Rome–Fiumicino Leonardo da Vinci International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-mkstudios-airport-lirf-rome"
+    "name": "Rome–Fiumicino Leonardo da Vinci International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-mkstudios-airport-lirf-rome",
+    "latitude": 41.804532,
+    "longitude": 12.251998
   },
   {
     "icao": "LIRJ",
-    "name": "LIRJ – Marina di Campo Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lirj-marina-di-campo"
+    "name": "Marina di Campo Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lirj-marina-di-campo",
+    "latitude": 42.760871,
+    "longitude": 10.239811
   },
   {
     "icao": "LKKV",
-    "name": "LKKV – Karlovy Vary Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lkkv-karlovy-vary"
-  },
-  {
-    "icao": "LLHA",
-    "name": "LLHA – Haifa International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-yshl-shellharbour"
+    "name": "Karlovy Vary Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lkkv-karlovy-vary",
+    "latitude": 50.202999,
+    "longitude": 12.915
   },
   {
     "icao": "LOWI",
-    "name": "LOWI – Innsbruck Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-lowi-innsbruck"
+    "name": "Innsbruck Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-lowi-innsbruck",
+    "latitude": 47.260201,
+    "longitude": 11.344
   },
   {
     "icao": "LOWK",
-    "name": "LOWK – Klagenfurt Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lowk-flughafen-klagenfurt"
+    "name": "Klagenfurt Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lowk-flughafen-klagenfurt",
+    "latitude": 46.642502,
+    "longitude": 14.3377
   },
   {
     "icao": "LOWS",
-    "name": "LOWS – Salzburg Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lows-salzburg"
+    "name": "Salzburg Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lows-salzburg",
+    "latitude": 47.793301,
+    "longitude": 13.0043
   },
   {
     "icao": "LPMA",
-    "name": "LPMA – Madeira International Airport Cristiano Ronaldo",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-amsim-lpma-madeira"
-  },
-  {
-    "icao": "LPMA",
-    "name": "LPMA – Madeira International Airport Cristiano Ronaldo",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-lpma-madeira"
+    "name": "Madeira International Airport Cristiano Ronaldo",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-amsim-lpma-madeira",
+    "latitude": 32.697899,
+    "longitude": -16.7745
   },
   {
     "icao": "LPPI",
-    "name": "LPPI – Pico Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lppi-pico"
+    "name": "Pico Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lppi-pico",
+    "latitude": 38.554298,
+    "longitude": -28.441299
   },
   {
     "icao": "LPPR",
-    "name": "LPPR – Francisco de Sá Carneiro Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LPPR"
+    "name": "Francisco de Sá Carneiro Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LPPR",
+    "latitude": 41.2481002808,
+    "longitude": -8.68138980865
   },
   {
     "icao": "LQPD",
-    "name": "LQPD – Prijedor Urije Airfield",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lqpd-prijedor-urije"
+    "name": "Prijedor Urije Airfield",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lqpd-prijedor-urije",
+    "latitude": 44.993986,
+    "longitude": 16.735457
   },
   {
     "icao": "LRBV",
-    "name": "LRBV – Brașov-Ghimbav International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LRBV"
+    "name": "Brașov-Ghimbav International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LRBV",
+    "latitude": 45.70558,
+    "longitude": 25.522871
   },
   {
     "icao": "LSZA",
-    "name": "LSZA – Lugano Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lsza-lugano"
+    "name": "Lugano Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lsza-lugano",
+    "latitude": 46.004299,
+    "longitude": 8.91058
   },
   {
     "icao": "LSZB",
-    "name": "LSZB – Bern Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lszb-bern"
+    "name": "Bern Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lszb-bern",
+    "latitude": 46.912868,
+    "longitude": 7.498512
   },
   {
     "icao": "LSZH",
-    "name": "LSZH – Zürich Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fsdreamteam-airport-lszh-zurich"
-  },
-  {
-    "icao": "LSZH",
-    "name": "LSZH – Zürich Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lszh-zurich"
+    "name": "Zürich Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fsdreamteam-airport-lszh-zurich",
+    "latitude": 47.458056,
+    "longitude": 8.548056
   },
   {
     "icao": "LSZR",
-    "name": "LSZR – Sankt Gallen Altenrhein Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lszr-altenrheinst-gallen"
+    "name": "Sankt Gallen Altenrhein Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lszr-altenrheinst-gallen",
+    "latitude": 47.485001,
+    "longitude": 9.56077
   },
   {
     "icao": "LTFM",
-    "name": "LTFM – İstanbul Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LTFM"
+    "name": "İstanbul Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LTFM",
+    "latitude": 41.261297,
+    "longitude": 28.741951
   },
   {
     "icao": "LXGB",
-    "name": "LXGB – Gibraltar Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-lxgb-gibraltar"
+    "name": "Gibraltar Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-lxgb-gibraltar",
+    "latitude": 36.151199,
+    "longitude": -5.34966
   },
   {
     "icao": "LZTT",
-    "name": "LZTT – Poprad-Tatry Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lztt-popradtatry"
+    "name": "Poprad-Tatry Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-lztt-popradtatry",
+    "latitude": 49.073601,
+    "longitude": 20.2411
   },
   {
     "icao": "MDPC",
-    "name": "MDPC – Punta Cana International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\MDPC"
+    "name": "Punta Cana International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\MDPC",
+    "latitude": 18.5674,
+    "longitude": -68.363403
   },
   {
     "icao": "MDPP",
-    "name": "MDPP – Gregorio Luperon International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-mdpp-puerto-plata"
+    "name": "Gregorio Luperon International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-mdpp-puerto-plata",
+    "latitude": 19.7579,
+    "longitude": -70.57
   },
   {
     "icao": "MHTG",
-    "name": "MHTG – Toncontín International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-mhtg-toncontin"
+    "name": "Toncontín International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-mhtg-toncontin",
+    "latitude": 14.0609,
+    "longitude": -87.217201
   },
   {
     "icao": "MKJS",
-    "name": "MKJS – Sangster International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-mkjs-sangster"
+    "name": "Sangster International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-mkjs-sangster",
+    "latitude": 18.5037,
+    "longitude": -77.913399
   },
   {
     "icao": "MRSN",
-    "name": "MRSN – Sirena Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-mrsn-sirena-station"
+    "name": "Sirena Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-mrsn-sirena-station",
+    "latitude": 8.4776,
+    "longitude": -83.591343
   },
   {
     "icao": "MUCL",
-    "name": "MUCL – Vilo Acuña International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-mucl-vilo-acuna"
+    "name": "Vilo Acuña International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-mucl-vilo-acuna",
+    "latitude": 21.6165008545,
+    "longitude": -81.5459976196
   },
   {
     "icao": "MYEH",
-    "name": "MYEH – North Eleuthera Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-myeh-north-eleuthera"
+    "name": "North Eleuthera Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-myeh-north-eleuthera",
+    "latitude": 25.474899292,
+    "longitude": -76.6835021973
   },
   {
     "icao": "NCAI",
-    "name": "NCAI – Aitutaki Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-ncai-aitutaki"
+    "name": "Aitutaki Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-ncai-aitutaki",
+    "latitude": -18.8309,
+    "longitude": -159.764008
   },
   {
     "icao": "NTTB",
-    "name": "NTTB – Bora Bora Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-nttb-borabora"
+    "name": "Bora Bora Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-nttb-borabora",
+    "latitude": -16.444400787353516,
+    "longitude": -151.75100708007812
   },
   {
     "icao": "NTTM",
-    "name": "NTTM – Moorea Temae Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-nttm-moorea"
+    "name": "Moorea Temae Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-nttm-moorea",
+    "latitude": -17.48979,
+    "longitude": -149.761777
   },
   {
     "icao": "NZFX",
-    "name": "NZFX – Phoenix Airfield",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-nzfx-phoenix-airfield-mcmurdo-station"
+    "name": "Phoenix Airfield",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-nzfx-phoenix-airfield-mcmurdo-station",
+    "latitude": -77.956389,
+    "longitude": 166.766667
+  },
+  {
+    "icao": "NZGS",
+    "name": "Gisborne Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-nzgs-gisborne",
+    "latitude": -38.6633,
+    "longitude": 177.977997
   },
   {
     "icao": "NZMF",
-    "name": "NZMF – Milford Sound Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-nzmf-milfordsound"
+    "name": "Milford Sound Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-nzmf-milfordsound",
+    "latitude": -44.673302,
+    "longitude": 167.923004
   },
   {
     "icao": "NZMJ",
-    "name": "NZMJ – Martins Bay Aerodrome",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-nzmj-martinsbay"
+    "name": "Martins Bay Aerodrome",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-nzmj-martinsbay",
+    "latitude": -44.365971,
+    "longitude": 168.016255
+  },
+  {
+    "icao": "NZQN",
+    "name": "Queenstown International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-nzqn-queenstown",
+    "latitude": -45.021099,
+    "longitude": 168.738998
   },
   {
     "icao": "NZRO",
-    "name": "NZRO – Rotorua Regional Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-nzro-rotorua"
+    "name": "Rotorua Regional Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-nzro-rotorua",
+    "latitude": -38.1092,
+    "longitude": 176.317001
   },
   {
     "icao": "NZTL",
-    "name": "NZTL – Tekapo Aerodrome",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-nztl-tekapo"
+    "name": "Tekapo Aerodrome",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-nztl-tekapo",
+    "latitude": -44.005299,
+    "longitude": 170.444
   },
   {
     "icao": "NZWR",
-    "name": "NZWR – Whangarei Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-nzwr-whangarei"
+    "name": "Whangarei Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-nzwr-whangarei",
+    "latitude": -35.769253,
+    "longitude": 174.363713
   },
   {
     "icao": "NZWS",
-    "name": "NZWS – Westport Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-nzws-westport"
+    "name": "Westport Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-nzws-westport",
+    "latitude": -41.737111,
+    "longitude": 171.579033
   },
   {
     "icao": "OKKK",
-    "name": "OKKK – Kuwait International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\1-kuwait"
+    "name": "Kuwait International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\1-kuwait",
+    "latitude": 29.226601,
+    "longitude": 47.968899
+  },
+  {
+    "icao": "OLBA",
+    "name": "Beirut Rafic Hariri International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\beyondatc-toolbar",
+    "latitude": 33.820899963378906,
+    "longitude": 35.488399505615234
   },
   {
     "icao": "OPOR",
-    "name": "OPOR – Ormara Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\GMME"
+    "name": "Ormara Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\GMME",
+    "latitude": 25.276625,
+    "longitude": 64.588343
   },
   {
-    "icao": "OPOR",
-    "name": "OPOR – Ormara Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-microsoft-airport-voloport"
-  },
-  {
-    "icao": "PACK",
-    "name": "PACK – Chefornak Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-francevfr-airport-apt1-airportfrance-pack1"
+    "icao": "ORTF",
+    "name": "Tall Afar Army Air Field",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-francevfr-airport-apt1-airportfrance-pack1",
+    "latitude": 36.2831,
+    "longitude": 42.403
   },
   {
     "icao": "PADE",
-    "name": "PADE – Deering Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-aerosoft-paderborn"
+    "name": "Deering Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-aerosoft-paderborn",
+    "latitude": 66.068901,
+    "longitude": -162.766914
   },
   {
     "icao": "PAVD",
-    "name": "PAVD – Valdez Pioneer Field",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-pavd-valdez"
+    "name": "Valdez Pioneer Field",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-pavd-valdez",
+    "latitude": 61.132712,
+    "longitude": -146.246567
+  },
+  {
+    "icao": "PHKO",
+    "name": "Ellison Onizuka Kona International Airport at Keahole",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-phko-kona",
+    "latitude": 19.738783,
+    "longitude": -156.045603
   },
   {
     "icao": "PTPN",
-    "name": "PTPN – Pohnpei International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-ptpn-pohnpei"
-  },
-  {
-    "icao": "RJEO",
-    "name": "RJEO – Okushiri Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-ljza-zletiscezagorjeobsavi"
+    "name": "Pohnpei International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-ptpn-pohnpei",
+    "latitude": 6.985099792480469,
+    "longitude": 158.20899963378906
   },
   {
     "icao": "RJFU",
-    "name": "RJFU – Nagasaki Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-rjfu-nagasaki"
+    "name": "Nagasaki Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-rjfu-nagasaki",
+    "latitude": 32.916901,
+    "longitude": 129.914001
   },
   {
     "icao": "RJTH",
-    "name": "RJTH – Hachijojima Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-rjth-hachijojima"
+    "name": "Hachijojima Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-rjth-hachijojima",
+    "latitude": 33.115002,
+    "longitude": 139.785995
   },
   {
     "icao": "RJTT",
-    "name": "RJTT – Tokyo Haneda International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-rjtt-tokyo-haneda"
+    "name": "Tokyo Haneda International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-rjtt-tokyo-haneda",
+    "latitude": 35.552299,
+    "longitude": 139.779999
   },
   {
     "icao": "ROKR",
-    "name": "ROKR – Kerama Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-rokr-kerama"
+    "name": "Kerama Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-rokr-kerama",
+    "latitude": 26.168337,
+    "longitude": 127.293423
   },
   {
     "icao": "RORS",
-    "name": "RORS – Shimojishima Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-rors-shimojishima"
+    "name": "Shimojishima Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-rors-shimojishima",
+    "latitude": 24.8267,
+    "longitude": 125.144997
   },
   {
     "icao": "SANT",
-    "name": "SANT – Teniente Benjamin Matienzo Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-sbrj-santos-dumont"
-  },
-  {
-    "icao": "SANT",
-    "name": "SANT – Teniente Benjamin Matienzo Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-sbsn-santarem"
+    "name": "Teniente Benjamin Matienzo Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-sbrj-santos-dumont",
+    "latitude": -26.8409,
+    "longitude": -65.104897
   },
   {
     "icao": "SBFI",
-    "name": "SBFI – Cataratas International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-sbfi-cataratas"
+    "name": "Cataratas International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-sbfi-cataratas",
+    "latitude": -25.594167,
+    "longitude": -54.489444
   },
   {
     "icao": "SBFN",
-    "name": "SBFN – Fernando de Noronha Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-sbfn-fernandodenoronha"
+    "name": "Fernando de Noronha Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-sbfn-fernandodenoronha",
+    "latitude": -3.854471,
+    "longitude": -32.423302
   },
   {
     "icao": "SBGL",
-    "name": "SBGL – Rio Galeão – Tom Jobim International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-sbgl-riodejaneiro"
+    "name": "Rio Galeão – Tom Jobim International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-sbgl-riodejaneiro",
+    "latitude": -22.809999,
+    "longitude": -43.250557
   },
   {
     "icao": "SBON",
-    "name": "SBON – Fazenda Renascer Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LPPT"
+    "name": "Fazenda Renascer Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LPPT",
+    "latitude": -7.615933,
+    "longitude": -47.452097
   },
   {
-    "icao": "SBOR",
-    "name": "SBOR – Fazenda Agro Tamareira Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-nzgs-gisborne"
+    "icao": "SCAL",
+    "name": "Valchac Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-seqm-mariscal-sucre-quito",
+    "latitude": -47.116279,
+    "longitude": -72.481975
   },
   {
     "icao": "SCIP",
-    "name": "SCIP – Mataveri Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-scip-mataveria"
+    "name": "Mataveri Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-scip-mataveria",
+    "latitude": -27.1648006439,
+    "longitude": -109.42199707
   },
   {
     "icao": "SCVH",
-    "name": "SCVH – La Victoria de Chacabuco Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-microsoft-airport-scvh-lavictoriadechacabuco"
+    "name": "La Victoria de Chacabuco Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-microsoft-airport-scvh-lavictoriadechacabuco",
+    "latitude": -33.050835,
+    "longitude": -70.708885
   },
   {
     "icao": "SEJI",
-    "name": "SEJI – Jipijapa Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-rjx8-suwanosejima"
+    "name": "Jipijapa Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-rjx8-suwanosejima",
+    "latitude": -1.0,
+    "longitude": -80.66666412353516
   },
   {
-    "icao": "SEQM",
-    "name": "SEQM – Mariscal Sucre International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-seqm-mariscal-sucre-quito"
+    "icao": "SELD",
+    "name": "Loma Alta Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\EDDL",
+    "latitude": -2.2078,
+    "longitude": -80.083339
   },
   {
-    "icao": "SIGN",
-    "name": "SIGN – Asa Delta Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-drzewieckidesign-epkk"
-  },
-  {
-    "icao": "SIMU",
-    "name": "SIMU – Fazenda Mutum Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-gaya-simulations-airport-lirq-florence"
+    "icao": "SETS",
+    "name": "Tsentsakentza Airstrip",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LIRN-rdpresets-Naples",
+    "latitude": -2.55673,
+    "longitude": -77.401593
   },
   {
     "icao": "SINK",
-    "name": "SINK – Fazenda Negrinha Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\EFHK"
+    "name": "Fazenda Negrinha Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\EFHK",
+    "latitude": -21.874831,
+    "longitude": -50.8729
   },
   {
-    "icao": "SLAN",
-    "name": "SLAN – Angora Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-kbid-block-island"
+    "icao": "SIPA",
+    "name": "Aeroclube de São José do Rio Pardo Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\FSIPANEL",
+    "latitude": -21.647157,
+    "longitude": -46.928262
   },
   {
     "icao": "SMZO",
-    "name": "SMZO – Zorg en Hoop Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-smzo-zorgenhoop"
+    "name": "Zorg en Hoop Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-smzo-zorgenhoop",
+    "latitude": 5.811131,
+    "longitude": -55.1913
   },
   {
     "icao": "SOOM",
-    "name": "SOOM – Saint-Laurent-du-Maroni Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-soom-saint-laurent"
+    "name": "Saint-Laurent-du-Maroni Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-soom-saint-laurent",
+    "latitude": 5.48306,
+    "longitude": -54.034401
   },
   {
     "icao": "SPGL",
-    "name": "SPGL – Chagual Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-spgl-chagual"
+    "name": "Chagual Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-spgl-chagual",
+    "latitude": -7.797624,
+    "longitude": -77.651249
   },
   {
-    "icao": "SVAL",
-    "name": "SVAL – Algodonal Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-ensb-svalbard"
+    "icao": "SSAG",
+    "name": "Fazenda Lobo Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fsipanel-messages",
+    "latitude": -19.711728,
+    "longitude": -52.726921
   },
   {
     "icao": "SYKA",
-    "name": "SYKA – Kaieteur International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-syka-kaieteur"
+    "name": "Kaieteur International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-syka-kaieteur",
+    "latitude": 5.17275476456,
+    "longitude": -59.491481781
   },
   {
     "icao": "TFFJ",
-    "name": "TFFJ – Saint Barthélemy - Gustaf III Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-tffj-gustaf"
+    "name": "Saint Barthélemy - Gustaf III Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-tffj-gustaf",
+    "latitude": 17.9044,
+    "longitude": -62.843601
   },
   {
     "icao": "TFFS",
-    "name": "TFFS – Terre-de-Haut Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-tffs-les-saintes"
+    "name": "Terre-de-Haut Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-tffs-les-saintes",
+    "latitude": 15.86439991,
+    "longitude": -61.5806007385
   },
   {
     "icao": "TNCM",
-    "name": "TNCM – Princess Juliana International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-tncm-princess-juliana"
+    "name": "Princess Juliana International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-tncm-princess-juliana",
+    "latitude": 18.041,
+    "longitude": -63.108898
   },
   {
     "icao": "TNCS",
-    "name": "TNCS – Juancho E. Yrausquin Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-tncs-saba"
+    "name": "Juancho E. Yrausquin Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-tncs-saba",
+    "latitude": 17.645351,
+    "longitude": -63.220571
   },
   {
     "icao": "TTCP",
-    "name": "TTCP – A.N.R. Robinson International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-ttcp-crown-point"
-  },
-  {
-    "icao": "UNIT",
-    "name": "UNIT – Tura Mountain Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-microsoft-unitedstates-point-of-interest"
+    "name": "A.N.R. Robinson International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-ttcp-crown-point",
+    "latitude": 11.1497,
+    "longitude": -60.832199
   },
   {
     "icao": "UNTR",
-    "name": "UNTR – Beryozkino Airfield",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-microsoft-countryside-point-of-interest"
-  },
-  {
-    "icao": "UNTR",
-    "name": "UNTR – Beryozkino Airfield",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-microsoft-countryside-point-of-interest-quarry"
+    "name": "Beryozkino Airfield",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-microsoft-countryside-point-of-interest",
+    "latitude": 56.50264,
+    "longitude": 84.686575
   },
   {
     "icao": "USHI",
-    "name": "USHI – Igrim Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-rjck-kushiro"
+    "name": "Igrim Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-rjck-kushiro",
+    "latitude": 63.200391,
+    "longitude": 64.440136
   },
   {
     "icao": "USTR",
-    "name": "USTR – Roshchino International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-microsoft-australia-point-of-interest"
+    "name": "Roshchino International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-microsoft-australia-point-of-interest",
+    "latitude": 57.16833,
+    "longitude": 65.31611
   },
   {
-    "icao": "USTR",
-    "name": "USTR – Roshchino International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-microsoft-germany-austria-switzerland-point-of-interest"
-  },
-  {
-    "icao": "UTSK",
-    "name": "UTSK – Karshi Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-eg78-outskerries"
+    "icao": "VIGR",
+    "name": "Gwalior Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\navigraph-avionics-g1000",
+    "latitude": 26.29330062866211,
+    "longitude": 78.22779846191406
   },
   {
     "icao": "VNLK",
-    "name": "VNLK – Lukla Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-vnlk-lukla"
+    "name": "Lukla Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-vnlk-lukla",
+    "latitude": 27.686768,
+    "longitude": 86.729479
   },
   {
     "icao": "VQPR",
-    "name": "VQPR – Paro International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-vqpr-paro"
+    "name": "Paro International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-vqpr-paro",
+    "latitude": 27.4032,
+    "longitude": 89.424599
   },
   {
     "icao": "WALE",
-    "name": "WALE – Melalan Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-keb-nanwalek"
+    "name": "Melalan Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-keb-nanwalek",
+    "latitude": -0.203611,
+    "longitude": 115.760002
   },
   {
     "icao": "WART",
-    "name": "WART – Trunojoyo Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-czst-stewart-aerodrome"
-  },
-  {
-    "icao": "WART",
-    "name": "WART – Trunojoyo Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-kswf-stewartintl"
+    "name": "Trunojoyo Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-czst-stewart-aerodrome",
+    "latitude": -7.022391,
+    "longitude": 113.887699
   },
   {
     "icao": "YCOM",
-    "name": "YCOM – Cooma Snowy Mountains Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\mycompany-aerial"
+    "name": "Cooma Snowy Mountains Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\mycompany-aerial",
+    "latitude": -36.300445,
+    "longitude": 148.972408
   },
   {
     "icao": "YLRE",
-    "name": "YLRE – Longreach Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-ylre-longreach"
+    "name": "Longreach Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-ylre-longreach",
+    "latitude": -23.4342,
+    "longitude": 144.279999
   },
   {
     "icao": "YMBT",
-    "name": "YMBT – Mount Beauty Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-ymbt-mountbeauty"
+    "name": "Mount Beauty Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-ymbt-mountbeauty",
+    "latitude": -36.731576,
+    "longitude": 147.168903
   },
   {
     "icao": "YPBO",
-    "name": "YPBO – Paraburdoo Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-ypbo-paraburdoo"
+    "name": "Paraburdoo Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-ypbo-paraburdoo",
+    "latitude": -23.1711006165,
+    "longitude": 117.745002747
+  },
+  {
+    "icao": "YSHL",
+    "name": "Shellharbour Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-microsoft-airport-yshl-shellharbour",
+    "latitude": -34.5611,
+    "longitude": 150.789001
   },
   {
     "icao": "YSSY",
-    "name": "YSSY – Sydney Kingsford Smith International Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-yssy-sydney"
+    "name": "Sydney Kingsford Smith International Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs24-asobo-airport-yssy-sydney",
+    "latitude": -33.946098,
+    "longitude": 151.177002
   },
   {
     "icao": "YTAM",
-    "name": "YTAM – Taroom Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LGAV"
-  },
-  {
-    "icao": "YTAM",
-    "name": "YTAM – Taroom Airport",
-    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/StreamedPackages\\fs20-flytampa-copenhagen"
+    "name": "Taroom Airport",
+    "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\LGAV",
+    "latitude": -25.801701,
+    "longitude": 149.899994
   }
 ]
