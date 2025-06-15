@@ -19,6 +19,16 @@ except ImportError:
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 RESULTS_DIR = os.path.join(BASE_DIR, "results")
 CSV_PATH = os.path.abspath(os.path.join(BASE_DIR, "data", "airports.csv"))
+# === Chargement mapping custom aéroports ===
+CUSTOM_AIRPORT_MAP_PATH = os.path.abspath(
+    os.path.join(BASE_DIR, "data", "custom_airport_mapping.json")
+)
+try:
+    with open(CUSTOM_AIRPORT_MAP_PATH, "r", encoding="utf-8") as f:
+        CUSTOM_AIRPORT_MAPPING = json.load(f)
+except Exception:
+    CUSTOM_AIRPORT_MAPPING = []
+    print(f"[WARN] Fichier de mapping custom non trouvé : {CUSTOM_AIRPORT_MAP_PATH}")
 
 def load_icao_dict_from_csv(csv_path):
     icao_dict = {}
@@ -49,6 +59,21 @@ def load_icao_dict_from_csv(csv_path):
             }
     return icao_dict
 
+def match_custom_mapping(data, mapping_list):
+    """
+    Tente de trouver un ICAO dans la table de mapping custom à partir des champs du manifest.
+    """
+    creator = data.get("creator", "").lower()
+    title = data.get("title", "").lower()
+    for mapping in mapping_list:
+        # On matche à la fois sur creator et sur title (substring autorisé)
+        if mapping["creator"] in creator and mapping["title"] in title:
+            print(
+                f"[SCAN] ICAO {mapping['icao']} forcé pour {creator}/{title} via mapping custom"
+            )
+            return mapping["icao"]
+    return None
+
 def extract_airport_info(manifest_path, icao_official=None):
     try:
         with open(manifest_path, "r", encoding="utf-8") as f:
@@ -73,16 +98,37 @@ def extract_airport_info(manifest_path, icao_official=None):
                             break
                     if found_icao:
                         break
+            # PATCH anti-multicode
             if not found_icao:
                 for field in possible_fields:
-                    match = re.search(r"([A-Z0-9]{4})", str(field).upper())
-                    if match:
-                        found_icao = match.group(1)
+                    codes = [c.strip() for c in str(field).upper().split("|")]
+                    if len(codes) > 1:
+                        print(f"[DEBUG] Multicode détecté dans {manifest_path}: {codes}")
+                    # Priorité 1 : ICAO présent dans la base officielle
+                    valid_icaos = [c for c in codes if c in icao_official]
+                    if valid_icaos:
+                        found_icao = valid_icaos[0]
+                        break
+                    # Priorité 2 : code à 4 lettres (si base officielle non passée)
+                    codes4 = [c for c in codes if len(c) == 4 and c.isalnum()]
+                    if codes4:
+                        found_icao = codes4[0]
                         break
             if found_icao and name:
                 return found_icao, name
             if found_icao:
                 return found_icao, found_icao
+            if not found_icao and "creator" in data and "title" in data:
+                    custom_icao = match_custom_mapping(data, CUSTOM_AIRPORT_MAPPING)
+                    if custom_icao:
+                        found_icao = custom_icao
+            if found_icao and name:
+                return found_icao, name
+            if found_icao:
+                return found_icao, found_icao
+    
+    
+    
     except Exception:
         pass
     return None, None
