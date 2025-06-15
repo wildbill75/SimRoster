@@ -29,3 +29,6 @@ Thumbs.db
 
 # Ignore settings personnalisés
 settings_*.json
+.env
+tools/*.jar
+tools/*.txt
