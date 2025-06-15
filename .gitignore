@@ -1,24 +1,31 @@
-__pycache__/
+# ⬛️ GÉNÉRÉ POUR REALAIRLINESPLANNER / SIMROSTER
+
+# Fichiers de résultats / caches utilisateurs
+/results/
+/data/*.json
+/data/*.csv
 *.pyc
-*.pyo
-.env
-*.log
-*.bak
-*.swp
+__pycache__/
 .DS_Store
 Thumbs.db
-*.old
-tools/
-sandbox/
-results/airport_scanresults.json
-results/aircraft_scanresults.json
-results/scan_report_ignored.csv
-results/selected_aircraft.json
-results/selected_airports.json
 
+# Fichiers temporaires de VSCode ou autres IDE
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
 
+# Logs, sauvegardes et fichiers temporaires
+*.log
+*.bak
+*.tmp
+*~
 
-results/airport_scanresults.json
-results/scan_report_ignored.csv
-results/airport_scanresults.json
-results/scan_report_ignored.csv
+# En cas de screenshots, outputs d’images temporaires
+/screenshots/
+*.png
+*.jpg
+*.jpeg
+
+# Ignore settings personnalisés
+settings_*.json
