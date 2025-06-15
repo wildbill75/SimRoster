@@ -32,3 +32,5 @@ settings_*.json
 .env
 tools/*.jar
 tools/*.txt
+results/airport_scanresults.json
+results/scan_report_ignored.csv
