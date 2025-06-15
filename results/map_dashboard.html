@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>SimRoster – Airport Map (Dashboard)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript" src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    <style>
+        html,
+        body,
+        #map {
+            height: 100%;
+            width: 100vw;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #map {
+            min-height: 400px;
+            min-width: 400px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+</head>
+
+<body>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        var map = L.map('map', {
+            center: [12.609, 3.1436], // Monde
+            zoom: 5,
+            zoomControl: true,
+            scrollWheelZoom: true
+        });
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '© OpenStreetMap, © CartoDB',
+            maxZoom: 15,
+            minZoom: 2
+        }).addTo(map);
+
+        let markers = [];
+        function clearMarkers() {
+            markers.forEach(marker => map.removeLayer(marker));
+            markers = [];
+        }
+        function renderMarkers(airports, selectedIcaos) {
+            clearMarkers();
+            airports.forEach(function (ap) {
+                if (!ap.latitude || !ap.longitude) return;
+                var isSelected = selectedIcaos.includes(ap.icao);
+                var color = isSelected ? "green" : "gray";
+                var marker = L.circleMarker([ap.latitude, ap.longitude], {
+                    radius: 6,
+                    fillColor: color,
+                    color: color,
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.85
+                }).addTo(map);
+                var popup = "<b>" + ap.icao + "</b><br/>" + ap.name;
+                if (ap.city) popup += "<br/>" + ap.city;
+                if (ap.country) popup += "<br/>" + ap.country;
+                marker.bindPopup(popup);
+                markers.push(marker);
+            });
+        }
+        window.refreshMap = function () {
+            if (window.airportBridge) {
+                window.airportBridge.get_airports(function (airports) {
+                    window.airportBridge.get_selected_icaos(function (selectedIcaos) {
+                        renderMarkers(airports, selectedIcaos);
+                    });
+                });
+            } else {
+                console.warn("refreshMap appelé mais airportBridge non prêt");
+            }
+        };
+        function setupBridge() {
+            if (typeof qt === "undefined" || !qt.webChannelTransport) {
+                setTimeout(setupBridge, 100);
+                return;
+            }
+            new QWebChannel(qt.webChannelTransport, function (channel) {
+                let bridgeObj = null;
+                if (channel.objects.airportBridgeDashboard) {
+                    bridgeObj = channel.objects.airportBridgeDashboard;
+                } else {
+                    for (const k in channel.objects) {
+                        bridgeObj = channel.objects[k];
+                        break;
+                    }
+                }
+                window.airportBridge = bridgeObj;
+                window.refreshMap();
+            });
+        }
+        document.addEventListener("DOMContentLoaded", setupBridge);
+    </script>
+</body>
+
+</html>
