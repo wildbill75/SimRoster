@@ -62,30 +62,30 @@ def run_airport_scan(progress_callback=None):
         print("[ERROR][BOOT] Stderr:", e.stderr)
 
 class AirportDataBridge(QObject):
-    def __init__(self, airports, selected_icaos):
+    def __init__(self, get_airports_func, get_selected_icaos_func):
         super().__init__()
-        self._airports = airports
-        self._selected_icaos = selected_icaos
+        self._get_airports_func = get_airports_func
+        self._get_selected_icaos_func = get_selected_icaos_func
 
     @pyqtSlot(result="QVariant")
     def get_airports(self):
-        print(
-            "[BRIDGE] get_airports called. Airports sent (count):", len(self._airports)
-        )
-        if self._airports:
-            print("[BRIDGE] Sample airport:", self._airports[0])
+        airports = self._get_airports_func()
+        print("[BRIDGE] get_airports called. Airports sent (count):", len(airports))
+        if airports:
+            print("[BRIDGE] Sample airport:", airports[0])
         else:
             print("[BRIDGE] No airports available")
-        return self._airports
+        return airports
 
     @pyqtSlot(result="QVariant")
     def get_selected_icaos(self):
+        selected_icaos = self._get_selected_icaos_func()
         print(
             "[BRIDGE] get_selected_icaos called. ICAOs (count):",
-            len(self._selected_icaos),
+            len(selected_icaos),
         )
-        print("[BRIDGE] ICAOs list:", self._selected_icaos)
-        return self._selected_icaos
+        print("[BRIDGE] ICAOs list:", selected_icaos)
+        return selected_icaos
 
 def get_default_paths():
     home = os.path.expanduser("~")
@@ -644,6 +644,10 @@ class FleetManagerPanel(QWidget):
             self._refresh_airport_list()
             self._refresh_selected_airport_list()
 
+            # --- Refresh dynamique de la carte ---
+            if hasattr(self, 'webview') and self.webview:
+                self.webview.page().runJavaScript("window.refreshMap && window.refreshMap();")
+
             # PATCH FINAL : MAJ carte via QWebChannel sans reload
             try:
                 print("[DEBUG] MAJ JS via QWebChannel (refreshMap())")
@@ -683,11 +687,18 @@ class FleetManagerPanel(QWidget):
             for ap in to_remove:
                 if ap in self.selected_airports:
                     self.selected_airports.remove(ap)
-                # (Optionnel) On le remet dans la liste disponible s'il n'y est pas déjà
                 if ap not in self.available_airports:
                     self.available_airports.append(ap)
             self._refresh_airport_list()
             self._refresh_selected_airport_list()
+
+            self.save_selection()  # <<< AJOUT OBLIGATOIRE ICI ! <<<
+
+            # --- Refresh dynamique de la carte ---
+            if hasattr(self, "webview") and self.webview:
+                self.webview.page().runJavaScript(
+                    "window.refreshMap && window.refreshMap();"
+                )
 
             # PATCH FINAL : MAJ carte via QWebChannel sans reload
             try:
@@ -727,6 +738,9 @@ class FleetManagerPanel(QWidget):
         self._refresh_selected_aircraft_list()
         self._refresh_airport_list()
         self._refresh_selected_airport_list()
+        # --- Refresh dynamique de la carte ---
+        if hasattr(self, "webview") and self.webview:
+            self.webview.page().runJavaScript("window.refreshMap && window.refreshMap();")
 
     def filter_aircraft(self, text):
         """
@@ -905,33 +919,39 @@ class MainWindow(QMainWindow):
         self.web_view.load(QUrl.fromLocalFile(map_path))
         self.web_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
-        # --- BRIDGE UNIQUE POUR LA CARTE ---
-        try:
-            with open(
-                os.path.join(
-                    os.path.dirname(__file__), "../../results/airport_scanresults.json"
-                ),
-                "r",
-                encoding="utf-8",
-            ) as f:
-                map_data = json.load(f)
-        except Exception as e:
-            print("[DEBUG] Erreur ouverture airport_scanresults.json :", e)
-            map_data = []
-        try:
-            with open(
-                os.path.join(
-                    os.path.dirname(__file__), "../../results/selected_airports.json"
-                ),
-                "r",
-                encoding="utf-8",
-            ) as f:
-                selected_icaos = [a["icao"] for a in json.load(f)]
-        except Exception as e:
-            print("[DEBUG] Erreur ouverture selected_airports.json :", e)
-            selected_icaos = []
+        # --- BRIDGE UNIQUE POUR LA CARTE (DYNAMIQUE) ---
+        import json
 
-        self.bridge = AirportDataBridge(map_data, selected_icaos)
+        airport_scanresults_path = os.path.abspath(
+            os.path.join(
+                os.path.dirname(__file__), "../../results/airport_scanresults.json"
+            )
+        )
+        selected_airports_path = os.path.abspath(
+            os.path.join(
+                os.path.dirname(__file__), "../../results/selected_airports.json"
+            )
+        )
+
+        def get_airports_live():
+            try:
+                with open(airport_scanresults_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                return data
+            except Exception as e:
+                print("[DEBUG] get_airports_live() : erreur :", e)
+                return []
+
+        def get_selected_icaos_live():
+            try:
+                with open(selected_airports_path, "r", encoding="utf-8") as f:
+                    icaos = [a["icao"] for a in json.load(f)]
+                return icaos
+            except Exception as e:
+                print("[DEBUG] get_selected_icaos_live() : erreur :", e)
+                return []
+
+        self.bridge = AirportDataBridge(get_airports_live, get_selected_icaos_live)
         self.channel = QWebChannel()
         self.channel.registerObject("airportBridgeDashboard", self.bridge)
 
