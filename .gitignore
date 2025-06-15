@@ -4,6 +4,7 @@
 /results/
 /data/*.json
 /data/*.csv
+!data/custom_airport_mapping.json
 *.pyc
 __pycache__/
 .DS_Store
