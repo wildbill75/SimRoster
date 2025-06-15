@@ -2,6 +2,7 @@ import sys
 import os
 import json
 import re
+import csv
 
 # Gestion intelligente des imports pour tous contextes d'exécution
 try:
@@ -20,38 +21,32 @@ RESULTS_DIR = os.path.join(BASE_DIR, "results")
 CSV_PATH = os.path.abspath(os.path.join(BASE_DIR, "data", "airports.csv"))
 
 def load_icao_dict_from_csv(csv_path):
-    print(f"[DEBUG] Chargement du CSV : {csv_path}")
     icao_dict = {}
-    try:
-        with open(csv_path, "r", encoding="utf-8") as f:
-            header = f.readline()
-            print(
-                f"[DEBUG] Première ligne lue (header brut): {repr(header)}"
-            )  # <== AJOUT POUR DEBUG
-            columns = [c.strip().lower() for c in header.split(",")]
-            print(
-                f"[DEBUG] Colonnes détectées après split/strip/lower: {columns}"
-            )  # <== AJOUT POUR DEBUG
-            if "icao" in columns and "name" in columns:
-                icao_idx = columns.index("icao")
-                name_idx = columns.index("name")
-            else:
-                print("[ERREUR] Colonnes 'icao' ou 'name' introuvables dans le CSV.")
-                return {}
-            for line in f:
-                if line.strip() == "":
-                    continue
-                fields = [x.strip() for x in line.split(",")]
-                if len(fields) <= max(icao_idx, name_idx):
-                    continue
-                icao = fields[icao_idx].upper()
-                name = fields[name_idx]
-                if icao:
-                    icao_dict[icao] = {"name": name}
-    except FileNotFoundError:
-        print(f"[ERREUR] Fichier CSV non trouvé : {csv_path}")
-    except Exception as e:
-        print(f"[ERREUR] Problème lecture CSV : {e}")
+    with open(csv_path, "r", encoding="utf-8") as f:
+        reader = csv.DictReader(f, delimiter=",", quotechar='"')
+        for row in reader:
+            icao = row["icao"].strip().upper()
+            name = row["name"].strip()
+            city = row["city"].strip()
+            country = row["country"].strip()
+            lat = row["latitude"].strip()
+            lon = row["longitude"].strip()
+            # Sécurise la conversion float
+            try:
+                lat = float(lat)
+            except Exception:
+                lat = None
+            try:
+                lon = float(lon)
+            except Exception:
+                lon = None
+            icao_dict[icao] = {
+                "name": name,
+                "city": city,
+                "country": country,
+                "latitude": lat,
+                "longitude": lon,
+            }
     return icao_dict
 
 def extract_airport_info(manifest_path, icao_official=None):
@@ -145,8 +140,12 @@ def find_icao_in_bgl(directory, icao_official, max_depth=3):
     return None
 
 def scan_airports(directories, csv_path):
+    import os
+    import re
+
     icao_dict = load_icao_dict_from_csv(csv_path)
-    icao_official = set(icao_dict.keys())
+    # On force les ICAO CSV en majuscule pour la recherche
+    icao_official = set(k.upper() for k in icao_dict.keys())
     found_airports = []
     ignored = []
 
@@ -228,8 +227,8 @@ def scan_airports(directories, csv_path):
                 # Recherche ICAO dans manifest
                 for manifest_path in manifest_paths:
                     icao, name = extract_airport_info(manifest_path, icao_official)
-                    if icao and icao in icao_official:
-                        found_icao = icao
+                    if icao and icao.upper() in icao_official:
+                        found_icao = icao.upper()
                         display_name = name
                         break
                 # Fallback ICAO dans le nom du dossier si rien trouvé
@@ -246,37 +245,59 @@ def scan_airports(directories, csv_path):
                         item_path, icao_official, max_depth=3
                     )
                     if ch_icao:
-                        found_icao = ch_icao
+                        found_icao = ch_icao.upper()
                         display_name = item
                 # Fallback BGL récursif
                 if not found_icao:
                     bgl_icao = find_icao_in_bgl(item_path, icao_official, max_depth=3)
                     if bgl_icao:
-                        found_icao = bgl_icao
+                        found_icao = bgl_icao.upper()
                         display_name = item
                 # Final check
                 if (
                     found_icao
-                    and found_icao in icao_official
-                    and icao_regex.match(found_icao)
+                    and found_icao.upper() in icao_official
+                    and icao_regex.match(found_icao.upper())
                 ):
-                    name_csv = icao_dict.get(found_icao, {}).get("name")
+                    # Récupère le nom réel (sans ICAO doublonné) depuis le CSV si possible
+                    name_csv = icao_dict.get(found_icao.upper(), {}).get("name")
                     if name_csv:
-                        label = f"{found_icao} – {name_csv}"
+                        cleaned_name = name_csv
+                        if cleaned_name.upper().startswith(found_icao.upper()):
+                            cleaned_name = cleaned_name[len(found_icao) :].lstrip(" -–")
+                        cleaned_name = cleaned_name.strip()
+                        label = cleaned_name if cleaned_name else name_csv
                     else:
-                        if display_name and display_name.strip().upper().startswith(
-                            found_icao
+                        cleaned_name = display_name
+                        if cleaned_name and cleaned_name.strip().upper().startswith(
+                            found_icao.upper()
                         ):
-                            label = display_name
-                        else:
-                            label = f"{found_icao} – {display_name}"
-                    found_airports.append(
-                        {"icao": found_icao, "name": label, "path": item_path}
-                    )
+                            cleaned_name = cleaned_name[len(found_icao) :].lstrip(" -–")
+                        label = cleaned_name.strip() if cleaned_name else found_icao
+
+                    # Ajoute les coordonnées depuis le CSV si disponibles
+                    lat = icao_dict.get(found_icao.upper(), {}).get("latitude")
+                    lon = icao_dict.get(found_icao.upper(), {}).get("longitude")
+                    entry = {
+                        "icao": found_icao.upper(),
+                        "name": label,
+                        "path": item_path,
+                    }
+                    if lat is not None and lon is not None:
+                        entry["latitude"] = lat
+                        entry["longitude"] = lon
+                    found_airports.append(entry)
                 else:
                     ignored.append(f"{found_icao if found_icao else item} ({item})")
 
-    found_airports = sorted(found_airports, key=lambda x: x["icao"])
+    # PATCH ICAO UNIQUE – Garde un seul aéroport par ICAO
+    unique_icao = {}
+    for ap in found_airports:
+        icao_upper = ap["icao"].upper()
+        if icao_upper not in unique_icao:
+            unique_icao[icao_upper] = ap
+    found_airports = sorted(list(unique_icao.values()), key=lambda x: x["icao"])
+
     for entry in ignored:
         print(f"[Scanner] [IGNORÉ] icao non listé en base officielle : {entry}")
 
