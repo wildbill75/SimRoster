@@ -3,6 +3,7 @@ import os
 import csv
 import json
 import subprocess
+import threading
 from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -19,16 +20,46 @@ from PyQt5.QtWidgets import (
     QListWidgetItem,
     QToolButton,
     QFileDialog,
-    QSizePolicy
+    QSizePolicy,
+    QSplashScreen,
+    QProgressBar,
+    QDialog,
+    QMessageBox,
 )
-from PyQt5.QtCore import Qt, QUrl, QObject, pyqtSlot
+from PyQt5.QtCore import Qt, QUrl, QObject, pyqtSlot, QMetaObject
 from PyQt5.QtGui import QFont
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWebChannel import QWebChannel
+from PyQt5.QtGui import QPixmap
+import time
 
 
 CONFIG_PATH = "data/settings_paths.json"
 
+
+def run_airport_scan(progress_callback=None):
+    # -- Lancement SYNCHRONE du scanner (bloque jusqu’à la fin)
+    script_path = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "../cli/airport_scanner.py")
+    )
+    import sys
+    import subprocess
+
+    print("[BOOT] Lancement du scanner automatique...")
+    try:
+        result = subprocess.run(
+            [sys.executable, script_path],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        print("[BOOT] Scanner output:\n", result.stdout)
+        if result.stderr.strip():
+            print("[BOOT] Scanner errors:\n", result.stderr)
+    except subprocess.CalledProcessError as e:
+        print("[ERROR][BOOT] Scanner failed:", e)
+        print("[ERROR][BOOT] Output:", e.stdout)
+        print("[ERROR][BOOT] Stderr:", e.stderr)
 
 class AirportDataBridge(QObject):
     def __init__(self, airports, selected_icaos):
@@ -55,7 +86,6 @@ class AirportDataBridge(QObject):
         )
         print("[BRIDGE] ICAOs list:", self._selected_icaos)
         return self._selected_icaos
-
 
 def get_default_paths():
     home = os.path.expanduser("~")
@@ -85,7 +115,6 @@ def save_paths(paths):
     os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)
     with open(CONFIG_PATH, "w", encoding="utf-8") as f:
         json.dump(paths, f, indent=2, ensure_ascii=False)
-
 
 # --- À placer tel quel dans main_gui.py, après les imports, EN REMPLAÇANT l'existante ---
 def safe_float(val):
@@ -172,6 +201,60 @@ def load_airports_from_json_or_csv():
     except Exception as e:
         print("Erreur chargement CSV aéroports (fallback) :", e)
     return airports
+
+def load_aircraft_from_json_or_csv():
+    """
+    Charge la liste complète des avions détectés.
+    (Tu dois avoir un fichier aircraft_scanresults.json dans results/)
+    """
+    path = os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__), "../../results/aircraft_scanresults.json"
+        )
+    )
+    if os.path.exists(path):
+        try:
+            with open(path, encoding="utf-8") as f:
+                data = json.load(f)
+                # Normalise si besoin : {'registration': ..., 'model': ...}
+                cleaned = []
+                for ac in data:
+                    if "registration" in ac and "model" in ac:
+                        cleaned.append(ac)
+                    elif "reg" in ac and "model" in ac:
+                        cleaned.append(
+                            {"registration": ac["reg"], "model": ac["model"]}
+                        )
+                return cleaned
+        except Exception as e:
+            print("[DEBUG] Erreur ouverture aircraft_scanresults.json :", e)
+    return []  # Fallback : vide
+
+class SplashScanDialog(QDialog):
+    def __init__(self, text="Scanning your add-on folders...", parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Please wait")
+        self.setFixedSize(360, 120)
+        self.setWindowFlags(
+            self.windowFlags() | Qt.CustomizeWindowHint | Qt.WindowStaysOnTopHint
+        )
+        self.label = QLabel(text)
+        self.progress = QProgressBar()
+        self.progress.setRange(0, 0)  # Marque indéterminée
+        layout = QVBoxLayout(self)
+        layout.addWidget(self.label)
+        layout.addWidget(self.progress)
+        self.setLayout(layout)
+        self.setStyleSheet(
+            """
+            QDialog { background: #23242a; color: #fff; border-radius: 10px; }
+            QLabel { font-size: 16px; }
+            QProgressBar { min-height: 16px; border-radius: 8px; background: #222; }
+        """
+        )
+
+    def set_progress(self, value):
+        pass  # Plus tard tu pourras mettre à jour une vraie barre de progression ici
 
 # ================= SETTINGS PANEL =====================
 class SettingsPanel(QWidget):
@@ -278,24 +361,6 @@ class SettingsPanel(QWidget):
         self.btn_save.clicked.connect(self.save_paths)
         btns_row.addWidget(self.btn_save)
 
-        self.btn_scan = QToolButton()
-        self.btn_scan.setText("Scan")
-        self.btn_scan.setStyleSheet(
-            """
-            background: #55bb77;
-            color: #fff;
-            border: none;
-            border-radius: 0px;
-            font-weight: bold;
-            font-size: 15px;
-            padding: 8px 32px;
-            min-width: 80px;
-            min-height: 26px;
-        """
-        )
-        self.btn_scan.clicked.connect(self.scan_now)
-        btns_row.addWidget(self.btn_scan)
-
         vbox.addSpacing(14)
         vbox.addLayout(btns_row)
         vbox.addStretch(1)
@@ -308,6 +373,7 @@ class SettingsPanel(QWidget):
             lineedit.setText(folder)
 
     def save_paths(self):
+        # --- Enregistre les chemins dans data/settings_paths.json ---
         paths = {
             "community": self.edit_community.text(),
             "streamed": self.edit_streamed.text(),
@@ -315,50 +381,9 @@ class SettingsPanel(QWidget):
         }
         save_paths(paths)
         self.paths = paths
-
-    def scan_now(self):
-        import sys
-        import subprocess  # <== à ajouter si absent en haut du fichier
-
-        # 1. Importe le vrai helper de config, pas de gestion maison !
-        from scripts.utils.config_helper import load_config, save_config
-
-        # 2. Récupère les valeurs des chemins depuis les widgets
-        community = self.edit_community.text()
-        streamed = self.edit_streamed.text()
-        onestore = self.edit_onestore.text()
-
-        # 3. Charge l'ancienne config (si existante)
-        config = load_config()
-        config["community_dir"] = community
-        config["official_onestore_dir"] = onestore
-        config["streamedpackages_dir"] = streamed
-        save_config(config)
-        print(
-            f"[INFO] Config saved at (unique): {__import__('os').path.abspath(__import__('os').path.join(__import__('os').path.dirname(__file__), '../../config/paths.json'))}"
-        )
-
-        # 4. Lance le scanner normalement (ne change rien ici)
-        script_path = __import__("os").path.abspath(
-            __import__("os").path.join(
-                __import__("os").path.dirname(__file__), "../cli/airport_scanner.py"
-            )
-        )
-        print(f"[INFO] Running scanner: {script_path}")
-        try:
-            result = subprocess.run(
-                [sys.executable, script_path],
-                capture_output=True,
-                text=True,
-                check=True,
-            )
-            print("[SCAN] Scanner output:\n", result.stdout)
-            if result.stderr.strip():
-                print("[SCAN] Scanner errors:\n", result.stderr)
-        except subprocess.CalledProcessError as e:
-            print("[ERROR] Scanner failed:", e)
-            print("[ERROR] Output:", e.stdout)
-            print("[ERROR] Stderr:", e.stderr)
+        QMessageBox.information(self, "Information",
+        "Paths saved.\nRestart the application to apply changes.")        
+        print("[SETTINGS] Paths saved to config:", paths)
 
 # ==================== FLEET MANAGER PANEL ====================
 class FleetManagerPanel(QWidget):
@@ -399,14 +424,6 @@ class FleetManagerPanel(QWidget):
         )
         title.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(title)
-
-        # ---------- Scan Now ----------
-        self.btn_scan = QPushButton("Scan Now")
-        self.btn_scan.setStyleSheet(
-            "background: #8d9099; color: #222; font-weight: bold; border-radius: 0px; font-size: 14px; padding: 8px 32px; min-width: 120px;"
-        )
-        main_layout.addWidget(self.btn_scan, alignment=Qt.AlignCenter)
-        self.btn_scan.clicked.connect(self.scan_and_reload)
 
         # ---------- Available Aircraft ----------
         lbl_aircraft = QLabel("Available Aircraft")
@@ -517,20 +534,20 @@ class FleetManagerPanel(QWidget):
         else:
             return f"{icao} – {name.strip()}"
 
-    def clean_aircraft_label(self, reg, model):
+    def clean_aircraft_label(self, registration, model):
         """
         Retourne un label unique pour un avion, de type REG – Modèle.
         Si le modèle commence déjà par la REG, ne le double pas.
         """
-        if model.strip().upper().startswith(reg):
+        if model.strip().upper().startswith(registration):
             return model.strip()
         else:
-            return f"{reg} – {model.strip()}"
+            return f"{registration} – {model.strip()}"
 
     def _refresh_aircraft_list(self):
         self.list_aircraft_available.clear()
         for ac in self.available_aircraft:
-            label = self.clean_aircraft_label(ac["reg"], ac["model"])
+            label = self.clean_aircraft_label(ac["registration"], ac["model"])
             item = QListWidgetItem(label)
             item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
             item.setCheckState(Qt.Unchecked)
@@ -539,7 +556,7 @@ class FleetManagerPanel(QWidget):
     def _refresh_selected_aircraft_list(self):
         self.list_aircraft_selected.clear()
         for ac in self.selected_aircraft:
-            label = self.clean_aircraft_label(ac["reg"], ac["model"])
+            label = self.clean_aircraft_label(ac["registration"], ac["model"])
             item = QListWidgetItem(label)
             item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
             item.setCheckState(Qt.Unchecked)
@@ -572,7 +589,9 @@ class FleetManagerPanel(QWidget):
             if item.checkState() == Qt.Checked:
                 label = item.text()
                 for ac in self.available_aircraft:
-                    ref_label = self.clean_aircraft_label(ac["reg"], ac["model"])
+                    ref_label = self.clean_aircraft_label(
+                        ac["registration"], ac["model"]
+                    )
                     if ref_label == label:
                         to_add.append(ac)
                         break
@@ -591,7 +610,9 @@ class FleetManagerPanel(QWidget):
             if item.checkState() == Qt.Checked:
                 label = item.text()
                 for ac in self.selected_aircraft:
-                    ref_label = self.clean_aircraft_label(ac["reg"], ac["model"])
+                    ref_label = self.clean_aircraft_label(
+                        ac["registration"], ac["model"]
+                    )
                     if ref_label == label:
                         to_remove.append(ac)
                         break
@@ -604,52 +625,103 @@ class FleetManagerPanel(QWidget):
         self._refresh_selected_aircraft_list()
 
     def add_airport(self):
-        to_add = []
-        for i in range(self.list_airport_available.count()):
-            item = self.list_airport_available.item(i)
-            if item.checkState() == Qt.Checked:
-                label = item.text()
-                for ap in self.available_airports:
-                    if self.clean_airport_label(ap["icao"], ap["name"]) == label:
-                        to_add.append(ap)
-                        break
-        for ap in to_add:
-            if ap not in self.selected_airports:
-                self.selected_airports.append(ap)
-            if ap in self.available_airports:
-                self.available_airports.remove(ap)
-        self.save_selection()
-        self._refresh_airport_list()
-        self._refresh_selected_airport_list()
-        self.webview.reload()
+        try:
+            to_add = []
+            for i in range(self.list_airport_available.count()):
+                item = self.list_airport_available.item(i)
+                if item.checkState() == Qt.Checked:
+                    label = item.text()
+                    for ap in self.available_airports:
+                        if self.clean_airport_label(ap["icao"], ap["name"]) == label:
+                            to_add.append(ap)
+                            break
+            for ap in to_add:
+                if ap not in self.selected_airports:
+                    self.selected_airports.append(ap)
+                if ap in self.available_airports:
+                    self.available_airports.remove(ap)
+            self.save_selection()
+            self._refresh_airport_list()
+            self._refresh_selected_airport_list()
+
+            # PATCH FINAL : MAJ carte via QWebChannel sans reload
+            try:
+                print("[DEBUG] MAJ JS via QWebChannel (refreshMap())")
+                if (
+                    self.webview
+                    and hasattr(self.webview, "page")
+                    and callable(self.webview.page().runJavaScript)
+                ):
+                    self.webview.page().runJavaScript("if(window.refreshMap) refreshMap();")
+                else:
+                    print("[WARN] webview.page() ou runJavaScript indisponible")
+            except Exception as e:
+                import traceback
+
+                print("[ERROR] Exception lors de l'appel refreshMap JS:", e)
+                print(traceback.format_exc())
+        except Exception as e:
+            import traceback
+
+            print("[CRITICAL] Crash dans add_airport():", e)
+            print(traceback.format_exc())
+            from PyQt5.QtWidgets import QMessageBox
+
+            QMessageBox.critical(self, "Erreur critique", f"Crash dans add_airport():\n{e}")
 
     def remove_airport(self):
+        try:
+            to_remove = []
+            for i in range(self.list_airport_selected.count()):
+                item = self.list_airport_selected.item(i)
+                if item.checkState() == Qt.Checked:
+                    label = item.text()
+                    for ap in self.selected_airports:
+                        if self.clean_airport_label(ap["icao"], ap["name"]) == label:
+                            to_remove.append(ap)
+                            break
+            for ap in to_remove:
+                if ap in self.selected_airports:
+                    self.selected_airports.remove(ap)
+                # (Optionnel) On le remet dans la liste disponible s'il n'y est pas déjà
+                if ap not in self.available_airports:
+                    self.available_airports.append(ap)
+            self._refresh_airport_list()
+            self._refresh_selected_airport_list()
 
-        to_remove = []
-        for i in range(self.list_airport_selected.count()):
-            item = self.list_airport_selected.item(i)
-            if item.checkState() == Qt.Checked:
-                label = item.text()
-                for ap in self.selected_airports:
-                    if self.clean_airport_label(ap["icao"], ap["name"]) == label:
-                        to_remove.append(ap)
-                        break
-        # Retire tous les aéroports cochés de la sélection
-        for ap in to_remove:
-            if ap in self.selected_airports:
-                self.selected_airports.remove(ap)
-            # (Optionnel) On le remet dans la liste disponible s'il n'y est pas déjà
-            if ap not in self.available_airports:
-                self.available_airports.append(ap)
-        self._refresh_airport_list()
-        self._refresh_selected_airport_list()
-        self.webview.reload()
+            # PATCH FINAL : MAJ carte via QWebChannel sans reload
+            try:
+                print("[DEBUG] MAJ JS via QWebChannel (refreshMap())")
+                if (
+                    self.webview
+                    and hasattr(self.webview, "page")
+                    and callable(self.webview.page().runJavaScript)
+                ):
+                    self.webview.page().runJavaScript("if(window.refreshMap) refreshMap();")
+                else:
+                    print("[WARN] webview.page() ou runJavaScript indisponible")
+            except Exception as e:
+                import traceback
+
+                print("[ERROR] Exception lors de l'appel refreshMap JS:", e)
+                print(traceback.format_exc())
+        except Exception as e:
+            import traceback
+
+            print("[CRITICAL] Crash dans remove_airport():", e)
+            print(traceback.format_exc())
+            from PyQt5.QtWidgets import QMessageBox
+
+            QMessageBox.critical(
+                self, "Erreur critique", f"Crash dans remove_airport():\n{e}"
+            )
 
     def reset_all(self):
-        self.available_aircraft += self.selected_aircraft
-        self.selected_aircraft.clear()
-        self.available_airports += self.selected_airports
+        # Recharge la VRAIE liste à partir du JSON/CSV (propre !)
+        self.available_airports = load_airports_from_json_or_csv()
         self.selected_airports.clear()
+        self.available_aircraft = load_aircraft_from_json_or_csv()
+        self.selected_aircraft.clear()
         self.save_selection()
         self._refresh_aircraft_list()
         self._refresh_selected_aircraft_list()
@@ -657,57 +729,58 @@ class FleetManagerPanel(QWidget):
         self._refresh_selected_airport_list()
 
     def filter_aircraft(self, text):
+        """
+        Filtre la liste des avions disponibles en conservant les cases à cocher,
+        conserve les ticks sur les items déjà cochés même après filtrage.
+        """
+        checked_regs = set()
+        for i in range(self.list_aircraft_available.count()):
+            item = self.list_aircraft_available.item(i)
+            if item.checkState() == Qt.Checked:
+                reg = item.text().split(" - ")[0]
+                checked_regs.add(reg)
+
         self.list_aircraft_available.clear()
         for ac in self.available_aircraft:
-            if text.lower() in ac["reg"].lower() or text.lower() in ac["model"].lower():
-                self.list_aircraft_available.addItem(f"{ac['reg']} – {ac['model']}")
+            if (
+                text.lower() in ac["registration"].lower()
+                or text.lower() in ac["model"].lower()
+            ):
+                label = self.clean_aircraft_label(ac["registration"], ac["model"])
+                item = QListWidgetItem(label)
+                item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
+                if ac["registration"] in checked_regs:
+                    item.setCheckState(Qt.Checked)
+                else:
+                    item.setCheckState(Qt.Unchecked)
+                self.list_aircraft_available.addItem(item)
 
     def filter_airports(self, text):
+        """
+        Filtre la liste des aéroports disponibles en conservant les cases à cocher,
+        conserve les ticks sur les items déjà cochés même après filtrage.
+        """
+        # Mémorise les items cochés (via ICAO)
+        checked_icaos = set()
+        for i in range(self.list_airport_available.count()):
+            item = self.list_airport_available.item(i)
+            if item.checkState() == Qt.Checked:
+                # On retrouve l'ICAO du label propre
+                icao = item.text().split(" - ")[0]
+                checked_icaos.add(icao)
+
         self.list_airport_available.clear()
         for ap in self.available_airports:
             if text.lower() in ap["icao"].lower() or text.lower() in ap["name"].lower():
-                self.list_airport_available.addItem(f"{ap['icao']} – {ap['name']}")
-
-        # Airports
-        try:
-            with open(self.AIRPORTS_SELECTION_PATH, encoding="utf-8") as f:
-                saved = json.load(f)
-                valid_icaos = {a["icao"] for a in self.available_airports}
-                self.selected_airports = [a for a in saved if a["icao"] in valid_icaos]
-                self.available_airports = [
-                    a
-                    for a in self.available_airports
-                    if a["icao"] not in {b["icao"] for b in self.selected_airports}
-                ]
-        except Exception:
-            self.selected_airports = []
-        # Aircraft
-        try:
-            with open(self.AIRCRAFT_SELECTION_PATH, encoding="utf-8") as f:
-                saved = json.load(f)
-                valid_regs = {a["reg"] for a in self.available_aircraft}
-                self.selected_aircraft = [a for a in saved if a["reg"] in valid_regs]
-                self.available_aircraft = [
-                    a
-                    for a in self.available_aircraft
-                    if a["reg"] not in {b["reg"] for b in self.selected_aircraft}
-                ]
-        except Exception:
-            self.selected_aircraft = []
-
-    def scan_and_reload(self):
-        print("[DEBUG] Scan lancé. Rafraîchir la liste après le scan réel.")
-        self.available_airports = self.load_real_airports()
-        # Supprime tout ce qui n’est plus dispo dans la sélection actuelle
-        valid_icaos = {a["icao"] for a in self.available_airports}
-        self.selected_airports = [
-            a for a in self.selected_airports if a["icao"] in valid_icaos
-        ]
-        # Et réactualise la liste visuelle
-        self._refresh_airport_list()
-        self._refresh_selected_airport_list()
-        # Optionnel : sauvegarde la sélection automatiquement
-        self.save_selection()
+                label = self.clean_airport_label(ap["icao"], ap["name"])
+                item = QListWidgetItem(label)
+                item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
+                # Restaure le check si déjà coché avant filtrage
+                if ap["icao"] in checked_icaos:
+                    item.setCheckState(Qt.Checked)
+                else:
+                    item.setCheckState(Qt.Unchecked)
+                self.list_airport_available.addItem(item)
 
     def save_selection(self):
         os.makedirs(os.path.dirname(self.AIRPORTS_SELECTION_PATH), exist_ok=True)
@@ -731,9 +804,16 @@ class FleetManagerPanel(QWidget):
         try:
             with open(self.AIRCRAFT_SELECTION_PATH, encoding="utf-8") as f:
                 saved = json.load(f)
-                valid_regs = {a["reg"] for a in self.available_aircraft}
-                self.selected_aircraft = [a for a in saved if a["reg"] in valid_regs]
-                self.available_aircraft = [a for a in self.available_aircraft if a["reg"] not in {b["reg"] for b in self.selected_aircraft}]
+                valid_regs = {a["registration"] for a in self.available_aircraft}
+                self.selected_aircraft = [
+                    a for a in saved if a["registration"] in valid_regs
+                ]
+                self.available_aircraft = [
+                    a
+                    for a in self.available_aircraft
+                    if a["registration"]
+                    not in {b["registration"] for b in self.selected_aircraft}
+                ]
         except Exception:
             self.selected_aircraft = []
 
@@ -765,14 +845,14 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("SimRoster")
         self.resize(1440, 900)
-        self.showMaximized()  # Plein écran au lancement
+        self.showMaximized()
 
+        # --- NAVIGATION LATÉRALE ---
         nav_widget = QWidget()
         nav_layout = QVBoxLayout(nav_widget)
         nav_layout.setContentsMargins(0, 0, 0, 0)
         nav_layout.setSpacing(0)
         nav_widget.setStyleSheet("background: #181818;")
-
         title = QLabel("SimRoster")
         title.setStyleSheet(
             "font-size: 24px; font-weight: bold; color: #ffffff; padding: 24px 8px 24px 16px; letter-spacing: 2px;"
@@ -783,7 +863,6 @@ class MainWindow(QMainWindow):
         self.btn_fleetmanager = QPushButton("Fleet Manager")
         self.btn_settings = QPushButton("Settings")
         self.btn_quit = QPushButton("Quit")
-
         for btn in [
             self.btn_dashboard,
             self.btn_fleetmanager,
@@ -808,63 +887,36 @@ class MainWindow(QMainWindow):
             """
             )
             nav_layout.addWidget(btn)
-
         nav_layout.addStretch(1)
         nav_widget.setFixedWidth(210)
 
-        self.central_stack = QStackedWidget()
+        # --- LAYOUT PRINCIPAL ---
+        main_widget = QWidget()
+        main_layout = QHBoxLayout(main_widget)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
+        main_layout.addWidget(nav_widget)
 
-        dashboard_panel = QWidget()
-        dashboard_layout = QVBoxLayout(dashboard_panel)
-        dashboard_layout.setContentsMargins(0, 0, 0, 0)
-        dashboard_layout.setSpacing(0)
-
+        # --- CARTE UNIQUE ---
         self.web_view = QWebEngineView()
         map_path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "../../results/map.html")
+            os.path.join(os.path.dirname(__file__), "../../results/map_dashboard.html")
         )
         self.web_view.load(QUrl.fromLocalFile(map_path))
         self.web_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        dashboard_layout.addWidget(self.web_view)
-        self.central_stack.addWidget(dashboard_panel)
 
-        fleet_panel_container = QWidget()
-        fleet_panel_layout = QHBoxLayout(fleet_panel_container)
-        fleet_panel_layout.setContentsMargins(0, 0, 0, 0)
-        fleet_panel_layout.setSpacing(0)
-
-        fleet_panel_widget = QWidget()
-        fleet_panel_widget.setFixedWidth(int(self.width() * 0.46))
-        fleet_panel_widget.setStyleSheet(
-            """
-            background: #212121;
-            border-radius: 0px;
-            box-shadow: 0 4px 24px 0 rgba(16,18,23,0.08);
-        """
-        )
-
-        def load_aircraft_sample():
-            return [
-                {"reg": "F-HBJB", "model": "A320neo Air France"},
-                {"reg": "D-AIZC", "model": "A320 Lufthansa"},
-            ]
-
-        # Fleet Manager panel avec QWebChannel pour la carte
-        fleet_map_view = QWebEngineView()
-        fleet_map_path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "../../results/map.html")
-        )
-
-        # 1. Charger les data JSON nécessaires
+        # --- BRIDGE UNIQUE POUR LA CARTE ---
         try:
             with open(
-                os.path.join(os.path.dirname(__file__), "../../results/map_data.json"),
+                os.path.join(
+                    os.path.dirname(__file__), "../../results/airport_scanresults.json"
+                ),
                 "r",
                 encoding="utf-8",
             ) as f:
                 map_data = json.load(f)
         except Exception as e:
-            print("[DEBUG] Erreur ouverture map_data.json :", e)
+            print("[DEBUG] Erreur ouverture airport_scanresults.json :", e)
             map_data = []
         try:
             with open(
@@ -879,127 +931,252 @@ class MainWindow(QMainWindow):
             print("[DEBUG] Erreur ouverture selected_airports.json :", e)
             selected_icaos = []
 
-        # 2. Bridge et QWebChannel
-        print(
-            "[DEBUG] Instanciation du bridge avec",
-            len(map_data),
-            "aéroports et",
-            len(selected_icaos),
-            "ICAOs sélectionnés",
-        )
-        bridge = AirportDataBridge(map_data, selected_icaos)
-        channel = QWebChannel()
-        channel.registerObject("airportBridge", bridge)
-        fleet_map_view.page().setWebChannel(channel)
-        print("[DEBUG] QWebChannel attaché à la page de la carte (avant .load)")
+        self.bridge = AirportDataBridge(map_data, selected_icaos)
+        self.channel = QWebChannel()
+        self.channel.registerObject("airportBridgeDashboard", self.bridge)
 
-        # 3. Instanciation du FleetManagerPanel avec webview
-        aircraft_init = load_aircraft_sample()
+        def attach_dashboard_bridge():
+            self.web_view.page().setWebChannel(self.channel)
+            print("[DEBUG] QWebChannel attaché à la carte principale (fond)")
+
+        self.web_view.loadFinished.connect(attach_dashboard_bridge)
+
+        # --- PANELS OVERLAY ---
+        self.overlay_stack = QStackedWidget()
+        self.overlay_stack.setStyleSheet("background: transparent;")
+
+        # DASHBOARD PANEL (vide, juste titre, à étoffer selon besoin)
+        dashboard_panel = QWidget()
+        dashboard_layout = QVBoxLayout(dashboard_panel)
+        dashboard_layout.setContentsMargins(0, 0, 0, 0)
+        dashboard_layout.setSpacing(0)
+        dashboard_title = QLabel("Dashboard")
+        dashboard_title.setStyleSheet(
+            "font-size: 22px; font-weight: 600; color: #ffffff; background: none; margin-top:30px; margin-bottom:20px;"
+        )
+        dashboard_title.setAlignment(Qt.AlignCenter)
+        dashboard_layout.addWidget(dashboard_title)
+        dashboard_layout.addStretch(1)
+
+        # FLEET MANAGER PANEL
+        aircraft_init = load_aircraft_from_json_or_csv()
         airports_init = load_airports_from_json_or_csv()
-        fleet_manager_core = FleetManagerPanel(
+        fleet_panel = FleetManagerPanel(
             available_aircraft=aircraft_init,
             selected_aircraft=[],
             available_airports=airports_init,
             selected_airports=[],
-            webview=fleet_map_view,
+            webview=self.web_view,
         )
 
-        # 4. Placement du panel + map
-        vbox = QVBoxLayout(fleet_panel_widget)
-        vbox.setContentsMargins(0, 0, 0, 0)
-        vbox.setSpacing(0)
-        vbox.addWidget(fleet_manager_core)
-        vbox.addStretch(1)
+        # SETTINGS PANEL
+        settings_panel = SettingsPanel(self)
 
-        print("[DEBUG] Chargement de la page HTML de la carte :", fleet_map_path)
-        fleet_map_view.load(QUrl.fromLocalFile(fleet_map_path))
+        # Ajoute les panels à la stack (ordre: Dashboard=0, Fleet=1, Settings=2)
+        self.overlay_stack.addWidget(dashboard_panel)
+        self.overlay_stack.addWidget(fleet_panel)
+        self.overlay_stack.addWidget(settings_panel)
 
-        fleet_map_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        fleet_panel_layout.addWidget(fleet_panel_widget)
-        fleet_panel_layout.addWidget(fleet_map_view)
+        # --- CONTAINER GLOBAL : Disposition horizontale, panel overlay à droite ---
+        right_container = QWidget()
+        right_layout = QHBoxLayout(right_container)
+        right_layout.setContentsMargins(0, 0, 0, 0)
+        right_layout.setSpacing(0)
 
-        self.central_stack.addWidget(fleet_panel_container)
+        # La carte (expanding, prend toute la place dispo)
+        right_layout.addWidget(self.web_view, stretch=1)
 
-        settings_panel_container = QWidget()
-        settings_panel_layout = QHBoxLayout(settings_panel_container)
-        settings_panel_layout.setContentsMargins(0, 0, 0, 0)
-        settings_panel_layout.setSpacing(0)
+        # PANEL OVERLAY À DROITE (Fleet, Dashboard, Settings) -- largeur fixe
+        self.overlay_stack.setFixedWidth(int(self.width() * 0.38))  # Ajuste selon le besoin
+        self.overlay_stack.setStyleSheet("background: #23242a; border-radius: 0px;")
 
-        settings_panel_widget = QWidget()
-        settings_panel_widget.setFixedWidth(int(self.width() * 0.46))
-        settings_panel_widget.setStyleSheet(
-            """
-            background: #212121;
-            border-radius: 0px;
-            box-shadow: 0 4px 24px 0 rgba(16,18,23,0.08);
-            """
-        )
-        vbox_settings = QVBoxLayout(settings_panel_widget)
-        vbox_settings.setContentsMargins(0, 0, 0, 0)
-        vbox_settings.setSpacing(0)
+        right_layout.addWidget(self.overlay_stack, stretch=0)
 
-        title = QLabel("Settings")
-        title.setStyleSheet(
-            """
-            font-size: 22px;
-            font-weight: 600;
-            color: #ffffff;
-            background: none;
-            """
-        )
-        title.setAlignment(Qt.AlignCenter)
-        vbox_settings.addSpacing(18)
-        vbox_settings.addWidget(title)
-        vbox_settings.addSpacing(20)
+        main_layout.addWidget(right_container)
 
-        settings_core = SettingsPanel(self)
-        settings_core.setStyleSheet(
-            """
-            background: #23242a;
-            border-radius: 8px;
-            padding: 18px 20px 22px 20px;
-            color: #fff;
-            """
-        )
-        vbox_settings.addWidget(settings_core)
-        vbox_settings.addStretch(1)
-
-        settings_map_view = QWebEngineView()
-        settings_map_path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "../../results/map.html")
-        )
-        settings_map_view.load(QUrl.fromLocalFile(settings_map_path))
-        settings_map_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        settings_panel_layout.addWidget(settings_panel_widget)
-        settings_panel_layout.addWidget(settings_map_view)
-
-        self.central_stack.addWidget(settings_panel_container)
-
-        main_widget = QWidget()
-        main_layout = QHBoxLayout(main_widget)
-        main_layout.setContentsMargins(0, 0, 0, 0)
-        main_layout.setSpacing(0)
-        main_layout.addWidget(nav_widget)
-        main_layout.addWidget(self.central_stack)
         self.setCentralWidget(main_widget)
 
-        self.btn_dashboard.clicked.connect(
-            lambda: self.central_stack.setCurrentIndex(0)
-        )
-        self.btn_fleetmanager.clicked.connect(
-            lambda: self.central_stack.setCurrentIndex(1)
-        )
-        self.btn_settings.clicked.connect(lambda: self.central_stack.setCurrentIndex(2))
+        # --- NAVIGATION ---
+        self.btn_dashboard.clicked.connect(lambda: self.set_panel(0))
+        self.btn_fleetmanager.clicked.connect(lambda: self.set_panel(1))
+        self.btn_settings.clicked.connect(lambda: self.set_panel(2))
         self.btn_quit.clicked.connect(self.close)
 
-        self.btn_dashboard.setChecked(True)
-        self.central_stack.setCurrentIndex(0)
+        self.set_panel(0)
+
+    def set_panel(self, index):
+        # Gère l'état "checked" des boutons (menu actif)
+        for btn, idx in zip(
+            [self.btn_dashboard, self.btn_fleetmanager, self.btn_settings], [0, 1, 2]
+        ):
+            btn.setChecked(idx == index)
+        self.overlay_stack.setCurrentIndex(index)
+
+    def show_test_minimal(self):
+        from PyQt5.QtWebEngineWidgets import QWebEngineView
+        from PyQt5.QtWebChannel import QWebChannel
+        from PyQt5.QtCore import QUrl, QObject, pyqtSlot
+
+        class Bridge(QObject):
+            @pyqtSlot(result=str)
+            def ping(self):
+                print("[BRIDGE] ping called")
+                return "pong"
+
+        HTML = """
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>SimRoster – Airport Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script type="text/javascript" src="qrc:///qtwebchannel/qwebchannel.js"></script>
+  <style>
+    html,
+    body,
+    #map {
+      height: 100%;
+      width: 100vw;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    #map {
+      min-height: 400px;
+      min-width: 400px;
+    }
+  </style>
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+</head>
+
+<body>
+  <div id="map"></div>
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <!-- QWebChannel (PyQt) -->
+  <script>
+    console.log("DEBUG MAP.HTML : script exécuté, document.URL = " + document.URL);
+
+    // Initialisation de la carte
+    var map = L.map('map', {
+      center: [12.609094496251984, 3.1436270680393745], // centre monde, zoom large
+      zoom: 5,
+      zoomControl: true,
+      scrollWheelZoom: true
+    });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '© OpenStreetMap, © CartoDB',
+      maxZoom: 15,
+      minZoom: 2
+    }).addTo(map);
+
+    // --- Bridge PyQt → JS, markers dynamiques ---
+    function setupBridge() {
+      // On vérifie que qt ET qt.webChannelTransport sont bien présents
+      if (typeof qt === "undefined" || !qt.webChannelTransport) {
+        console.warn("qt ou qt.webChannelTransport pas prêt, retry dans 100ms...");
+        setTimeout(setupBridge, 100);
+        return;
+      }
+
+      console.log("QWebChannel present, bridge ready to call Python...");
+      new QWebChannel(qt.webChannelTransport, function (channel) {
+        console.log("CALLBACK QWEBCHANNEL EXECUTED !!");
+        // On expose le bridge globalement pour debug/dynamique
+        window.airportBridge = channel.objects.airportBridge;
+        console.log("window.airportBridge exposé =", typeof window.airportBridge);
+
+        if (typeof window.airportBridge === "undefined") {
+          console.error("window.airportBridge est toujours undefined juste après l'exposition !");
+        } else {
+          console.log("window.airportBridge EST OK !");
+        }
+
+        // -- Rendu des marqueurs dynamiques --
+        window.airportBridge.get_airports(function (airports) {
+          window.airportBridge.get_selected_icaos(function (selectedIcaos) {
+            airports.forEach(function (ap) {
+              if (!ap.latitude || !ap.longitude) return;
+              var isSelected = selectedIcaos.includes(ap.icao);
+              var color = isSelected ? "green" : "gray";
+              var marker = L.circleMarker([ap.latitude, ap.longitude], {
+                radius: 6,
+                fillColor: color,
+                color: color,
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.85
+              }).addTo(map);
+
+              var popup = "<b>" + ap.icao + "</b><br/>" + ap.name;
+              if (ap.city) popup += "<br/>" + ap.city;
+              if (ap.country) popup += "<br/>" + ap.country;
+              marker.bindPopup(popup);
+            });
+          });
+        });
+      });
+    }
+
+    // Lance le setup du bridge avec sécurité "retry"
+    document.addEventListener("DOMContentLoaded", setupBridge);
+  </script>
+</body>
+</html>
+
+        """
+
+        win = QMainWindow(self)
+        win.setWindowTitle("Test QWebChannel SimRoster")
+        view = QWebEngineView(win)
+        win.setCentralWidget(view)
+
+        # QWebChannel setup
+        channel = QWebChannel()
+        bridge = Bridge()
+        channel.registerObject("bridge", bridge)
+        view.page().setWebChannel(channel)
+
+        # Charge le HTML localement
+        view.setHtml(HTML, QUrl("qrc:///"))
+
+        win.resize(800, 600)
+        win.show()
 
 
 if __name__ == "__main__":
+    import sys
+    from PyQt5.QtWidgets import QApplication
+
     app = QApplication(sys.argv)
-    font = QFont("Roboto", 12)
-    app.setFont(font)
-    window = MainWindow()
-    window.show()
+
+    # --- SPLASH SCREEN DE SCAN ---
+    splash = SplashScanDialog()
+    splash.show()
+    app.processEvents()  # S'assure que la fenêtre s'affiche AVANT le scan
+
+    # LANCE LE SCAN AUTOMATIQUE
+    try:
+        airports = run_airport_scan(progress_callback=splash.set_progress)
+        splash.set_progress(100)
+        splash.close()
+    except Exception as e:
+        import traceback
+
+        splash.close()
+        from PyQt5.QtWidgets import QMessageBox
+
+        QMessageBox.critical(
+            None,
+            "Erreur critique",
+            f"Erreur lors du scan des aéroports :\n{e}\n\n{traceback.format_exc()}",
+        )
+        sys.exit(1)
+
+    # --- LANCE L'INTERFACE GRAPHIQUE PRINCIPALE ---
+    main_window = MainWindow()
+    main_window.show()
     sys.exit(app.exec_())
