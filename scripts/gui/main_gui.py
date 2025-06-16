@@ -36,6 +36,34 @@ import time
 
 
 CONFIG_PATH = "data/settings_paths.json"
+DIALOG_STYLESHEET = """
+QDialog {
+    background: #23242b;
+}
+QLabel {
+    color: #fff;
+    font-size: 17px;
+}
+QLineEdit, QComboBox {
+    background: #343842;
+    color: #fff;
+    font-size: 16px;
+    border: 1px solid #404040;
+    border-radius: 6px;
+    padding: 7px 10px;
+}
+QComboBox QAbstractItemView {
+    background: #343842;
+    color: #fff;
+    selection-background-color: #3b3f4b;
+    selection-color: #fff;
+    border-radius: 6px;
+    font-size: 16px;
+}
+QPushButton {
+    font-size: 15px;
+}
+"""
 
 
 def run_airport_scan(progress_callback=None):
@@ -419,7 +447,7 @@ class FleetManagerPanel(QWidget):
         main_layout.setSpacing(16)
 
         # ---------- Titre ----------
-        title = QLabel("Fleet Manager")
+        title = QLabel("FLEET MANAGER")
         title.setStyleSheet(
             "font-size: 22px; font-weight: 600; color: #ffffff; background: none;"
         )
@@ -430,7 +458,7 @@ class FleetManagerPanel(QWidget):
         lbl_aircraft = QLabel("Available Aircraft")
         lbl_aircraft.setStyleSheet("font-size: 15px; color: #fff; font-weight: bold;")
         main_layout.addWidget(lbl_aircraft)
-        # Search aircraft
+
         self.aircraft_search = QLineEdit()
         self.aircraft_search.setPlaceholderText("Search Aircraft...")
         self.aircraft_search.setStyleSheet(
@@ -438,31 +466,48 @@ class FleetManagerPanel(QWidget):
         )
         self.aircraft_search.textChanged.connect(self.filter_aircraft)
         main_layout.addWidget(self.aircraft_search)
+
         self.list_aircraft_available = QListWidget()
-        self.list_aircraft_available.setSelectionMode(QListWidget.MultiSelection)
+        self.list_aircraft_available.setSelectionMode(QListWidget.NoSelection)
         self.list_aircraft_available.setStyleSheet(
             "background: #343842; color: #fff; font-size: 14px; border: none;"
         )
         main_layout.addWidget(self.list_aircraft_available)
+
+        # --- Aircraft buttons (↓ Add, ↑ Remove, + Manual Add à droite) ---
         aircraft_btns_layout = QHBoxLayout()
+        aircraft_btns_layout.setSpacing(12)
+        btn_style_common = (
+            "background: #8d9099; color: #222; border: none; border-radius: 6px; "
+            "font-weight: 600; padding: 8px 18px; font-size: 13px; min-width: 120px;"
+        )
         self.btn_aircraft_add = QPushButton("↓ Add Aircraft")
-        self.btn_aircraft_remove = QPushButton("↑ Remove Aircraft")
-        for b in [self.btn_aircraft_add, self.btn_aircraft_remove]:
-            b.setStyleSheet(
-                "background: #8d9099; color: #222; border: none; border-radius: 0px; font-weight: 600; padding: 8px 10px; font-size: 13px;"
-            )
+        self.btn_aircraft_add.setStyleSheet(btn_style_common)
         aircraft_btns_layout.addWidget(self.btn_aircraft_add)
+        self.btn_aircraft_remove = QPushButton("↑ Remove Aircraft")
+        self.btn_aircraft_remove.setStyleSheet(btn_style_common)
         aircraft_btns_layout.addWidget(self.btn_aircraft_remove)
+        aircraft_btns_layout.addStretch(1)
+        self.btn_add_manual_aircraft = QPushButton("+ Manual Add")
+        self.btn_add_manual_aircraft.setStyleSheet(
+            "background: #88C070; color: #111; border: none; border-radius: 6px; "
+            "font-weight: 600; padding: 8px 18px; font-size: 13px; min-width: 120px;"
+        )
+        aircraft_btns_layout.addWidget(self.btn_add_manual_aircraft)
+        self.btn_add_manual_aircraft.clicked.connect(self.open_manual_add_aircraft_dialog)
         main_layout.addLayout(aircraft_btns_layout)
+        main_layout.addSpacing(18)
+
         self.btn_aircraft_add.clicked.connect(self.add_aircraft)
         self.btn_aircraft_remove.clicked.connect(self.remove_aircraft)
 
+        # ---------- Selected Aircraft ----------
         lbl_aircraft_sel = QLabel("Selected Aircraft")
-        lbl_aircraft_sel.setStyleSheet(
-            "font-size: 15px; color: #fff; font-weight: bold;"
-        )
+        lbl_aircraft_sel.setStyleSheet("font-size: 15px; color: #fff; font-weight: bold;")
         main_layout.addWidget(lbl_aircraft_sel)
+
         self.list_aircraft_selected = QListWidget()
+        self.list_aircraft_selected.setSelectionMode(QListWidget.NoSelection)
         self.list_aircraft_selected.setStyleSheet(
             "background: #343842; color: #fff; font-size: 14px; border: none;"
         )
@@ -480,37 +525,31 @@ class FleetManagerPanel(QWidget):
         self.airport_search.textChanged.connect(self.filter_airports)
         main_layout.addWidget(self.airport_search)
         self.list_airport_available = QListWidget()
-        self.list_airport_available.setSelectionMode(QListWidget.MultiSelection)
         self.list_airport_available.setStyleSheet(
             "background: #343842; color: #fff; font-size: 14px; border: none;"
         )
+        self.list_airport_available.setSelectionMode(QListWidget.NoSelection)
         main_layout.addWidget(self.list_airport_available)
-        # ---------- Boutons Airport (modifié: ajout bouton manuel) ----------
+
+        # --- Airport buttons (↓ Add, ↑ Remove, + Manual Add à droite) ---
         airport_btns_layout = QHBoxLayout()
-        airport_btns_layout.setSpacing(8)
-
-        # Bouton Add Airport
+        airport_btns_layout.setSpacing(12)
         self.btn_airport_add = QPushButton("↓ Add Airport")
-        self.btn_airport_add.setStyleSheet(
-            "background: #8d9099; color: #222; border: none; border-radius: 6px; font-weight: 600; padding: 8px 10px; font-size: 13px;"
-        )
+        self.btn_airport_add.setStyleSheet(btn_style_common)
         airport_btns_layout.addWidget(self.btn_airport_add)
-
-        # Bouton Remove Airport
         self.btn_airport_remove = QPushButton("↑ Remove Airport")
-        self.btn_airport_remove.setStyleSheet(
-            "background: #8d9099; color: #222; border: none; border-radius: 6px; font-weight: 600; padding: 8px 10px; font-size: 13px;"
-        )
+        self.btn_airport_remove.setStyleSheet(btn_style_common)
         airport_btns_layout.addWidget(self.btn_airport_remove)
-
-        # Nouveau bouton Add Manual Airport
+        airport_btns_layout.addStretch(1)
         self.btn_add_manual_airport = QPushButton("+ Manual Add")
         self.btn_add_manual_airport.setStyleSheet(
-            "background: #88C070; color: #111; border: none; border-radius: 6px; font-weight: 600; padding: 8px 10px; font-size: 13px;"
+            "background: #88C070; color: #111; border: none; border-radius: 6px; "
+            "font-weight: 600; padding: 8px 18px; font-size: 13px; min-width: 120px;"
         )
         airport_btns_layout.addWidget(self.btn_add_manual_airport)
-
+        self.btn_add_manual_airport.clicked.connect(self.add_manual_airport_dialog)
         main_layout.addLayout(airport_btns_layout)
+        main_layout.addSpacing(18)
 
         # Connexions
         self.btn_airport_add.clicked.connect(self.add_airport)
@@ -526,6 +565,7 @@ class FleetManagerPanel(QWidget):
         self.list_airport_selected.setStyleSheet(
             "background: #343842; color: #fff; font-size: 14px; border: none;"
         )
+        self.list_airport_selected.setSelectionMode(QListWidget.NoSelection)
         main_layout.addWidget(self.list_airport_selected)
 
         # ---------- Reset All ----------
@@ -554,20 +594,26 @@ class FleetManagerPanel(QWidget):
         else:
             return f"{icao} – {name.strip()}"
 
-    def clean_aircraft_label(self, registration, model):
+    def clean_aircraft_label(self, registration, model, company=None, engine=None):
         """
-        Retourne un label unique pour un avion, de type REG – Modèle.
-        Si le modèle commence déjà par la REG, ne le double pas.
+        Retourne un label enrichi : REG – MODELE – COMPAGNIE – ENGINE (si dispo)
         """
-        if model.strip().upper().startswith(registration):
-            return model.strip()
-        else:
-            return f"{registration} – {model.strip()}"
+        label = f"{registration} – {model}"
+        if company:
+            label += f" – {company}"
+        if engine:
+            label += f" – {engine}"
+        return label
 
     def _refresh_aircraft_list(self):
         self.list_aircraft_available.clear()
         for ac in self.available_aircraft:
-            label = self.clean_aircraft_label(ac["registration"], ac["model"])
+            label = self.clean_aircraft_label(
+                ac.get("registration", ""),
+                ac.get("model", ""),
+                ac.get("company", ""),
+                ac.get("engine", ""),
+            )
             item = QListWidgetItem(label)
             item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
             item.setCheckState(Qt.Unchecked)
@@ -576,7 +622,12 @@ class FleetManagerPanel(QWidget):
     def _refresh_selected_aircraft_list(self):
         self.list_aircraft_selected.clear()
         for ac in self.selected_aircraft:
-            label = self.clean_aircraft_label(ac["registration"], ac["model"])
+            label = self.clean_aircraft_label(
+                ac.get("registration", ""),
+                ac.get("model", ""),
+                ac.get("company", ""),
+                ac.get("engine", ""),
+            )
             item = QListWidgetItem(label)
             item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
             item.setCheckState(Qt.Unchecked)
@@ -603,6 +654,7 @@ class FleetManagerPanel(QWidget):
             self.list_airport_selected.addItem(item)
 
     def add_aircraft(self):
+        """Déplace les avions cochés d'Available vers Selected (sans supprimer du JSON)."""
         to_add = []
         for i in range(self.list_aircraft_available.count()):
             item = self.list_aircraft_available.item(i)
@@ -610,7 +662,10 @@ class FleetManagerPanel(QWidget):
                 label = item.text()
                 for ac in self.available_aircraft:
                     ref_label = self.clean_aircraft_label(
-                        ac["registration"], ac["model"]
+                        ac.get("registration", ""),
+                        ac.get("model", ""),
+                        ac.get("company", ""),
+                        ac.get("engine", ""),
                     )
                     if ref_label == label:
                         to_add.append(ac)
@@ -622,8 +677,10 @@ class FleetManagerPanel(QWidget):
                 self.available_aircraft.remove(ac)
         self._refresh_aircraft_list()
         self._refresh_selected_aircraft_list()
+        self.save_selection()
 
     def remove_aircraft(self):
+        """Déplace les avions cochés de Selected vers Available (sans supprimer du JSON)."""
         to_remove = []
         for i in range(self.list_aircraft_selected.count()):
             item = self.list_aircraft_selected.item(i)
@@ -631,18 +688,22 @@ class FleetManagerPanel(QWidget):
                 label = item.text()
                 for ac in self.selected_aircraft:
                     ref_label = self.clean_aircraft_label(
-                        ac["registration"], ac["model"]
+                        ac.get("registration", ""),
+                        ac.get("model", ""),
+                        ac.get("company", ""),
+                        ac.get("engine", ""),
                     )
                     if ref_label == label:
                         to_remove.append(ac)
                         break
         for ac in to_remove:
-            if ac in self.selected_aircraft:
-                self.selected_aircraft.remove(ac)
             if ac not in self.available_aircraft:
                 self.available_aircraft.append(ac)
+            if ac in self.selected_aircraft:
+                self.selected_aircraft.remove(ac)
         self._refresh_aircraft_list()
         self._refresh_selected_aircraft_list()
+        self.save_selection()
 
     def add_airport(self):
         try:
@@ -748,114 +809,169 @@ class FleetManagerPanel(QWidget):
             )
 
     def add_manual_airport_dialog(self):
-        from PyQt5.QtWidgets import QFileDialog, QInputDialog, QMessageBox
-        import os
-        import json
-
-        folder = QFileDialog.getExistingDirectory(self, "Select Airport Folder")
-        if not folder:
-            return
-
-        # Suggestion ICAO code : nom du dossier si length == 4 sinon demande manuelle
-        icao_guess = ""
-        basename = os.path.basename(folder)
-        if len(basename) == 4:
-            icao_guess = basename.upper()
-        icao, ok = QInputDialog.getText(self, "ICAO", "Enter ICAO code:", text=icao_guess)
-        if not ok or not icao or len(icao.strip()) != 4:
-            QMessageBox.warning(self, "Error", "Invalid ICAO entered.")
-            return
-        icao = icao.strip().upper()
-
-        # Cherche dans airports.csv
-        csv_path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "../../data/airports.csv")
+        from PyQt5.QtWidgets import (
+            QDialog,
+            QVBoxLayout,
+            QHBoxLayout,
+            QLabel,
+            QLineEdit,
+            QPushButton,
+            QMessageBox,
         )
-        name, lat, lon = None, None, None
-        try:
-            with open(csv_path, encoding="utf-8") as f:
-                for line in f:
-                    parts = line.strip().split(",")
-                    if len(parts) >= 6 and parts[0].strip().upper() == icao:
-                        name = parts[1].strip()
-                        lat = float(parts[4])
-                        lon = float(parts[5])
-                        break
-        except Exception as e:
-            print(f"[ERROR] airports.csv lookup: {e}")
+        import os, json
 
-        # Si non trouvé, demande à la main (rare)
-        if lat is None or lon is None:
-            lat_str, ok1 = QInputDialog.getText(
-                self, "Latitude missing", "Enter latitude (ex: 37.9364):"
-            )
-            lon_str, ok2 = QInputDialog.getText(
-                self, "Longitude missing", "Enter longitude (ex: 23.9445):"
-            )
-            if not (ok1 and ok2):
-                QMessageBox.warning(self, "Error", "Latitude/Longitude required.")
+        dlg = QDialog(self)
+        dlg.setWindowTitle("Manual Add Airport")
+        dlg.setFixedSize(700, 360)
+        dlg.setStyleSheet(DIALOG_STYLESHEET)
+
+        layout = QVBoxLayout(dlg)
+        layout.setContentsMargins(28, 22, 28, 22)
+        layout.setSpacing(24)
+
+        # --- ICAO
+        icao_layout = QHBoxLayout()
+        lbl_icao = QLabel("ICAO*")
+        icao_edit = QLineEdit()
+        icao_edit.setPlaceholderText("ex: LFPG")
+        icao_layout.addWidget(lbl_icao)
+        icao_layout.addWidget(icao_edit)
+        layout.addLayout(icao_layout)
+
+        # --- Name
+        name_layout = QHBoxLayout()
+        lbl_name = QLabel("Airport Name*")
+        name_edit = QLineEdit()
+        name_edit.setPlaceholderText("ex: Paris Charles de Gaulle")
+        name_layout.addWidget(lbl_name)
+        name_layout.addWidget(name_edit)
+        layout.addLayout(name_layout)
+
+        # --- Latitude
+        lat_layout = QHBoxLayout()
+        lbl_lat = QLabel("Latitude*")
+        lat_edit = QLineEdit()
+        lat_edit.setPlaceholderText("ex: 48.7262")
+        lat_layout.addWidget(lbl_lat)
+        lat_layout.addWidget(lat_edit)
+        layout.addLayout(lat_layout)
+
+        # --- Longitude
+        lon_layout = QHBoxLayout()
+        lbl_lon = QLabel("Longitude*")
+        lon_edit = QLineEdit()
+        lon_edit.setPlaceholderText("ex: 2.3652")
+        lon_layout.addWidget(lbl_lon)
+        lon_layout.addWidget(lon_edit)
+        layout.addLayout(lon_layout)
+
+        # --- Dossier scenery
+        folder_layout = QHBoxLayout()
+        lbl_folder = QLabel("Scenery Folder*")
+        folder_edit = QLineEdit()
+        folder_edit.setMinimumWidth(160)
+        btn_browse = QPushButton("Browse")
+        btn_browse.setStyleSheet(
+            "background: #8d9099; color: #fff; border: none; border-radius: 6px; "
+            "font-weight: 600; padding: 8px 26px; font-size: 15px; min-width: 90px;"
+        )
+        btn_browse.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        def browse_folder():
+            from PyQt5.QtWidgets import QFileDialog
+            folder = QFileDialog.getExistingDirectory(dlg, "Select Airport Folder")
+            if folder:
+                folder_edit.setText(folder)
+        btn_browse.clicked.connect(browse_folder)
+        folder_layout.addWidget(lbl_folder)
+        folder_layout.addWidget(folder_edit)
+        folder_layout.addWidget(btn_browse)
+        layout.addLayout(folder_layout)
+
+        # --- Boutons Add / Cancel
+        btns_layout = QHBoxLayout()
+        btns_layout.addStretch(1)
+        btn_add = QPushButton("Add")
+        btn_cancel = QPushButton("Cancel")
+        btn_add.setStyleSheet(
+            "background: #88C070; color: #111; border: none; border-radius: 6px; "
+            "font-weight: 600; padding: 8px 26px; font-size: 15px; min-width: 120px;"
+        )
+        btn_cancel.setStyleSheet(
+            "background: #8d9099; color: #fff; border: none; border-radius: 6px; "
+            "font-weight: 600; padding: 8px 26px; font-size: 15px; min-width: 120px;"
+        )
+        btns_layout.addWidget(btn_add)
+        btns_layout.addWidget(btn_cancel)
+        layout.addLayout(btns_layout)
+
+        btn_cancel.clicked.connect(dlg.reject)
+
+        def try_add_airport():
+            icao = icao_edit.text().strip().upper()
+            name = name_edit.text().strip()
+            lat_str = lat_edit.text().strip()
+            lon_str = lon_edit.text().strip()
+            folder = folder_edit.text().strip()
+            if not icao or len(icao) != 4:
+                QMessageBox.warning(dlg, "Error", "ICAO code is required (4 letters).")
+                return
+            if not name:
+                QMessageBox.warning(dlg, "Error", "Airport name is required.")
                 return
             try:
-                lat = float(lat_str.strip())
-                lon = float(lon_str.strip())
+                lat = float(lat_str)
+                lon = float(lon_str)
             except Exception:
-                QMessageBox.warning(self, "Error", "Invalid latitude/longitude.")
+                QMessageBox.warning(dlg, "Error", "Latitude and longitude must be numbers.")
                 return
-
-        if not name:
-            name, _ = QInputDialog.getText(self, "Airport Name", "Enter airport name:")
-
-        # === SEULEMENT LES CLÉS QUI EXISTENT DANS LE JSON AUTO ===
-        airport_entry = {
-            "icao": icao,
-            "name": name or f"Manual {icao}",
-            "path": folder,
-            "latitude": lat,
-            "longitude": lon,
-        }
-        print(f"[DEBUG][MANUAL ADD] airport_entry = {airport_entry}")
-
-        # Ajoute et tri la liste, SANS clé supplémentaire !
-        self.available_airports.append(airport_entry)
-        self.available_airports = sorted(self.available_airports, key=lambda a: a["icao"])
-
-        # Mets à jour le JSON du scan pour que la carte l’ait aussi
-        results_path = os.path.abspath(
-            os.path.join(
-                os.path.dirname(__file__), "../../results/airport_scanresults.json"
+            if not folder or not os.path.exists(folder):
+                QMessageBox.warning(dlg, "Error", "Valid folder is required.")
+                return
+            airport_entry = {
+                "icao": icao,
+                "name": name,
+                "path": folder,
+                "latitude": lat,
+                "longitude": lon,
+            }
+            self.available_airports.append(airport_entry)
+            self.available_airports = sorted(
+                self.available_airports, key=lambda a: a["icao"]
             )
-        )
-        try:
-            # Recharge le contenu actuel
-            if os.path.exists(results_path):
-                with open(results_path, encoding="utf-8") as f:
-                    json_data = json.load(f)
-                    if not isinstance(json_data, list):
-                        json_data = []
-            else:
-                json_data = []
-            # Enlève tout doublon sur l'ICAO (écrase l'ancien si déjà présent)
-            json_data = [a for a in json_data if a.get("icao", "").upper() != icao]
-            json_data.append(airport_entry)
-            json_data = sorted(json_data, key=lambda a: a["icao"])
-            with open(results_path, "w", encoding="utf-8") as f:
-                json.dump(json_data, f, indent=2, ensure_ascii=False)
-            print(f"[DEBUG][MANUAL ADD] airport_scanresults.json updated with new airport.")
-        except Exception as e:
-            print(f"[ERROR][MANUAL ADD] Failed to update airport_scanresults.json: {e}")
+            # Update JSON
+            results_path = os.path.abspath(
+                os.path.join(
+                    os.path.dirname(__file__), "../../results/airport_scanresults.json"
+                )
+            )
+            try:
+                if os.path.exists(results_path):
+                    with open(results_path, encoding="utf-8") as f:
+                        json_data = json.load(f)
+                        if not isinstance(json_data, list):
+                            json_data = []
+                else:
+                    json_data = []
+                json_data = [a for a in json_data if a.get("icao", "").upper() != icao]
+                json_data.append(airport_entry)
+                json_data = sorted(json_data, key=lambda a: a["icao"])
+                with open(results_path, "w", encoding="utf-8") as f:
+                    json.dump(json_data, f, indent=2, ensure_ascii=False)
+            except Exception as e:
+                print(f"[ERROR][MANUAL ADD] Failed to update airport_scanresults.json: {e}")
 
-        self._refresh_airport_list()
+            self._refresh_airport_list()
+            if hasattr(self, "webview") and self.webview:
+                self.webview.page().runJavaScript(
+                    "window.refreshMap && window.refreshMap();"
+                )
+            QMessageBox.information(
+                self, "Airport added", f"Manual airport {icao} added to the available list."
+            )
+            dlg.accept()
 
-        # PATCH : Recharge la liste pour la carte (force relecture)
-        if hasattr(self, "webview") and self.webview:
-            self.webview.page().runJavaScript("window.refreshMap && window.refreshMap();")
-
-        # **DEBUG : logge la liste**
-        print(f"[DEBUG][MANUAL ADD] all available_airports now: {self.available_airports}")
-
-        QMessageBox.information(
-            self, "Airport added", f"Manual airport {icao} added to the available list."
-        )
+        btn_add.clicked.connect(try_add_airport)
+        dlg.exec_()
 
     def lookup_airport_csv(self, icao):
         """Cherche un ICAO dans airports.csv, retourne un dict (name, lat, lon) ou None si non trouvé."""
@@ -1006,6 +1122,322 @@ class FleetManagerPanel(QWidget):
         """
         return load_airports_from_json_or_csv()
 
+    def open_manual_add_aircraft_dialog(self):
+        from PyQt5.QtWidgets import (
+            QDialog,
+            QVBoxLayout,
+            QHBoxLayout,
+            QLabel,
+            QLineEdit,
+            QPushButton,
+            QComboBox,
+            QMessageBox,
+            QSizePolicy,
+            QWidget,
+        )
+        from PyQt5.QtCore import Qt
+
+        dlg = QDialog(self)
+        dlg.setWindowTitle("Manual Add Aircraft")
+        dlg.setFixedSize(440, 380)
+        dlg.setStyleSheet(DIALOG_STYLESHEET)
+
+        layout = QVBoxLayout(dlg)
+        layout.setContentsMargins(28, 22, 28, 22)
+        layout.setSpacing(24)
+
+        # --- Registration
+        reg_layout = QHBoxLayout()
+        lbl_reg = QLabel("Registration*")
+        reg_edit = QLineEdit()
+        reg_edit.setPlaceholderText("ex: F-HTYN")
+        reg_edit.setMinimumWidth(180)
+        reg_layout.addWidget(lbl_reg)
+        reg_layout.addWidget(reg_edit)
+        layout.addLayout(reg_layout)
+
+        # --- Modèle
+        model_layout = QHBoxLayout()
+        lbl_model = QLabel("Model*")
+        model_combo = QComboBox()
+        model_combo.addItems(["A319", "A320", "A321"])
+        model_combo.setMinimumWidth(120)
+        model_layout.addWidget(lbl_model)
+        model_layout.addWidget(model_combo)
+        layout.addLayout(model_layout)
+
+        # --- Compagnie
+        company_layout = QHBoxLayout()
+        lbl_company = QLabel("Company")
+        company_edit = QLineEdit()
+        company_edit.setPlaceholderText("ex: Air France")
+        company_edit.setMinimumWidth(180)
+        company_layout.addWidget(lbl_company)
+        company_layout.addWidget(company_edit)
+        layout.addLayout(company_layout)
+
+        # --- Type moteur
+        engine_layout = QHBoxLayout()
+        lbl_engine = QLabel("Engine")
+        engine_combo = QComboBox()
+        engine_combo.addItems(["UNKNOWN", "CFM", "IAE"])
+        engine_combo.setMinimumWidth(120)
+        engine_layout.addWidget(lbl_engine)
+        engine_layout.addWidget(engine_combo)
+        layout.addLayout(engine_layout)
+
+        # --- Boutons
+        btns_layout = QHBoxLayout()
+        btns_layout.addStretch(1)
+        btn_add = QPushButton("Add")
+        btn_cancel = QPushButton("Cancel")
+        # Styles boutons comme Add/Remove Airport
+        btn_style = (
+            "background: #8d9099; color: #fff; border: none; border-radius: 6px; "
+            "font-weight: 600; padding: 8px 26px; font-size: 15px; min-width: 120px;"
+        )
+        btn_add.setStyleSheet(
+            "background: #88C070; color: #111; border: none; border-radius: 6px; "
+            "font-weight: 600; padding: 8px 26px; font-size: 15px; min-width: 120px;"
+        )
+        btn_cancel.setStyleSheet(btn_style)
+        btns_layout.addWidget(btn_add)
+        btns_layout.addWidget(btn_cancel)
+        layout.addLayout(btns_layout)
+
+        btn_cancel.clicked.connect(dlg.reject)
+
+        def try_add_aircraft():
+            registration = reg_edit.text().strip().upper()
+            if not registration or len(registration) < 3:
+                QMessageBox.warning(dlg, "Error", "Registration is required (min 3 chars).")
+                return
+            if any(
+                a["registration"].upper() == registration
+                for a in self.available_aircraft + self.selected_aircraft
+            ):
+                QMessageBox.warning(
+                    dlg, "Error", "This registration already exists in your lists."
+                )
+                return
+            model = model_combo.currentText()
+            company = company_edit.text().strip()
+            engine = engine_combo.currentText()
+            new_ac = {
+                "registration": registration,
+                "model": model,
+                "company": company,
+                "engine": engine,
+            }
+            self.available_aircraft.append(new_ac)
+            self.save_aircraft_scanresults()
+            self._refresh_aircraft_list()
+            dlg.accept()
+            QMessageBox.information(
+                self,
+                "Aircraft added",
+                f"{registration} ({model}) added to the available aircraft.",
+            )
+
+        btn_add.clicked.connect(try_add_aircraft)
+        dlg.exec_()
+
+    def open_manual_add_airport_dialog(self):
+        from PyQt5.QtWidgets import (
+            QDialog,
+            QVBoxLayout,
+            QHBoxLayout,
+            QLabel,
+            QLineEdit,
+            QPushButton,
+            QMessageBox,
+        )
+        from PyQt5.QtCore import Qt
+        import os, json
+
+        dlg = QDialog(self)
+        dlg.setWindowTitle("Manual Add Airport")
+        dlg.setFixedSize(600, 360)
+        dlg.setStyleSheet(DIALOG_STYLESHEET)
+
+        layout = QVBoxLayout(dlg)
+        layout.setContentsMargins(28, 22, 28, 22)
+        layout.setSpacing(24)
+
+        # --- ICAO code
+        icao_layout = QHBoxLayout()
+        lbl_icao = QLabel("ICAO*")
+        icao_edit = QLineEdit()
+        icao_edit.setPlaceholderText("ex: LFPG")
+        icao_layout.addWidget(lbl_icao)
+        icao_layout.addWidget(icao_edit)
+        layout.addLayout(icao_layout)
+
+        # --- Name
+        name_layout = QHBoxLayout()
+        lbl_name = QLabel("Airport Name*")
+        name_edit = QLineEdit()
+        name_edit.setPlaceholderText("ex: Paris Charles de Gaulle")
+        name_layout.addWidget(lbl_name)
+        name_layout.addWidget(name_edit)
+        layout.addLayout(name_layout)
+
+        # --- Latitude
+        lat_layout = QHBoxLayout()
+        lbl_lat = QLabel("Latitude*")
+        lat_edit = QLineEdit()
+        lat_edit.setPlaceholderText("ex: 48.7262")
+        lat_layout.addWidget(lbl_lat)
+        lat_layout.addWidget(lat_edit)
+        layout.addLayout(lat_layout)
+
+        # --- Longitude
+        lon_layout = QHBoxLayout()
+        lbl_lon = QLabel("Longitude*")
+        lon_edit = QLineEdit()
+        lon_edit.setPlaceholderText("ex: 2.3652")
+        lon_layout.addWidget(lbl_lon)
+        lon_layout.addWidget(lon_edit)
+        layout.addLayout(lon_layout)
+
+        # --- Dossier
+        folder_layout = QHBoxLayout()
+        lbl_folder = QLabel("Scenery Folder*")
+        folder_edit = QLineEdit()
+        btn_browse = QPushButton("Browse")
+
+        def browse_folder():
+            from PyQt5.QtWidgets import QFileDialog
+
+            folder = QFileDialog.getExistingDirectory(dlg, "Select Airport Folder")
+            if folder:
+                folder_edit.setText(folder)
+
+        btn_browse.clicked.connect(browse_folder)
+        folder_layout.addWidget(lbl_folder)
+        folder_layout.addWidget(folder_edit)
+        folder_layout.addWidget(btn_browse)
+        layout.addLayout(folder_layout)
+
+        # --- Boutons
+        btns_layout = QHBoxLayout()
+        btns_layout.addStretch(1)
+        btn_add = QPushButton("Add")
+        btn_cancel = QPushButton("Cancel")
+        btn_add.setStyleSheet(
+            "background: #88C070; color: #111; border: none; border-radius: 6px; "
+            "font-weight: 600; padding: 8px 26px; font-size: 15px; min-width: 120px;"
+        )
+        btn_cancel.setStyleSheet(
+            "background: #8d9099; color: #fff; border: none; border-radius: 6px; "
+            "font-weight: 600; padding: 8px 26px; font-size: 15px; min-width: 120px;"
+        )
+        btns_layout.addWidget(btn_add)
+        btns_layout.addWidget(btn_cancel)
+        layout.addLayout(btns_layout)
+
+        btn_cancel.clicked.connect(dlg.reject)
+
+        def try_add_airport():
+            icao = icao_edit.text().strip().upper()
+            name = name_edit.text().strip()
+            lat_str = lat_edit.text().strip()
+            lon_str = lon_edit.text().strip()
+            folder = folder_edit.text().strip()
+            if not icao or len(icao) != 4:
+                QMessageBox.warning(dlg, "Error", "ICAO code is required (4 letters).")
+                return
+            if not name:
+                QMessageBox.warning(dlg, "Error", "Airport name is required.")
+                return
+            try:
+                lat = float(lat_str)
+                lon = float(lon_str)
+            except Exception:
+                QMessageBox.warning(dlg, "Error", "Latitude and longitude must be numbers.")
+                return
+            if not folder or not os.path.exists(folder):
+                QMessageBox.warning(dlg, "Error", "Valid folder is required.")
+                return
+            # Construction de l'entrée aéroport
+            airport_entry = {
+                "icao": icao,
+                "name": name,
+                "path": folder,
+                "latitude": lat,
+                "longitude": lon,
+            }
+            self.available_airports.append(airport_entry)
+            self.available_airports = sorted(
+                self.available_airports, key=lambda a: a["icao"]
+            )
+            # Mise à jour du JSON
+            results_path = os.path.abspath(
+                os.path.join(
+                    os.path.dirname(__file__), "../../results/airport_scanresults.json"
+                )
+            )
+            try:
+                if os.path.exists(results_path):
+                    with open(results_path, encoding="utf-8") as f:
+                        json_data = json.load(f)
+                        if not isinstance(json_data, list):
+                            json_data = []
+                else:
+                    json_data = []
+                # Remove any previous ICAO entry
+                json_data = [a for a in json_data if a.get("icao", "").upper() != icao]
+                json_data.append(airport_entry)
+                json_data = sorted(json_data, key=lambda a: a["icao"])
+                with open(results_path, "w", encoding="utf-8") as f:
+                    json.dump(json_data, f, indent=2, ensure_ascii=False)
+            except Exception as e:
+                print(f"[ERROR][MANUAL ADD] Failed to update airport_scanresults.json: {e}")
+
+            self._refresh_airport_list()
+            if hasattr(self, "webview") and self.webview:
+                self.webview.page().runJavaScript(
+                    "window.refreshMap && window.refreshMap();"
+                )
+            QMessageBox.information(
+                self, "Airport added", f"Manual airport {icao} added to the available list."
+            )
+            dlg.accept()
+
+        btn_add.clicked.connect(try_add_airport)
+        dlg.exec_()
+
+    def save_aircraft_scanresults(self):
+        import os, json
+
+        results_path = os.path.abspath(
+            os.path.join(
+                os.path.dirname(__file__), "../../results/aircraft_scanresults.json"
+            )
+        )
+        # Recharge tout, ajoute l’avion si unique registration
+        try:
+            if os.path.exists(results_path):
+                with open(results_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                if not isinstance(data, list):
+                    data = []
+            else:
+                data = []
+            # Ajoute tous les avions uniques (pas de doublon REG)
+            seen = set()
+            all_ac = data + [ac for ac in self.available_aircraft if ac not in data]
+            cleaned = []
+            for ac in all_ac:
+                reg = ac.get("registration", "").upper()
+                if reg and reg not in seen:
+                    cleaned.append(ac)
+                    seen.add(reg)
+            with open(results_path, "w", encoding="utf-8") as f:
+                json.dump(cleaned, f, indent=2, ensure_ascii=False)
+            print("[DEBUG][MANUAL ADD] aircraft_scanresults.json updated.")
+        except Exception as e:
+            print("[ERROR][MANUAL ADD] Failed to update aircraft_scanresults.json:", e)
 
 # ==================== MAIN WINDOW ====================
 class MainWindow(QMainWindow):
@@ -1021,7 +1453,7 @@ class MainWindow(QMainWindow):
         nav_layout.setContentsMargins(0, 0, 0, 0)
         nav_layout.setSpacing(0)
         nav_widget.setStyleSheet("background: #181818;")
-        title = QLabel("SimRoster")
+        title = QLabel("SIMROSTER")
         title.setStyleSheet(
             "font-size: 24px; font-weight: bold; color: #ffffff; padding: 24px 8px 24px 16px; letter-spacing: 2px;"
         )
@@ -1124,7 +1556,7 @@ class MainWindow(QMainWindow):
         dashboard_layout = QVBoxLayout(dashboard_panel)
         dashboard_layout.setContentsMargins(0, 0, 0, 0)
         dashboard_layout.setSpacing(0)
-        dashboard_title = QLabel("Dashboard")
+        dashboard_title = QLabel("DASHBOARD")
         dashboard_title.setStyleSheet(
             "font-size: 22px; font-weight: 600; color: #ffffff; background: none; margin-top:30px; margin-bottom:20px;"
         )
