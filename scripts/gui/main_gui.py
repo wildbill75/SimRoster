@@ -26,6 +26,7 @@ from PyQt5.QtWidgets import (
     QDialog,
     QMessageBox,
     QInputDialog,
+    QComboBox,
 )
 from PyQt5.QtCore import Qt, QUrl, QObject, pyqtSlot, QMetaObject
 from PyQt5.QtGui import QFont
@@ -63,6 +64,48 @@ QComboBox QAbstractItemView {
 QPushButton {
     font-size: 15px;
 }
+"""
+PANEL_STYLESHEET = """
+    QWidget {
+        background: #23242a;
+        color: #fff;
+        font-size: 14px;
+    }
+    QLabel {
+        color: #fff;
+    }
+    QComboBox, QLineEdit {
+        background: #343842;
+        color: #fff;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+    QListWidget {
+        background: #343842;
+        color: #fff;
+        border: none;
+        font-size: 14px;
+    }
+    QPushButton {
+        background: #8d9099;
+        color: #222;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        padding: 8px 18px;
+        font-size: 13px;
+        min-width: 120px;
+    }
+    QPushButton#ManualAddButton {
+        background: #88C070;
+        color: #111;
+        font-weight: 600;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 18px;
+        font-size: 13px;
+        min-width: 120px;
+    }
 """
 
 
@@ -434,6 +477,7 @@ class FleetManagerPanel(QWidget):
     ):
         super().__init__(parent)
         # Données
+        self.setStyleSheet(PANEL_STYLESHEET)
         self.available_aircraft = available_aircraft or []
         self.selected_aircraft = selected_aircraft or []
         self.available_airports = available_airports or []
@@ -456,44 +500,30 @@ class FleetManagerPanel(QWidget):
 
         # ---------- Available Aircraft ----------
         lbl_aircraft = QLabel("Available Aircraft")
-        lbl_aircraft.setStyleSheet("font-size: 15px; color: #fff; font-weight: bold;")
         main_layout.addWidget(lbl_aircraft)
 
         self.aircraft_search = QLineEdit()
         self.aircraft_search.setPlaceholderText("Search Aircraft...")
-        self.aircraft_search.setStyleSheet(
-            "background: #343842; color: #fff; font-size: 14px; border-radius: 0; border: none; margin-bottom: 4px; padding: 6px 8px;"
-        )
+    
         self.aircraft_search.textChanged.connect(self.filter_aircraft)
         main_layout.addWidget(self.aircraft_search)
 
         self.list_aircraft_available = QListWidget()
         self.list_aircraft_available.setSelectionMode(QListWidget.NoSelection)
-        self.list_aircraft_available.setStyleSheet(
-            "background: #343842; color: #fff; font-size: 14px; border: none;"
-        )
         main_layout.addWidget(self.list_aircraft_available)
 
         # --- Aircraft buttons (↓ Add, ↑ Remove, + Manual Add à droite) ---
         aircraft_btns_layout = QHBoxLayout()
         aircraft_btns_layout.setSpacing(12)
-        btn_style_common = (
-            "background: #8d9099; color: #222; border: none; border-radius: 6px; "
-            "font-weight: 600; padding: 8px 18px; font-size: 13px; min-width: 120px;"
-        )
-        self.btn_aircraft_add = QPushButton("↓ Add Aircraft")
-        self.btn_aircraft_add.setStyleSheet(btn_style_common)
+        self.btn_aircraft_add = QPushButton("↓ Add Aircraft") 
         aircraft_btns_layout.addWidget(self.btn_aircraft_add)
         self.btn_aircraft_remove = QPushButton("↑ Remove Aircraft")
-        self.btn_aircraft_remove.setStyleSheet(btn_style_common)
         aircraft_btns_layout.addWidget(self.btn_aircraft_remove)
         aircraft_btns_layout.addStretch(1)
         self.btn_add_manual_aircraft = QPushButton("+ Manual Add")
-        self.btn_add_manual_aircraft.setStyleSheet(
-            "background: #88C070; color: #111; border: none; border-radius: 6px; "
-            "font-weight: 600; padding: 8px 18px; font-size: 13px; min-width: 120px;"
-        )
+        self.btn_add_manual_aircraft.setObjectName("ManualAddButton")
         aircraft_btns_layout.addWidget(self.btn_add_manual_aircraft)
+
         self.btn_add_manual_aircraft.clicked.connect(self.open_manual_add_aircraft_dialog)
         main_layout.addLayout(aircraft_btns_layout)
         main_layout.addSpacing(18)
@@ -503,53 +533,43 @@ class FleetManagerPanel(QWidget):
 
         # ---------- Selected Aircraft ----------
         lbl_aircraft_sel = QLabel("Selected Aircraft")
-        lbl_aircraft_sel.setStyleSheet("font-size: 15px; color: #fff; font-weight: bold;")
         main_layout.addWidget(lbl_aircraft_sel)
 
         self.list_aircraft_selected = QListWidget()
         self.list_aircraft_selected.setSelectionMode(QListWidget.NoSelection)
-        self.list_aircraft_selected.setStyleSheet(
-            "background: #343842; color: #fff; font-size: 14px; border: none;"
-        )
         main_layout.addWidget(self.list_aircraft_selected)
 
         # ---------- Available Airports ----------
         lbl_airport = QLabel("Available Airports")
-        lbl_airport.setStyleSheet("font-size: 15px; color: #fff; font-weight: bold;")
         main_layout.addWidget(lbl_airport)
         self.airport_search = QLineEdit()
         self.airport_search.setPlaceholderText("Search ICAO or name...")
-        self.airport_search.setStyleSheet(
-            "background: #343842; color: #fff; font-size: 14px; border-radius: 0; border: none; margin-bottom: 4px; padding: 6px 8px;"
-        )
         self.airport_search.textChanged.connect(self.filter_airports)
         main_layout.addWidget(self.airport_search)
         self.list_airport_available = QListWidget()
-        self.list_airport_available.setStyleSheet(
-            "background: #343842; color: #fff; font-size: 14px; border: none;"
-        )
         self.list_airport_available.setSelectionMode(QListWidget.NoSelection)
         main_layout.addWidget(self.list_airport_available)
 
         # --- Airport buttons (↓ Add, ↑ Remove, + Manual Add à droite) ---
+        # ---------- Boutons Airport (alignés comme Aircraft) ----------
         airport_btns_layout = QHBoxLayout()
         airport_btns_layout.setSpacing(12)
+
         self.btn_airport_add = QPushButton("↓ Add Airport")
-        self.btn_airport_add.setStyleSheet(btn_style_common)
         airport_btns_layout.addWidget(self.btn_airport_add)
+
         self.btn_airport_remove = QPushButton("↑ Remove Airport")
-        self.btn_airport_remove.setStyleSheet(btn_style_common)
         airport_btns_layout.addWidget(self.btn_airport_remove)
-        airport_btns_layout.addStretch(1)
+
+        airport_btns_layout.addStretch()  # <-- SANS VALEUR, juste comme ça
+
         self.btn_add_manual_airport = QPushButton("+ Manual Add")
-        self.btn_add_manual_airport.setStyleSheet(
-            "background: #88C070; color: #111; border: none; border-radius: 6px; "
-            "font-weight: 600; padding: 8px 18px; font-size: 13px; min-width: 120px;"
-        )
+        self.btn_add_manual_airport.setObjectName("ManualAddButton")
         airport_btns_layout.addWidget(self.btn_add_manual_airport)
-        self.btn_add_manual_airport.clicked.connect(self.add_manual_airport_dialog)
+
         main_layout.addLayout(airport_btns_layout)
         main_layout.addSpacing(18)
+
 
         # Connexions
         self.btn_airport_add.clicked.connect(self.add_airport)
@@ -557,22 +577,13 @@ class FleetManagerPanel(QWidget):
         self.btn_add_manual_airport.clicked.connect(self.add_manual_airport_dialog)
 
         lbl_airport_sel = QLabel("Selected Airports")
-        lbl_airport_sel.setStyleSheet(
-            "font-size: 15px; color: #fff; font-weight: bold;"
-        )
         main_layout.addWidget(lbl_airport_sel)
         self.list_airport_selected = QListWidget()
-        self.list_airport_selected.setStyleSheet(
-            "background: #343842; color: #fff; font-size: 14px; border: none;"
-        )
         self.list_airport_selected.setSelectionMode(QListWidget.NoSelection)
         main_layout.addWidget(self.list_airport_selected)
 
         # ---------- Reset All ----------
         self.btn_reset_all = QPushButton("Reset All")
-        self.btn_reset_all.setStyleSheet(
-            "background: #8d9099; color: #222; border: none; border-radius: 0px; font-weight: bold; font-size: 14px; margin-top: 8px; min-width: 80px;"
-        )
         main_layout.addWidget(self.btn_reset_all, alignment=Qt.AlignCenter)
         self.btn_reset_all.clicked.connect(self.reset_all)
 
@@ -1439,6 +1450,213 @@ class FleetManagerPanel(QWidget):
         except Exception as e:
             print("[ERROR][MANUAL ADD] Failed to update aircraft_scanresults.json:", e)
 
+# ==================== FLIGHT PLANNING PANEL ====================
+class FlightPlanningPanel(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(32, 32, 32, 32)
+        layout.setSpacing(24)
+
+        # Title
+        title = QLabel("FLIGHT PLANNING")
+        title.setStyleSheet(
+            "font-size: 22px; font-weight: 600; color: #ffffff; background: none;"
+        )
+        title.setAlignment(Qt.AlignCenter)
+        layout.addWidget(title)
+
+        # -- Row: Aircraft selection
+        aircraft_row = QHBoxLayout()
+        lbl_aircraft = QLabel("Aircraft")
+        lbl_aircraft.setStyleSheet("font-size: 15px; color: #fff;")
+        self.aircraft_combo = QComboBox()
+        self.aircraft_combo.setMinimumWidth(220)
+        self.aircraft_combo.setStyleSheet(
+            "background: #23242a; color: #fff; font-size: 14px;"
+        )
+        aircraft_row.addWidget(lbl_aircraft)
+        aircraft_row.addWidget(self.aircraft_combo)
+        aircraft_row.addStretch(1)
+        layout.addLayout(aircraft_row)
+
+        # -- Row: Departure Airport
+        dep_row = QHBoxLayout()
+        lbl_dep = QLabel("Departure")
+        lbl_dep.setStyleSheet("font-size: 15px; color: #fff;")
+        self.dep_combo = QComboBox()
+        self.dep_combo.setMinimumWidth(180)
+        self.dep_combo.setStyleSheet(
+            "background: #23242a; color: #fff; font-size: 14px;"
+        )
+        dep_row.addWidget(lbl_dep)
+        dep_row.addWidget(self.dep_combo)
+        dep_row.addStretch(1)
+        layout.addLayout(dep_row)
+
+        # -- Row: Arrival Airport
+        arr_row = QHBoxLayout()
+        lbl_arr = QLabel("Arrival")
+        lbl_arr.setStyleSheet("font-size: 15px; color: #fff;")
+        self.arr_combo = QComboBox()
+        self.arr_combo.setMinimumWidth(180)
+        self.arr_combo.setStyleSheet(
+            "background: #23242a; color: #fff; font-size: 14px;"
+        )
+        arr_row.addWidget(lbl_arr)
+        arr_row.addWidget(self.arr_combo)
+        arr_row.addStretch(1)
+        layout.addLayout(arr_row)
+
+        # -- Row: Company filter (optional)
+        company_row = QHBoxLayout()
+        lbl_company = QLabel("Airline")
+        lbl_company.setStyleSheet("font-size: 15px; color: #fff;")
+        self.company_combo = QComboBox()
+        self.company_combo.setMinimumWidth(180)
+        self.company_combo.setStyleSheet(
+            "background: #23242a; color: #fff; font-size: 14px;"
+        )
+        company_row.addWidget(lbl_company)
+        company_row.addWidget(self.company_combo)
+        company_row.addStretch(1)
+        layout.addLayout(company_row)
+
+        # -- Search Button
+        btn_row = QHBoxLayout()
+        self.btn_search = QPushButton("Search real flights")
+        self.btn_search.setStyleSheet(
+            "background: #88C070; color: #111; font-weight: 600; font-size: 15px; "
+            "border-radius: 8px; padding: 12px 32px; min-width: 200px;"
+        )
+        btn_row.addStretch(1)
+        btn_row.addWidget(self.btn_search)
+        btn_row.addStretch(1)
+        layout.addLayout(btn_row)
+
+        # -- Results List
+        results_label = QLabel("Matching Flights")
+        results_label.setStyleSheet(
+            "font-size: 15px; color: #fff; font-weight: bold; margin-top: 8px;"
+        )
+        layout.addWidget(results_label)
+
+        self.flights_list = QListWidget()
+        self.flights_list.setStyleSheet(
+            "background: #343842; color: #fff; font-size: 14px; border: none;"
+        )
+        layout.addWidget(self.flights_list)
+
+        # -- Populate combos with user selection (dummy at first)
+        self.populate_combos()
+
+        # -- Connect logic
+        self.btn_search.clicked.connect(self.search_real_flights)
+        self.aircraft_combo.currentIndexChanged.connect(self.sync_company_from_aircraft)
+
+    def refresh_panel(self):
+        """Reload les combos à partir des JSON de sélection."""
+        self.populate_combos()
+        # Tu pourrais aussi vider les résultats de recherche pour éviter les artefacts :
+        self.flights_list.clear()
+
+    def populate_combos(self):
+        # --- Chemins JSON
+        base_dir = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "../../results")
+        )
+        aircraft_json = os.path.join(base_dir, "selected_aircraft.json")
+        airport_json = os.path.join(base_dir, "selected_airports.json")
+
+        # --- Avions sélectionnés
+        self.aircraft_combo.clear()
+        try:
+            with open(aircraft_json, encoding="utf-8") as f:
+                aircraft_list = json.load(f)
+            if not aircraft_list:
+                self.aircraft_combo.addItem("(No aircraft selected)")
+            else:
+                for ac in aircraft_list:
+                    # Format affiché : F-GKXC | A320 | Air France
+                    reg = ac.get("registration", "???")
+                    model = ac.get("model", "???")
+                    company = ac.get("company", "???")
+                    label = f"{reg} | {model} | {company}"
+                    self.aircraft_combo.addItem(label)
+        except Exception as e:
+            self.aircraft_combo.addItem("(No aircraft found)")
+            print(f"[ERROR] Reading aircraft JSON: {e}")
+
+        # --- Aéroports sélectionnés
+        self.dep_combo.clear()
+        self.arr_combo.clear()
+        airport_names = []
+        try:
+            with open(airport_json, encoding="utf-8") as f:
+                airport_list = json.load(f)
+            if not airport_list:
+                self.dep_combo.addItem("(No airport selected)")
+                self.arr_combo.addItem("(No airport selected)")
+            else:
+                for ap in airport_list:
+                    icao = ap.get("icao", "????")
+                    name = ap.get("name", "")
+                    label = f"{icao} - {name}" if name else icao
+                    airport_names.append(label)
+                    self.dep_combo.addItem(label)
+                    self.arr_combo.addItem(label)
+        except Exception as e:
+            self.dep_combo.addItem("(No airports found)")
+            self.arr_combo.addItem("(No airports found)")
+            print(f"[ERROR] Reading airport JSON: {e}")
+
+        # --- Airlines
+        self.company_combo.clear()
+        companies = set()
+        try:
+            with open(aircraft_json, encoding="utf-8") as f:
+                aircraft_list = json.load(f)
+            for ac in aircraft_list:
+                company = ac.get("company", "").strip()
+                if company:
+                    companies.add(company)
+            if companies:
+                self.company_combo.addItem("All airlines")
+                for c in sorted(companies):
+                    self.company_combo.addItem(c)
+            else:
+                self.company_combo.addItem("(No airline)")
+        except Exception:
+            self.company_combo.addItem("(No airline)")
+
+    def sync_company_from_aircraft(self):
+        # Si l'utilisateur choisit un avion, synchronise la compagnie
+        idx = self.aircraft_combo.currentIndex()
+        if idx >= 0:
+            label = self.aircraft_combo.currentText()
+            # Ex : "F-HBNK | A320 | Air France"
+            if "|" in label:
+                parts = [x.strip() for x in label.split("|")]
+                if len(parts) == 3:
+                    company = parts[2]
+                    # Met à jour la combo si ce n'est pas "All airlines"
+                    idx_company = self.company_combo.findText(company)
+                    if idx_company >= 0:
+                        self.company_combo.setCurrentIndex(idx_company)
+
+    def search_real_flights(self):
+        # TODO: Intégrer la vraie logique FR24 mock + filtrage sur le pool sélectionné
+        self.flights_list.clear()
+        # Dummy result list
+        self.flights_list.addItem("AF1234 | LFPO → LFMN | Dep 08:30 | Arr 09:55")
+        self.flights_list.addItem("EZY8876 | LFPO → LFMN | Dep 10:40 | Arr 12:10")
+        self.flights_list.addItem("VY5022 | LFMN → LFPO | Dep 13:05 | Arr 14:45")
+        # Message box de debug, à retirer plus tard
+        QMessageBox.information(
+            self, "Results", "Dummy flight results populated. Replace with real data."
+        )
+
+
 # ==================== MAIN WINDOW ====================
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -1461,11 +1679,13 @@ class MainWindow(QMainWindow):
 
         self.btn_dashboard = QPushButton("Dashboard")
         self.btn_fleetmanager = QPushButton("Fleet Manager")
+        self.btn_flightplanning = QPushButton("Flight Planning")
         self.btn_settings = QPushButton("Settings")
         self.btn_quit = QPushButton("Quit")
         for btn in [
             self.btn_dashboard,
             self.btn_fleetmanager,
+            self.btn_flightplanning,
             self.btn_settings,
             self.btn_quit,
         ]:
@@ -1581,13 +1801,15 @@ class MainWindow(QMainWindow):
         # Ajoute les panels à la stack (ordre: Dashboard=0, Fleet=1, Settings=2)
         self.overlay_stack.addWidget(dashboard_panel)
         self.overlay_stack.addWidget(fleet_panel)
+        flight_planning_panel = FlightPlanningPanel(self)
+        self.overlay_stack.addWidget(flight_planning_panel)
         self.overlay_stack.addWidget(settings_panel)
 
         # --- CONTAINER GLOBAL : Disposition horizontale, panel overlay à droite ---
         right_container = QWidget()
         right_layout = QHBoxLayout(right_container)
         right_layout.setContentsMargins(0, 0, 0, 0)
-        right_layout.setSpacing(0)
+        right_layout.setSpacing(0)  
 
         # La carte (expanding, prend toute la place dispo)
         right_layout.addWidget(self.web_view, stretch=1)
@@ -1605,18 +1827,31 @@ class MainWindow(QMainWindow):
         # --- NAVIGATION ---
         self.btn_dashboard.clicked.connect(lambda: self.set_panel(0))
         self.btn_fleetmanager.clicked.connect(lambda: self.set_panel(1))
-        self.btn_settings.clicked.connect(lambda: self.set_panel(2))
+        self.btn_flightplanning.clicked.connect(lambda: self.set_panel(2))
+        self.btn_settings.clicked.connect(lambda: self.set_panel(3))
         self.btn_quit.clicked.connect(self.close)
 
         self.set_panel(0)
 
+
     def set_panel(self, index):
-        # Gère l'état "checked" des boutons (menu actif)
         for btn, idx in zip(
-            [self.btn_dashboard, self.btn_fleetmanager, self.btn_settings], [0, 1, 2]
+            [
+                self.btn_dashboard,
+                self.btn_fleetmanager,
+                self.btn_flightplanning,
+                self.btn_settings,
+            ],
+            [0, 1, 2, 3],
         ):
             btn.setChecked(idx == index)
         self.overlay_stack.setCurrentIndex(index)
+
+        # === Refresh dynamique du Flight Planning Panel ===
+        if index == 2:  # 2 = Flight Planning (selon l’ordre d’ajout dans overlay_stack)
+            panel = self.overlay_stack.widget(2)
+            if hasattr(panel, "refresh_panel"):
+                panel.refresh_panel()
 
     def show_test_minimal(self):
         from PyQt5.QtWebEngineWidgets import QWebEngineView
