@@ -25,6 +25,7 @@ from PyQt5.QtWidgets import (
     QProgressBar,
     QDialog,
     QMessageBox,
+    QInputDialog,
 )
 from PyQt5.QtCore import Qt, QUrl, QObject, pyqtSlot, QMetaObject
 from PyQt5.QtGui import QFont
@@ -484,18 +485,37 @@ class FleetManagerPanel(QWidget):
             "background: #343842; color: #fff; font-size: 14px; border: none;"
         )
         main_layout.addWidget(self.list_airport_available)
+        # ---------- Boutons Airport (modifié: ajout bouton manuel) ----------
         airport_btns_layout = QHBoxLayout()
+        airport_btns_layout.setSpacing(8)
+
+        # Bouton Add Airport
         self.btn_airport_add = QPushButton("↓ Add Airport")
-        self.btn_airport_remove = QPushButton("↑ Remove Airport")
-        for b in [self.btn_airport_add, self.btn_airport_remove]:
-            b.setStyleSheet(
-                "background: #8d9099; color: #222; border: none; border-radius: 0px; font-weight: 600; padding: 8px 10px; font-size: 13px;"
-            )
+        self.btn_airport_add.setStyleSheet(
+            "background: #8d9099; color: #222; border: none; border-radius: 6px; font-weight: 600; padding: 8px 10px; font-size: 13px;"
+        )
         airport_btns_layout.addWidget(self.btn_airport_add)
+
+        # Bouton Remove Airport
+        self.btn_airport_remove = QPushButton("↑ Remove Airport")
+        self.btn_airport_remove.setStyleSheet(
+            "background: #8d9099; color: #222; border: none; border-radius: 6px; font-weight: 600; padding: 8px 10px; font-size: 13px;"
+        )
         airport_btns_layout.addWidget(self.btn_airport_remove)
+
+        # Nouveau bouton Add Manual Airport
+        self.btn_add_manual_airport = QPushButton("+ Manual Add")
+        self.btn_add_manual_airport.setStyleSheet(
+            "background: #88C070; color: #111; border: none; border-radius: 6px; font-weight: 600; padding: 8px 10px; font-size: 13px;"
+        )
+        airport_btns_layout.addWidget(self.btn_add_manual_airport)
+
         main_layout.addLayout(airport_btns_layout)
+
+        # Connexions
         self.btn_airport_add.clicked.connect(self.add_airport)
         self.btn_airport_remove.clicked.connect(self.remove_airport)
+        self.btn_add_manual_airport.clicked.connect(self.add_manual_airport_dialog)
 
         lbl_airport_sel = QLabel("Selected Airports")
         lbl_airport_sel.setStyleSheet(
@@ -726,6 +746,140 @@ class FleetManagerPanel(QWidget):
             QMessageBox.critical(
                 self, "Erreur critique", f"Crash dans remove_airport():\n{e}"
             )
+
+    def add_manual_airport_dialog(self):
+        from PyQt5.QtWidgets import QFileDialog, QInputDialog, QMessageBox
+        import os
+        import json
+
+        folder = QFileDialog.getExistingDirectory(self, "Select Airport Folder")
+        if not folder:
+            return
+
+        # Suggestion ICAO code : nom du dossier si length == 4 sinon demande manuelle
+        icao_guess = ""
+        basename = os.path.basename(folder)
+        if len(basename) == 4:
+            icao_guess = basename.upper()
+        icao, ok = QInputDialog.getText(self, "ICAO", "Enter ICAO code:", text=icao_guess)
+        if not ok or not icao or len(icao.strip()) != 4:
+            QMessageBox.warning(self, "Error", "Invalid ICAO entered.")
+            return
+        icao = icao.strip().upper()
+
+        # Cherche dans airports.csv
+        csv_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "../../data/airports.csv")
+        )
+        name, lat, lon = None, None, None
+        try:
+            with open(csv_path, encoding="utf-8") as f:
+                for line in f:
+                    parts = line.strip().split(",")
+                    if len(parts) >= 6 and parts[0].strip().upper() == icao:
+                        name = parts[1].strip()
+                        lat = float(parts[4])
+                        lon = float(parts[5])
+                        break
+        except Exception as e:
+            print(f"[ERROR] airports.csv lookup: {e}")
+
+        # Si non trouvé, demande à la main (rare)
+        if lat is None or lon is None:
+            lat_str, ok1 = QInputDialog.getText(
+                self, "Latitude missing", "Enter latitude (ex: 37.9364):"
+            )
+            lon_str, ok2 = QInputDialog.getText(
+                self, "Longitude missing", "Enter longitude (ex: 23.9445):"
+            )
+            if not (ok1 and ok2):
+                QMessageBox.warning(self, "Error", "Latitude/Longitude required.")
+                return
+            try:
+                lat = float(lat_str.strip())
+                lon = float(lon_str.strip())
+            except Exception:
+                QMessageBox.warning(self, "Error", "Invalid latitude/longitude.")
+                return
+
+        if not name:
+            name, _ = QInputDialog.getText(self, "Airport Name", "Enter airport name:")
+
+        # === SEULEMENT LES CLÉS QUI EXISTENT DANS LE JSON AUTO ===
+        airport_entry = {
+            "icao": icao,
+            "name": name or f"Manual {icao}",
+            "path": folder,
+            "latitude": lat,
+            "longitude": lon,
+        }
+        print(f"[DEBUG][MANUAL ADD] airport_entry = {airport_entry}")
+
+        # Ajoute et tri la liste, SANS clé supplémentaire !
+        self.available_airports.append(airport_entry)
+        self.available_airports = sorted(self.available_airports, key=lambda a: a["icao"])
+
+        # Mets à jour le JSON du scan pour que la carte l’ait aussi
+        results_path = os.path.abspath(
+            os.path.join(
+                os.path.dirname(__file__), "../../results/airport_scanresults.json"
+            )
+        )
+        try:
+            # Recharge le contenu actuel
+            if os.path.exists(results_path):
+                with open(results_path, encoding="utf-8") as f:
+                    json_data = json.load(f)
+                    if not isinstance(json_data, list):
+                        json_data = []
+            else:
+                json_data = []
+            # Enlève tout doublon sur l'ICAO (écrase l'ancien si déjà présent)
+            json_data = [a for a in json_data if a.get("icao", "").upper() != icao]
+            json_data.append(airport_entry)
+            json_data = sorted(json_data, key=lambda a: a["icao"])
+            with open(results_path, "w", encoding="utf-8") as f:
+                json.dump(json_data, f, indent=2, ensure_ascii=False)
+            print(f"[DEBUG][MANUAL ADD] airport_scanresults.json updated with new airport.")
+        except Exception as e:
+            print(f"[ERROR][MANUAL ADD] Failed to update airport_scanresults.json: {e}")
+
+        self._refresh_airport_list()
+
+        # PATCH : Recharge la liste pour la carte (force relecture)
+        if hasattr(self, "webview") and self.webview:
+            self.webview.page().runJavaScript("window.refreshMap && window.refreshMap();")
+
+        # **DEBUG : logge la liste**
+        print(f"[DEBUG][MANUAL ADD] all available_airports now: {self.available_airports}")
+
+        QMessageBox.information(
+            self, "Airport added", f"Manual airport {icao} added to the available list."
+        )
+
+    def lookup_airport_csv(self, icao):
+        """Cherche un ICAO dans airports.csv, retourne un dict (name, lat, lon) ou None si non trouvé."""
+        icao = icao.strip().upper()
+        csv_path = self.airports_csv_path  # Adapte ici si variable différente !
+        if not os.path.isfile(csv_path):
+            return None
+        with open(csv_path, "r", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if row.get("icao", "").strip().upper() == icao:
+                    # Les clés exactes dépendent de ton CSV, adapte si besoin.
+                    name = row.get("name", "")
+                    try:
+                        lat = float(row.get("latitude", ""))
+                        lon = float(row.get("longitude", ""))
+                    except ValueError:
+                        lat = lon = None
+                    return {
+                        "name": name,
+                        "latitude": lat,
+                        "longitude": lon,
+                    }
+        return None
 
     def reset_all(self):
         # Recharge la VRAIE liste à partir du JSON/CSV (propre !)

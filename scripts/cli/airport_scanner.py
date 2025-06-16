@@ -30,6 +30,97 @@ except Exception:
     CUSTOM_AIRPORT_MAPPING = []
     print(f"[WARN] Fichier de mapping custom non trouvé : {CUSTOM_AIRPORT_MAP_PATH}")
 
+
+def extract_icao_from_folder_or_name(folder_name):
+    """
+    Extrait le premier code ICAO (4 lettres/nombres) juste après 'airport-' dans un nom de dossier ou manifest.
+    Exemple: 'fs24-microsoft-airport-cycg-castlegar,LEGA|EGAR|CYCG' -> 'CYCG'
+    """
+    import re
+
+    match = re.search(r"airport-([a-z0-9]{4})", folder_name, re.IGNORECASE)
+    if match:
+        return match.group(1).upper()
+    return None
+
+def extract_airport_info(manifest_path, icao_official):
+    """
+    Tente d’extraire l’ICAO et le nom à partir d’un manifest.json et applique le mapping custom si besoin.
+    Retourne (icao, name)
+    """
+    import json
+    import os
+
+    found_icao = None
+    name = None
+
+    if not os.path.exists(manifest_path):
+        print(f"[DEBUG] Manifest absent : {manifest_path}")
+        return None, None
+
+    try:
+        with open(manifest_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception as e:
+        print(f"[DEBUG] Erreur lecture manifest {manifest_path}: {e}")
+        return None, None
+
+    # 1. Recherche ICAO dans les champs classiques (standard)
+    # (ne pas toucher cette section si elle marche déjà)
+
+    # 2. Fallback: mapping custom (whitelist)
+    if not found_icao:
+        print(f"[DEBUG] Tentative mapping custom pour manifest: {manifest_path}")
+        print(f"[DEBUG] Data manifest: {data}")
+        if "creator" in data and "title" in data:
+            print(
+                f"[DEBUG] mapping custom: call avec creator={data['creator']} / title={data['title']}"
+            )
+            custom_icao = match_custom_mapping(data, CUSTOM_AIRPORT_MAPPING)
+            if custom_icao:
+                print(f"[DEBUG] [CUSTOM MATCH] ICAO forcé par mapping: {custom_icao}")
+                found_icao = custom_icao
+                name = data.get("title", "")
+            else:
+                print(
+                    f"[DEBUG] Aucun match mapping custom pour creator={data['creator']} / title={data['title']}"
+                )
+        else:
+            print(
+                "[DEBUG] Champ 'creator' ou 'title' manquant dans le manifest, mapping custom ignoré."
+            )
+
+    # 3. Fallback: Pattern ICAO dans le nom de fichier (ex: "airport-XXXX")
+    if not found_icao:
+        import re
+
+        # pattern: airport-XXXX ou fs24-microsoft-airport-XXXX-...
+        base_name = os.path.basename(os.path.dirname(manifest_path))
+        matches = re.findall(
+            r"(?:airport\-|^)([A-Z0-9]{4})(?:\-|$)", base_name, re.IGNORECASE
+        )
+        for candidate in matches:
+            if candidate.upper() in icao_official:
+                found_icao = candidate.upper()
+                print(
+                    f"[DEBUG] ICAO extrait via pattern 'airport-XXXX' ou nom dossier : {found_icao}"
+                )
+                name = data.get("title", "") or base_name
+                break
+
+    # 4. Fallback: Nom du dossier = ICAO
+    if not found_icao:
+        base_name = os.path.basename(os.path.dirname(manifest_path))
+        if len(base_name) == 4 and base_name.upper() in icao_official:
+            found_icao = base_name.upper()
+            print(f"[DEBUG] ICAO trouvé via nom de dossier simple : {found_icao}")
+            name = data.get("title", "") or base_name
+
+    if found_icao:
+        print(f"[DEBUG] ICAO FINAL retenu : {found_icao} pour {manifest_path}")
+
+    return found_icao, name
+
 def load_icao_dict_from_csv(csv_path):
     icao_dict = {}
     with open(csv_path, "r", encoding="utf-8") as f:
@@ -60,18 +151,21 @@ def load_icao_dict_from_csv(csv_path):
     return icao_dict
 
 def match_custom_mapping(data, mapping_list):
-    """
-    Tente de trouver un ICAO dans la table de mapping custom à partir des champs du manifest.
-    """
-    creator = data.get("creator", "").lower()
-    title = data.get("title", "").lower()
-    for mapping in mapping_list:
-        # On matche à la fois sur creator et sur title (substring autorisé)
-        if mapping["creator"] in creator and mapping["title"] in title:
+    creator = str(data.get("creator", "")).strip().lower()
+    title = str(data.get("title", "")).strip().lower()
+    print(f"[CUSTOM MATCH] manifest: creator='{creator}', title='{title}'")
+    for entry in mapping_list:
+        map_creator = entry.get("creator", "").strip().lower()
+        map_title = entry.get("title", "").strip().lower()
+        map_icao = entry.get("icao", "").strip().upper()
+        print(
+            f"[CUSTOM MATCH TEST] Est-ce que '{map_creator}' in '{creator}' AND '{map_title}' in '{title}' ?"
+        )
+        if map_creator in creator and map_title in title:
             print(
-                f"[SCAN] ICAO {mapping['icao']} forcé pour {creator}/{title} via mapping custom"
+                f"[CUSTOM MATCH] -> Match trouvé pour ICAO {map_icao} ({map_creator}/{map_title})"
             )
-            return mapping["icao"]
+            return map_icao
     return None
 
 def extract_airport_info(manifest_path, icao_official=None):
@@ -119,19 +213,56 @@ def extract_airport_info(manifest_path, icao_official=None):
             if found_icao:
                 return found_icao, found_icao
             if not found_icao and "creator" in data and "title" in data:
-                    custom_icao = match_custom_mapping(data, CUSTOM_AIRPORT_MAPPING)
-                    if custom_icao:
-                        found_icao = custom_icao
+                custom_icao = match_custom_mapping(data, CUSTOM_AIRPORT_MAPPING)
+                if custom_icao:
+                    found_icao = custom_icao
             if found_icao and name:
                 return found_icao, name
             if found_icao:
                 return found_icao, found_icao
-    
-    
-    
+
     except Exception:
         pass
     return None, None
+
+def find_icao_in_bgl(folder, icao_official, max_depth=3):
+    import os
+    import re
+
+    # RegEx pour détecter toute séquence de 4 lettres/numéros majuscules
+    icao_pattern = re.compile(rb"([A-Z0-9]{4})")
+
+    def scan_dir(current_folder, depth):
+        if depth < 0:
+            return None
+        for root, dirs, files in os.walk(current_folder):
+            for file in files:
+                if file.lower().endswith(".bgl"):
+                    bgl_path = os.path.join(root, file)
+                    try:
+                        with open(bgl_path, "rb") as f:
+                            data = f.read()
+                            for match in icao_pattern.finditer(data):
+                                possible_icao = match.group(1).decode(
+                                    "ascii", errors="ignore"
+                                )
+                                if possible_icao in icao_official:
+                                    print(
+                                        f"[BGL SCAN] ICAO détecté dans {bgl_path}: {possible_icao}"
+                                    )
+                                    return possible_icao
+                    except Exception as e:
+                        print(f"[BGL SCAN] Erreur lecture {bgl_path}: {e}")
+            # Ne pas descendre plus profond que max_depth
+            if depth > 0:
+                for subdir in dirs:
+                    subdir_path = os.path.join(root, subdir)
+                    found = scan_dir(subdir_path, depth - 1)
+                    if found:
+                        return found
+        return None
+
+    return scan_dir(folder, max_depth)
 
 def find_icao_in_content_info(directory, icao_official, max_depth=3):
     candidates = ["ContentHistory.json", "content_info.json", "contenthistory.json"]
@@ -188,6 +319,7 @@ def find_icao_in_bgl(directory, icao_official, max_depth=3):
 def scan_airports(directories, csv_path):
     import os
     import re
+    import json
 
     icao_dict = load_icao_dict_from_csv(csv_path)
     # On force les ICAO CSV en majuscule pour la recherche
@@ -269,23 +401,78 @@ def scan_airports(directories, csv_path):
                         sub_manifest = os.path.join(subitem_path, "manifest.json")
                         if os.path.exists(sub_manifest):
                             manifest_paths.append(sub_manifest)
+
                 found_icao, display_name = None, None
-                # Recherche ICAO dans manifest
-                for manifest_path in manifest_paths:
-                    icao, name = extract_airport_info(manifest_path, icao_official)
-                    if icao and icao.upper() in icao_official:
-                        found_icao = icao.upper()
-                        display_name = name
-                        break
-                # Fallback ICAO dans le nom du dossier si rien trouvé
-                if not found_icao:
-                    upper_item = item.upper()
-                    for known_icao in icao_official:
-                        if known_icao in upper_item:
-                            found_icao = known_icao
-                            display_name = item
+
+                # PATCH : PRIORITÉ ContentInfo/ContentHistory pour Community et AddonLinker
+                contentinfo_icao = None
+                contentinfo_path = os.path.join(item_path, "ContentInfo")
+                if os.path.isdir(contentinfo_path):
+                    for root, dirs, files in os.walk(contentinfo_path):
+                        for file in files:
+                            if file.lower() in [
+                                "contenthistory.json",
+                                "content-info.json",
+                            ]:
+                                contentinfo_file = os.path.join(root, file)
+                                try:
+                                    with open(contentinfo_file, encoding="utf-8") as f:
+                                        data = json.load(f)
+                                        # 1. MSFS2024 PAYWARE/Community: "items" list d’objets (type "airport")
+                                        if "items" in data and isinstance(
+                                            data["items"], list
+                                        ):
+                                            for entry in data["items"]:
+                                                if (
+                                                    entry.get("type", "").lower()
+                                                    == "airport"
+                                                    and "content" in entry
+                                                ):
+                                                    ci_icao = (
+                                                        entry["content"].strip().upper()
+                                                    )
+                                                    if (
+                                                        ci_icao
+                                                        and ci_icao in icao_official
+                                                    ):
+                                                        contentinfo_icao = ci_icao
+                                                        break
+                                        # 2. Certains ContentInfo.json => champ direct "content"
+                                        elif "content" in data:
+                                            ci_icao = (
+                                                str(data["content"]).strip().upper()
+                                            )
+                                            if ci_icao and ci_icao in icao_official:
+                                                contentinfo_icao = ci_icao
+                                except Exception as e:
+                                    print(
+                                        f"[DEBUG] Erreur lecture ContentInfo: {contentinfo_file}: {e}"
+                                    )
+                        if contentinfo_icao:
                             break
-                # Fallback ContentHistory/Info JSON récursif
+                if contentinfo_icao:
+                    found_icao = contentinfo_icao
+                    display_name = item
+
+                # Sinon, recherche ICAO dans manifest (fallback)
+                if not found_icao:
+                    for manifest_path in manifest_paths:
+                        icao, name = extract_airport_info(manifest_path, icao_official)
+                        if icao and icao.upper() in icao_official:
+                            found_icao = icao.upper()
+                            display_name = name
+                            break
+
+                # Fallback : pattern "airport-xxxx"
+                if not found_icao:
+                    found_icao = extract_icao_from_folder_or_name(item)
+                    if found_icao and found_icao.upper() in icao_official:
+                        print(
+                            f"[SCAN] ICAO extrait via pattern airport- : {found_icao}"
+                        )
+                        display_name = item
+
+                # Fallback ContentHistory/Info JSON récursif (pour Official/Streamed)
                 if not found_icao:
                     ch_icao = find_icao_in_content_info(
                         item_path, icao_official, max_depth=3
@@ -293,13 +480,15 @@ def scan_airports(directories, csv_path):
                     if ch_icao:
                         found_icao = ch_icao.upper()
                         display_name = item
+
                 # Fallback BGL récursif
                 if not found_icao:
                     bgl_icao = find_icao_in_bgl(item_path, icao_official, max_depth=3)
                     if bgl_icao:
                         found_icao = bgl_icao.upper()
                         display_name = item
-                # Final check
+
+                # Final check et ajout à la liste si tout est bon
                 if (
                     found_icao
                     and found_icao.upper() in icao_official
@@ -334,6 +523,9 @@ def scan_airports(directories, csv_path):
                         entry["longitude"] = lon
                     found_airports.append(entry)
                 else:
+                    print(
+                        f"\n[DEBUG] AUCUN ICAO trouvé pour le dossier : {item} (manifest(s) = {manifest_paths})\n"
+                    )
                     ignored.append(f"{found_icao if found_icao else item} ({item})")
 
     # PATCH ICAO UNIQUE – Garde un seul aéroport par ICAO
@@ -377,7 +569,6 @@ def save_results(results, filename):
     os.makedirs(RESULTS_DIR, exist_ok=True)
     with open(os.path.join(RESULTS_DIR, filename), "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
-
 
 if __name__ == "__main__":
     config = load_config()
