@@ -1,23 +1,482 @@
 [
     {
         "model": "A319",
+        "registration": "OE-LKF",
+        "company": "EasyJet Europe",
+        "icao": "EJU",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-319-easyJet-EJU-Y156-LKF\\SimObjects\\Airplanes\\FNX_319_CFM_EJU_LKF",
+        "iata": "U2",
+        "callsign": "Alpine"
+    },
+    {
+        "model": "A319",
+        "registration": "OE-LKY",
+        "company": "EasyJet Europe",
+        "icao": "EJU",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-319-easyJet-EJU-Y156-LKY\\SimObjects\\Airplanes\\FNX_319_CFM_EJU_LKY",
+        "iata": "U2",
+        "callsign": "Alpine"
+    },
+    {
+        "model": "A319",
+        "registration": "OE-LQB",
+        "company": "EasyJet Europe",
+        "icao": "EJU",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-319-easyJet-EJU-Y156-LQB\\SimObjects\\Airplanes\\FNX_319_CFM_EJU_LQB",
+        "iata": "U2",
+        "callsign": "Alpine"
+    },
+    {
+        "model": "A319",
+        "registration": "OE-LQW",
+        "company": "EasyJet Europe",
+        "icao": "EJU",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-319-easyJet-EJU-Y156-LQW\\SimObjects\\Airplanes\\FNX_319_CFM_EJU_LQW",
+        "iata": "U2",
+        "callsign": "Alpine"
+    },
+    {
+        "model": "A319",
         "registration": "F-GRHB",
         "company": "Air France",
         "icao": "AFR",
-        "engine_type": "CFM"
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-319-liveries\\SimObjects\\Airplanes\\FNX_319_CFM_AFRFGRHB",
+        "iata": "AF",
+        "callsign": "Airfrans"
+    },
+    {
+        "model": "A320",
+        "registration": "F-GKXC",
+        "company": "Air France",
+        "icao": "AFR",
+        "engine_type": "UNKNOWN",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-320 AF 2025 (F-GKXC) 4K\\SimObjects\\Airplanes\\fnx-320 V2 Air France 2025 4K",
+        "iata": "AF",
+        "callsign": "Airfrans"
+    },
+    {
+        "model": "A320",
+        "registration": "F-HEPG",
+        "company": "Air France",
+        "icao": "AFR",
+        "engine_type": "UNKNOWN",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-320 AF 2025 SL (F-HEPG) 4K\\SimObjects\\Airplanes\\fnx-320 V2 Air France 2025 SL 4K",
+        "iata": "AF",
+        "callsign": "Airfrans"
+    },
+    {
+        "model": "A320",
+        "registration": "SX-DNC",
+        "company": "AEGEAN",
+        "icao": "AEE",
+        "engine_type": "IAE",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-320-AEESXDNCCO\\SimObjects\\Airplanes\\FNX_320_IAE_SL_AEESXDNC"
+    },
+    {
+        "model": "A320",
+        "registration": "OE-ICF",
+        "company": "EasyJet Europe",
+        "icao": "EJU",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-320-easyJet-EJU-Y186-ICF\\SimObjects\\Airplanes\\FNX_320_CFM_EJU_ICF",
+        "iata": "U2",
+        "callsign": "Alpine"
+    },
+    {
+        "model": "A320",
+        "registration": "OE-ICK",
+        "company": "EasyJet Europe",
+        "icao": "EJU",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-320-easyJet-EJU-Y186-ICK\\SimObjects\\Airplanes\\FNX_320_CFM_EJU_ICK",
+        "iata": "U2",
+        "callsign": "Alpine"
+    },
+    {
+        "model": "A320",
+        "registration": "OE-ICN",
+        "company": "EasyJet Europe",
+        "icao": "EJU",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-320-easyJet-EJU-Y186-ICN\\SimObjects\\Airplanes\\FNX_320_CFM_EJU_ICN",
+        "iata": "U2",
+        "callsign": "Alpine"
+    },
+    {
+        "model": "A320",
+        "registration": "OE-IJB",
+        "company": "EasyJet Europe",
+        "icao": "EJU",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-320-easyJet-EJU-Y186-IJB\\SimObjects\\Airplanes\\FNX_320_CFM_EJU_IJB",
+        "iata": "U2",
+        "callsign": "Alpine"
+    },
+    {
+        "model": "A320",
+        "registration": "OE-IJK",
+        "company": "EasyJet Europe",
+        "icao": "EJU",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-320-easyJet-EJU-Y186-IJK\\SimObjects\\Airplanes\\FNX_320_CFM_EJU_IJK",
+        "iata": "U2",
+        "callsign": "Alpine"
+    },
+    {
+        "model": "A320",
+        "registration": "OE-IJZ",
+        "company": "EasyJet Europe",
+        "icao": "EJU",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-320-easyJet-EJU-Y186-IJZ\\SimObjects\\Airplanes\\FNX_320_CFM_EJU_IJZ",
+        "iata": "U2",
+        "callsign": "Alpine"
+    },
+    {
+        "model": "A320",
+        "registration": "OE-IZF",
+        "company": "EasyJet Europe",
+        "icao": "EJU",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-320-easyJet-EJU-Y186-IZF\\SimObjects\\Airplanes\\FNX_320_CFM_EJU_IZF",
+        "iata": "U2",
+        "callsign": "Alpine"
+    },
+    {
+        "model": "A320",
+        "registration": "OE-IZG",
+        "company": "EasyJet Europe",
+        "icao": "EJU",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-320-easyJet-EJU-Y186-IZG\\SimObjects\\Airplanes\\FNX_320_CFM_EJU_IZG",
+        "iata": "U2",
+        "callsign": "Alpine"
+    },
+    {
+        "model": "A320",
+        "registration": "OE-IZH",
+        "company": "EasyJet Europe",
+        "icao": "EJU",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-320-easyJet-EJU-Y186-IZH\\SimObjects\\Airplanes\\FNX_320_CFM_EJU_IZH",
+        "iata": "U2",
+        "callsign": "Alpine"
+    },
+    {
+        "model": "A320",
+        "registration": "OE-IZJ",
+        "company": "EasyJet Europe",
+        "icao": "EJU",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-320-easyJet-EJU-Y186-IZJ\\SimObjects\\Airplanes\\FNX_320_CFM_EJU_IZJ",
+        "iata": "U2",
+        "callsign": "Alpine"
+    },
+    {
+        "model": "A320",
+        "registration": "OE-IZL",
+        "company": "EasyJet Europe",
+        "icao": "EJU",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-320-easyJet-EJU-Y186-IZL\\SimObjects\\Airplanes\\FNX_320_CFM_EJU_IZL",
+        "iata": "U2",
+        "callsign": "Alpine"
+    },
+    {
+        "model": "A320",
+        "registration": "OE-IZN",
+        "company": "EasyJet Europe",
+        "icao": "EJU",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-320-easyJet-EJU-Y186-IZN\\SimObjects\\Airplanes\\FNX_320_CFM_EJU_IZN",
+        "iata": "U2",
+        "callsign": "Alpine"
+    },
+    {
+        "model": "A320",
+        "registration": "OE-IZQ",
+        "company": "EasyJet Europe",
+        "icao": "EJU",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-320-easyJet-EJU-Y186-IZQ\\SimObjects\\Airplanes\\FNX_320_CFM_EJU_IZQ",
+        "iata": "U2",
+        "callsign": "Alpine"
+    },
+    {
+        "model": "A320",
+        "registration": "HB-JXN",
+        "company": "EasyJet Switzerland",
+        "icao": "EZS",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-320-easyJet-EZS-Y186-JXN\\SimObjects\\Airplanes\\FNX_320_CFM_EZS_JXN",
+        "iata": "U2",
+        "callsign": "Top Swiss"
+    },
+    {
+        "model": "A320",
+        "registration": "HB-JXQ",
+        "company": "EasyJet Switzerland",
+        "icao": "EZS",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-320-easyJet-EZS-Y186-JXQ\\SimObjects\\Airplanes\\FNX_320_CFM_EZS_JXQ",
+        "iata": "U2",
+        "callsign": "Top Swiss"
+    },
+    {
+        "model": "A320",
+        "registration": "HB-JXS",
+        "company": "EasyJet Switzerland",
+        "icao": "EZS",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-320-easyJet-EZS-Y186-JXS\\SimObjects\\Airplanes\\FNX_320_CFM_EZS_JXS",
+        "iata": "U2",
+        "callsign": "Top Swiss"
+    },
+    {
+        "model": "A320",
+        "registration": "HB-JXV",
+        "company": "EasyJet Switzerland",
+        "icao": "EZS",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-320-easyJet-EZS-Y186-JXV\\SimObjects\\Airplanes\\FNX_320_CFM_EZS_JXV",
+        "iata": "U2",
+        "callsign": "Top Swiss"
+    },
+    {
+        "model": "A320",
+        "registration": "OE-INM",
+        "company": "EasyJet Europe",
+        "icao": "EJU",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-320-easyJet-EZY-Y186-INM\\SimObjects\\Airplanes\\FNX_320_CFM_EJU_INM",
+        "iata": "U2",
+        "callsign": "Alpine"
+    },
+    {
+        "model": "A320",
+        "registration": "G-EZOF",
+        "company": "EasyJet UK",
+        "icao": "EZY",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-320-easyJet-EZY-Y186-ZOF\\SimObjects\\Airplanes\\FNX_320_CFM_EZY_ZOF",
+        "iata": "U2",
+        "callsign": "Easy"
+    },
+    {
+        "model": "A320",
+        "registration": "G-EZRZ",
+        "company": "EasyJet UK",
+        "icao": "EZY",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-320-easyJet-EZY-Y186-ZRZ\\SimObjects\\Airplanes\\FNX_320_CFM_EZY_ZRZ",
+        "iata": "U2",
+        "callsign": "Easy"
+    },
+    {
+        "model": "A320",
+        "registration": "G-EZWH",
+        "company": "EasyJet UK",
+        "icao": "EZY",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-320-easyJet-EZY-Y186-ZWH\\SimObjects\\Airplanes\\FNX_320_CFM_EZY_ZWH",
+        "iata": "U2",
+        "callsign": "Easy"
     },
     {
         "model": "A320",
         "registration": "F-GKXS",
         "company": "Air France",
         "icao": "AFR",
-        "engine_type": "CFM"
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-320-liveries\\SimObjects\\Airplanes\\FNX_320_CFM_AFRFGKXS",
+        "iata": "AF",
+        "callsign": "Airfrans"
+    },
+    {
+        "model": "A320",
+        "registration": "G-EZOA",
+        "company": "EasyJet UK",
+        "icao": "EZY",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-320-liveries\\SimObjects\\Airplanes\\FNX_320_CFM_SL_EZYGEZOA",
+        "iata": "U2",
+        "callsign": "Easy"
+    },
+    {
+        "model": "A321",
+        "registration": "SX-DGA",
+        "company": "AEGEAN",
+        "icao": "AEE",
+        "engine_type": "IAE",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-321-AEESXDGACO\\SimObjects\\Airplanes\\FNX_321_IAE_AEESXDGA"
+    },
+    {
+        "model": "A321",
+        "registration": "SX-DNH",
+        "company": "AEGEAN",
+        "icao": "AEE",
+        "engine_type": "IAE",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-321-AEESXDNHCO\\SimObjects\\Airplanes\\FNX_321_IAE_AEESXDNH"
+    },
+    {
+        "model": "A321",
+        "registration": "SX-DVZ",
+        "company": "AEGEAN",
+        "icao": "AEE",
+        "engine_type": "IAE",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-321-AEESXDVZCO\\SimObjects\\Airplanes\\FNX_321_IAE_AEESXDVZ"
+    },
+    {
+        "model": "A321",
+        "registration": "SX-DNG",
+        "company": "AEGEAN",
+        "icao": "AEE",
+        "engine_type": "IAE",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-321-Aegean-SX-DNG\\SimObjects\\Airplanes\\FNX_321_IAE_AEE_SXDNG"
+    },
+    {
+        "model": "A321",
+        "registration": "D-AIAA",
+        "company": "Condor",
+        "icao": "CFG",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-321-CFGDAIAA_JK_4K\\SimObjects\\Airplanes\\FNX_321_CFM_SL_CFGDAIAA_JK_4K",
+        "iata": "DE",
+        "callsign": "Condor"
+    },
+    {
+        "model": "A321",
+        "registration": "D-AIAB",
+        "company": "Condor",
+        "icao": "CFG",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-321-CFGDAIAB_JK_4K\\SimObjects\\Airplanes\\FNX_321_CFM_SL_CFGDAIAB_JK_4K",
+        "iata": "DE",
+        "callsign": "Condor"
+    },
+    {
+        "model": "A321",
+        "registration": "D-AIAC",
+        "company": "Condor",
+        "icao": "CFG",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-321-CFGDAIAC_JK_4K\\SimObjects\\Airplanes\\FNX_321_CFM_SL_CFGDAIAC_JK_4K",
+        "iata": "DE",
+        "callsign": "Condor"
+    },
+    {
+        "model": "A321",
+        "registration": "D-AIAD",
+        "company": "Condor",
+        "icao": "CFG",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-321-CFGDAIAD_JK_4K\\SimObjects\\Airplanes\\FNX_321_CFM_SL_CFGDAIAD_JK_4K",
+        "iata": "DE",
+        "callsign": "Condor"
+    },
+    {
+        "model": "A321",
+        "registration": "D-AIAF",
+        "company": "Condor",
+        "icao": "CFG",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-321-CFGDAIAF_JK_4K\\SimObjects\\Airplanes\\FNX_321_CFM_SL_CFGDAIAF_JK_4K",
+        "iata": "DE",
+        "callsign": "Condor"
+    },
+    {
+        "model": "A321",
+        "registration": "D-AIAG",
+        "company": "Condor",
+        "icao": "CFG",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-321-CFGDAIAG_JK_4K\\SimObjects\\Airplanes\\FNX_321_CFM_SL_CFGDAIAG_JK_4K",
+        "iata": "DE",
+        "callsign": "Condor"
+    },
+    {
+        "model": "A321",
+        "registration": "D-AIAI",
+        "company": "Condor",
+        "icao": "CFG",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-321-CFGDAIAI_JK_4K\\SimObjects\\Airplanes\\FNX_321_CFM_SL_CFGDAIAI_JK_4K",
+        "iata": "DE",
+        "callsign": "Condor"
+    },
+    {
+        "model": "A321",
+        "registration": "D-AIAS",
+        "company": "Condor",
+        "icao": "CFG",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-321-CFGDAIAS_JK_4K\\SimObjects\\Airplanes\\FNX_321_CFM_SL_CFGDAIAS_JK_4K",
+        "iata": "DE",
+        "callsign": "Condor"
+    },
+    {
+        "model": "A321",
+        "registration": "D-ATCA",
+        "company": "Condor",
+        "icao": "CFG",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-321-CFGDATCA_JK_4K\\SimObjects\\Airplanes\\FNX_321_CFM_CFGDATCA_JK_4K",
+        "iata": "DE",
+        "callsign": "Condor"
+    },
+    {
+        "model": "A321",
+        "registration": "D-ATCB",
+        "company": "Condor",
+        "icao": "CFG",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-321-CFGDATCB_JK_4K\\SimObjects\\Airplanes\\FNX_321_CFM_SL_CFGDATCB_JK_4K",
+        "iata": "DE",
+        "callsign": "Condor"
+    },
+    {
+        "model": "A321",
+        "registration": "D-ATTC",
+        "company": "Condor",
+        "icao": "CFG",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-321-CFGDATCC_JK_4K\\SimObjects\\Airplanes\\FNX_321_CFM_SL_CFGDATCC_JK_4K",
+        "iata": "DE",
+        "callsign": "Condor"
+    },
+    {
+        "model": "A321",
+        "registration": "D-ATCF",
+        "company": "Condor",
+        "icao": "CFG",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-321-CFGDATCF_JK_4K\\SimObjects\\Airplanes\\FNX_321_CFM_SL_CFGDATCF_JK_4K",
+        "iata": "DE",
+        "callsign": "Condor"
+    },
+    {
+        "model": "A321",
+        "registration": "D-ATCG",
+        "company": "Condor",
+        "icao": "CFG",
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-321-CFGDATCG_JK_4K\\SimObjects\\Airplanes\\FNX_321_CFM_SL_CFGDATCG_JK_4K",
+        "iata": "DE",
+        "callsign": "Condor"
     },
     {
         "model": "A321",
         "registration": "F-GTAT",
         "company": "Air France",
         "icao": "AFR",
-        "engine_type": "CFM"
+        "engine_type": "CFM",
+        "path": "C:/Users/Bertrand/AppData/Local/Packages/Microsoft.Limitless_8wekyb3d8bbwe/LocalCache/Packages/Community\\fnx-aircraft-321-liveries\\SimObjects\\Airplanes\\FNX_321_CFM_AFRFGTAT",
+        "iata": "AF",
+        "callsign": "Airfrans"
     }
 ]

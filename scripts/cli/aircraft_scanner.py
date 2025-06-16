@@ -1,13 +1,12 @@
 import sys
 import os
+import csv
+import json
 
-# Ajoute le dossier utils pour l'import du config_helper
 sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "utils"))
 )
 from config_helper import load_config
-
-import json
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 RESULTS_DIR = os.path.join(BASE_DIR, "results")
@@ -28,6 +27,7 @@ def parse_aircraft_cfg(cfg_path):
     company = ""
     icao = ""
     model = ""
+    callsign = ""
     with open(cfg_path, "r", encoding="utf-8", errors="ignore") as f:
         lines = f.readlines()
     in_flight_sim = False
@@ -53,41 +53,173 @@ def parse_aircraft_cfg(cfg_path):
                     model = "A320"
                 elif "A321" in value.upper():
                     model = "A321"
-    return registration, company, icao, model
+            elif key == "atc_flight_number":
+                callsign = value
+    return registration, company, icao, model, callsign
 
 
-def scan_fenix_aircraft(community_path):
-    liveries_folders = [
-        "fnx-aircraft-319-liveries",
-        "fnx-aircraft-320-liveries",
-        "fnx-aircraft-321-liveries",
+def load_callsign_dict(csv_path):
+    callsign_dict = {}
+    with open(csv_path, encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            # Stocke par ICAO (toujours en majuscule)
+            icao = row.get("ICAO", "").upper()
+            if icao:
+                callsign_dict[icao] = {
+                    "callsign": row.get("Callsign", "").title(),
+                    "company": row.get("Companyname", ""),
+                    "iata": row.get("IATA", ""),
+                }
+    return callsign_dict
+
+
+def normalize_registration(registration, company, icao_code):
+    # Correction spéciale Aegean "SXDDNH" => "SX-DNH"
+    if registration:
+        reg = registration.upper().replace("-", "")
+        if reg.startswith("SXD") and len(reg) == 6:
+            return "SX-" + reg[3:]
+        if reg.startswith("SX") and len(reg) == 5:
+            return "SX-" + reg[2:]
+    return registration
+
+
+def get_callsign_for_company(company, icao, airline_callsign_map):
+    company_clean = (company or "").strip().lower()
+    icao_clean = (icao or "").strip().upper()
+    for entry in airline_callsign_map:
+        if entry["ICAO"].upper() == icao_clean:
+            return entry["Callsign"]
+    for entry in airline_callsign_map:
+        if entry["Companyname"].lower() == company_clean:
+            return entry["Callsign"]
+    return None
+
+
+def is_fenix_stock_livery(entry):
+    """
+    Renvoie True si cette entrée correspond à une livrée 'maison' Fenix à exclure.
+    On identifie :
+        - Company == "Fenix" ou "Unknown" ou "Default" ou "Asobo" ou "FBW"
+        - Registration dans la liste des stocks connus
+        - Le chemin contient fnx-aircraft-319-321 (ou variantes), sans -liveries
+    """
+    stock_registrations = {
+        "G-FBIG",
+        "G-FENX",
+        "G-SMOL",
+        "G-FENY",
+        "G-FENZ",
+        "G-FENW",
+        "OE-LWF",
+        # Ajoute d'autres si tu veux être exhaustif sur les registrations maison Phoenix
+    }
+    stock_companies = {"fenix", "asobo", "fbw", "unknown", "default"}
+    registration = (entry.get("registration") or "").upper()
+    company = (entry.get("company") or "").lower()
+    path = (entry.get("path") or "").replace("\\", "/").lower()
+    # Exclusion stricte sur le dossier
+    if "fnx-aircraft-319-321" in path and "-liveries" not in path:
+        return True
+    # Exclusion stricte sur company
+    if company in stock_companies:
+        return True
+    # Exclusion stricte sur registration
+    if registration in stock_registrations:
+        return True
+    # Exclusion si modèle mais pas de compagnie, registration ou path douteux
+    return False
+
+
+def scan_all_aircraft(community_path):
+    blacklist = [
+        "fsltl",
+        "aig-",
+        "ivao-",
+        "traffic",
+        "ai-",
+        "bgl",
+        "statics",
+        "simple aircraft",
+        "justflight-traffic",
     ]
+    strict_blacklist = [
+        "fnx-aircraft-319",
+        "fnx-aircraft-320",
+        "fnx-aircraft-321",
+    ]
+    callsign_csv = os.path.join("data", "airline_callsign_full.csv")
+    callsign_dict = load_callsign_dict(callsign_csv)
+
     results = []
-    for folder in liveries_folders:
-        full_livery_path = os.path.join(community_path, folder)
-        simobjects_path = os.path.join(full_livery_path, "SimObjects", "Airplanes")
-        if not os.path.isdir(simobjects_path):
+    for item in os.listdir(community_path):
+        lower_item = item.lower()
+        if lower_item in strict_blacklist or any(kw in lower_item for kw in blacklist):
+            print(f"[EXCLU] {item} (blacklist)")
             continue
-        for livery_folder in os.listdir(simobjects_path):
-            livery_path = os.path.join(simobjects_path, livery_folder)
+        addon_path = os.path.join(community_path, item)
+        if not os.path.isdir(addon_path):
+            continue
+        simobj_base = os.path.join(addon_path, "SimObjects", "Airplanes")
+        if not os.path.isdir(simobj_base):
+            continue
+        for livery_folder in os.listdir(simobj_base):
+            livery_path = os.path.join(simobj_base, livery_folder)
             if not os.path.isdir(livery_path):
                 continue
             aircraft_cfg = os.path.join(livery_path, "aircraft.cfg")
             if not os.path.isfile(aircraft_cfg):
                 continue
-            registration, company, icao, model = parse_aircraft_cfg(aircraft_cfg)
+            registration, company, icao, model, callsign = parse_aircraft_cfg(
+                aircraft_cfg
+            )
             engine_type = guess_engine_type(livery_folder)
-            if registration and model:
-                results.append(
-                    {
-                        "model": model,
-                        "registration": registration,
-                        "company": company if company else "UNKNOWN",
-                        "icao": icao if icao else "UNKNOWN",
-                        "engine_type": engine_type,
-                    }
-                )
-    return results
+            entry = {
+                "model": model,
+                "registration": registration,
+                "company": company if company else "UNKNOWN",
+                "icao": icao if icao else "UNKNOWN",
+                "engine_type": engine_type,
+                "path": livery_path,
+            }
+            # Ajoute callsign et remplit les infos compagnie depuis le CSV si possible
+            if icao and icao.upper() in callsign_dict:
+                cdata = callsign_dict[icao.upper()]
+                entry["company"] = cdata["company"]
+                entry["icao"] = icao.upper()
+                entry["iata"] = cdata["iata"]
+                entry["callsign"] = cdata["callsign"]
+            elif callsign:
+                entry["callsign"] = callsign
+            results.append(entry)
+    # -- Patch registration/callsign via CSV --
+    airline_callsign_path = "data/airline_callsign_full.csv"
+    airline_callsign_map = []
+    with open(airline_callsign_path, encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        airline_callsign_map = sorted(
+            [row for row in reader], key=lambda x: x["Companyname"]
+        )
+    for entry in results:
+        reg = entry.get("registration")
+        company = entry.get("company")
+        icao = entry.get("icao")
+        # Patch registration (ex: SX-DNH pour Aegean, etc.)
+        entry["registration"] = normalize_registration(reg, company, icao)
+        # Patch callsign (CSV prioritaire)
+        callsign_csv = get_callsign_for_company(company, icao, airline_callsign_map)
+        if callsign_csv:
+            entry["callsign"] = callsign_csv
+
+    # -- Exclusion des livrées Fenix de base --
+    results_clean = []
+    for entry in results:
+        if is_fenix_stock_livery(entry):
+            print(f"[EXCLU][STOCK] {entry.get('registration')} / {entry.get('path')}")
+            continue
+        results_clean.append(entry)
+    return results_clean
 
 
 def save_results(results, filename):
@@ -102,9 +234,8 @@ if __name__ == "__main__":
     if not community_path or not os.path.isdir(community_path):
         print("[ERREUR] Chemin Community non défini ou invalide dans la config !")
         sys.exit(1)
-    results = scan_fenix_aircraft(community_path)
+    results = scan_all_aircraft(community_path)
     save_results(results, "aircraft_scanresults.json")
     print("[Scanner] Fichier JSON généré avec succès : aircraft_scanresults.json")
     print()
-    print("[INFO] Pensez à choisir manuellement l'Airframe dans SimBrief :")
-    print("→ Fenix Simulations (MSFS) - A319/A320/A321 CFM selon le modèle")
+    print("[INFO] Avions scannés dans tous les dossiers Community (A319/A320/A321)")
