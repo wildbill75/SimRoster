@@ -2,8 +2,14 @@ import sys
 import os
 import csv
 import json
+import random
+import locale
+import datetime
+import re
 import subprocess
 import threading
+import pytz  # pip install pytz
+import time
 from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -33,7 +39,17 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWebChannel import QWebChannel
 from PyQt5.QtGui import QPixmap
-import time
+from datetime import datetime
+from scripts.gui.flight_card import Ui_FlightCardDialog
+from datetime import datetime, timezone
+
+
+# À personnaliser selon ton arborescence locale
+aircraft_img_dir = r"C:\Users\Bertrand\Documents\SimRoster\images\aircraft"
+company_img_dir = r"C:\Users\Bertrand\Documents\SimRoster\images\company"
+callsign_csv_path = (r"C:\Users\Bertrand\Documents\SimRoster\data\airline_callsign_full.csv")
+airports_csv_path = r"C:\Users\Bertrand\Documents\SimRoster\data\airports.csv"
+gates_csv_path = r"C:\Users\Bertrand\Documents\SimRoster\data\airport_gates_db.csv"
 
 
 CONFIG_PATH = "data/settings_paths.json"
@@ -107,7 +123,345 @@ PANEL_STYLESHEET = """
         min-width: 120px;
     }
 """
+CALLSIGN_MAP = {}  # ICAO compagnie → {company, callsign, iata}
+AIRPORTS_CSV = {}  # ICAO airport → dict row
+AIRPORT_GATES = {}  # (ICAO airport, ICAO compagnie) → list of gates
+STYLE_FLIGHTCARD = """
+QDialog {
+    background: #23252b;
+    border-radius: 24px;
+}
 
+QGroupBox {
+    border: none;
+    background: transparent;
+    margin: 0;
+    padding: 0;
+}
+
+/* "Card" visuelle sur chaque bloc départ/arrivée */
+QGroupBox#BOXDEP, QGroupBox#BOXARR {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #1d2240, stop:1 #232740);
+    border-radius: 18px;
+    margin: 0 14px 24px 14px;
+    padding: 22px 20px 10px 20px;
+    min-width: 320px;
+    max-width: 440px;
+    border: 2px solid #3551a3;
+}
+
+QLabel {
+    color: #ecedf3;
+    font-size: 13px;
+    background: transparent;
+    letter-spacing: 0.5px;
+}
+
+QLabel[objectName="DEPICAO"], QLabel[objectName="ARRICAO"] {
+    color: #fff;
+    background: #3060ff;
+    border-radius: 10px;
+    font-size: 22px;
+    font-weight: bold;
+    padding: 6px 24px;
+    margin-bottom: 10px;
+    border: 2px solid #173080;
+    text-align: center;
+}
+
+QLabel[objectName="DEPNAME"], QLabel[objectName="ARRNAME"] {
+    color: #a1d0ff;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+}
+
+QLabel[objectName="DEPDATE"], QLabel[objectName="ARRDATE"] {
+    color: #ffe36e;
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+/* Horaires - style pour tous les labels "class=timeblock" */
+QLabel[class="timeblock"] {
+    color: #fff;
+    font-size: 11px;
+    font-weight: 500;
+    margin: 2px 0 2px 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    text-align: center;
+}
+
+/* Badges GATE */
+QLabel[objectName="DEPNUMBER"], QLabel[objectName="ARRNUMB"] {
+    color: #23252b;
+    background: #ffe36e;
+    border-radius: 10px;
+    font-weight: 900;
+    font-size: 24px;
+    padding: 2px 18px 2px 18px;
+    margin: 7px 0 7px 0;
+    border: 2px solid #dac030;
+    min-width: 0;
+    text-align: center;
+}
+
+/* Champs techniques alignés à gauche */
+QLabel[objectName="TYPE"], QLabel[objectName="MODEL"], QLabel[objectName="REGNUMBER"], QLabel[objectName="FLTNUMBER"], QLabel[objectName="CALNUMB"] {
+    color: #d5d8ff;
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    margin-bottom: 3px;
+    qproperty-alignment: 'AlignLeft';
+}
+
+/* Boutons */
+QPushButton, QDialogButtonBox QPushButton {
+    background-color: #2d5be7;
+    color: white;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 8px 28px;
+    margin: 8px 18px 8px 18px;
+    box-shadow: 0 2px 10px #193ca055;
+}
+QPushButton:hover, QDialogButtonBox QPushButton:hover {
+    background-color: #183060;
+    color: #ffe36e;
+}
+"""
+
+
+# --- LOADERS ---
+
+def load_callsign_map(path):
+    global CALLSIGN_MAP
+    with open(path, newline="", encoding="utf-8") as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            icao = row["ICAO"].strip().upper()
+            CALLSIGN_MAP[icao] = {
+                "company": row["Companyname"].strip(),
+                "callsign": row["Callsign"].strip().upper(),
+                "iata": row["IATA"].strip().upper(),
+            }
+
+def load_airports_csv(path):
+    global AIRPORTS_CSV
+    with open(path, newline="", encoding="utf-8") as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            icao = row["icao"].strip().upper()
+            AIRPORTS_CSV[icao] = row
+
+def load_airport_gates_csv(path):
+    global AIRPORT_GATES
+    with open(path, newline="", encoding="utf-8") as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            icao = row["icao"].strip().upper()
+            airline_icao = row["airline_icao"].strip().upper()
+            gates = [g.strip() for g in row["gates"].split("|") if g.strip()]
+            AIRPORT_GATES[(icao, airline_icao)] = gates
+
+# --- À APPELER UNE FOIS AU LANCEMENT ---
+load_callsign_map(callsign_csv_path)
+load_airports_csv(airports_csv_path)
+load_airport_gates_csv(gates_csv_path)
+
+
+def parse_iso_datetime(iso_string):
+    try:
+        if iso_string.endswith("Z"):
+            iso_string = iso_string[:-1]
+        dt = datetime.fromisoformat(iso_string)
+        dt = dt.replace(tzinfo=timezone.utc)
+        return dt
+    except Exception as e:
+        print(f"[WARN] Erreur parsing datetime : {iso_string} ({e})")
+        return None
+
+
+def format_date_localized(dt, lang="fr"):
+    days_fr = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
+    months_fr = [
+        "janvier",
+        "février",
+        "mars",
+        "avril",
+        "mai",
+        "juin",
+        "juillet",
+        "août",
+        "septembre",
+        "octobre",
+        "novembre",
+        "décembre",
+    ]
+    days_en = [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
+    ]
+    months_en = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+    ]
+
+    if not dt:
+        return ""
+    weekday = dt.weekday()
+    day = dt.day
+    month = dt.month
+    year = dt.year
+
+    if lang == "fr":
+        return f"{days_fr[weekday]} {day} {months_fr[month-1]} {year}"
+    else:
+        return f"{days_en[weekday]} {months_en[month-1]} {day}, {year}"
+
+def format_hour_utc_local(dt, tz_name, lang="fr"):
+    if not dt:
+        return ""
+    try:
+        tz = pytz.timezone(tz_name)
+        local_dt = dt.astimezone(tz)
+    except Exception as e:
+        print(f"[WARN] Erreur sur conversion tz : {tz_name} ({e})")
+        local_dt = dt
+    if lang == "fr":
+        fmt_utc = dt.strftime("%H:%M").replace(":", "H")
+        fmt_local = local_dt.strftime("%H:%M").replace(":", "H")
+        return f"UTC : {fmt_utc} - LOCAL : {fmt_local}"
+    else:
+        fmt_utc = dt.strftime("%I:%M %p").lstrip("0").replace(":", "H")
+        fmt_local = local_dt.strftime("%I:%M %p").lstrip("0").replace(":", "H")
+        return f"UTC: {fmt_utc} - LOCAL: {fmt_local}"
+
+def get_actual_or_scheduled_time(flight_data, scheduled_key, actual_key):
+    actual = flight_data.get(actual_key, "")
+    scheduled = flight_data.get(scheduled_key, "")
+    if actual and actual != scheduled:
+        return actual, True
+    return scheduled, False
+
+def clean_airport_name(raw_name):
+    if not raw_name:
+        return ""
+    suffixes = [
+        "International Airport",
+        "Aéroport International",
+        "Aéroport",
+        "Airport",
+        "Aeropuerto",
+        "Aeroporto",
+        "Flughafen",
+        "Aeroport",
+        "Aerodrome",
+        "Terminal",
+        "Regional",
+        "National",
+        "Municipal",
+    ]
+    name = raw_name
+    name = re.sub(r"\(.*?\)", "", name).strip()
+    name = name.split("–")[0].split("-")[0].strip()
+    for suffix in suffixes:
+        if name.lower().endswith(suffix.lower()):
+            name = name[: -len(suffix)].strip()
+    if len(name) > 32:
+        name = name.split()[0]
+    return name
+
+def get_city_airport_display(city, airport_name):
+    city = city or ""
+    airport_clean = clean_airport_name(airport_name)
+    if city and airport_clean:
+        return f"{city} – {airport_clean}"
+    elif city:
+        return city
+    elif airport_clean:
+        return airport_clean
+    return "Unknown"
+
+def get_company_name(flight_data):
+    company_name = flight_data.get("airline_name", "")
+    if company_name:
+        return company_name
+    airline_icao = flight_data.get("airline_icao", "")
+    if airline_icao and airline_icao in CALLSIGN_MAP:
+        return CALLSIGN_MAP[airline_icao]["company"]
+    flight_number = flight_data.get("flight_number", "")
+    if flight_number and len(flight_number) > 2:
+        prefix_guess = flight_number[:2].upper()
+        for icao, data in CALLSIGN_MAP.items():
+            if data["iata"] == prefix_guess:
+                return data["company"]
+    return "Unknown"
+
+def get_flight_callsign(flight_data):
+    callsign = flight_data.get("callsign", "")
+    if callsign:
+        airline_icao = flight_data.get("airline_icao", "")
+        if not airline_icao and len(callsign) > 3:
+            airline_icao = callsign[:3].upper()
+        company_name = CALLSIGN_MAP.get(airline_icao, {}).get("company", "")
+        if company_name:
+            return f"{callsign} / {company_name}"
+        else:
+            return callsign
+    flight_number = flight_data.get("flight_number", "")
+    airline_icao = flight_data.get("airline_icao", "")
+    if not airline_icao:
+        if flight_number and len(flight_number) > 2:
+            prefix_guess = flight_number[:2].upper()
+            for icao, data in CALLSIGN_MAP.items():
+                if data["iata"] == prefix_guess:
+                    airline_icao = icao
+                    break
+    if airline_icao and flight_number:
+        number_part = flight_number
+        if number_part.upper().startswith(airline_icao):
+            number_part = number_part[len(airline_icao) :]
+        callsign_code = f"{airline_icao}{number_part}"
+        company_name = CALLSIGN_MAP.get(airline_icao, {}).get("company", "")
+        if company_name:
+            return f"{callsign_code} / {company_name}"
+        else:
+            return callsign_code
+    return "Unknown"
+
+def registration_image_filename(registration):
+    return f"{registration.upper()}.png"
+
+def company_logo_filename(company_name):
+    return company_name.lower().replace(" ", "-") + ".png"
+
+def pick_gate(icao, airline_icao):
+    gates = AIRPORT_GATES.get((icao.upper(), airline_icao.upper()), [])
+    if gates:
+        return random.choice(gates)
+    return "Unknown"
 
 def run_airport_scan(progress_callback=None):
     # -- Lancement SYNCHRONE du scanner (bloque jusqu’à la fin)
@@ -1525,6 +1879,7 @@ class FlightPlanningPanel(QWidget):
         # -- Search Button
         btn_row = QHBoxLayout()
         self.btn_search = QPushButton("Search real flights")
+        self.btn_search.clicked.connect(self.search_real_flights)
         self.btn_search.setStyleSheet(
             "background: #88C070; color: #111; font-weight: 600; font-size: 15px; "
             "border-radius: 8px; padding: 12px 32px; min-width: 200px;"
@@ -1553,6 +1908,8 @@ class FlightPlanningPanel(QWidget):
         # -- Connect logic
         self.btn_search.clicked.connect(self.search_real_flights)
         self.aircraft_combo.currentIndexChanged.connect(self.sync_company_from_aircraft)
+
+        self.flights_list.itemDoubleClicked.connect(self.show_flight_details)
 
     def refresh_panel(self):
         """Reload les combos à partir des JSON de sélection."""
@@ -1645,16 +2002,238 @@ class FlightPlanningPanel(QWidget):
                         self.company_combo.setCurrentIndex(idx_company)
 
     def search_real_flights(self):
-        # TODO: Intégrer la vraie logique FR24 mock + filtrage sur le pool sélectionné
         self.flights_list.clear()
-        # Dummy result list
-        self.flights_list.addItem("AF1234 | LFPO → LFMN | Dep 08:30 | Arr 09:55")
-        self.flights_list.addItem("EZY8876 | LFPO → LFMN | Dep 10:40 | Arr 12:10")
-        self.flights_list.addItem("VY5022 | LFMN → LFPO | Dep 13:05 | Arr 14:45")
-        # Message box de debug, à retirer plus tard
-        QMessageBox.information(
-            self, "Results", "Dummy flight results populated. Replace with real data."
+
+        # --- Récupère les sélections dans l'UI ---
+        aircraft_label = self.aircraft_combo.currentText()
+        dep_label = self.dep_combo.currentText()
+        arr_label = self.arr_combo.currentText()
+        company_label = self.company_combo.currentText()
+
+        registration = model = company = ""
+        if "|" in aircraft_label:
+            parts = [x.strip() for x in aircraft_label.split("|")]
+            if len(parts) == 3:
+                registration, model, company = parts
+
+        # --- Extraction propre des ICAO (garde la casse UPPER) ---
+        dep_icao = (
+            dep_label.split(" - ")[0].strip().upper()
+            if " - " in dep_label
+            else dep_label.strip().upper()
         )
+        arr_icao = (
+            arr_label.split(" - ")[0].strip().upper()
+            if " - " in arr_label
+            else arr_label.strip().upper()
+        )
+
+        # --- Charge le mock FR24 ---
+        fr24_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "../../results/mock_fr24_flights.json")
+        )
+        try:
+            with open(fr24_path, encoding="utf-8") as f:
+                all_flights = json.load(f)
+        except Exception as e:
+            self.flights_list.addItem(f"Failed to load FR24 flights: {e}")
+            return
+
+        # --- Filtrage ---
+        filtered = []
+        for flight in all_flights:
+            # Filtre registration (optionnel)
+            if (
+                registration
+                and registration not in ("(No aircraft selected)", "")
+                and flight.get("registration", "").upper() != registration.upper()
+            ):
+                continue
+            # Filtre départ ICAO (attention aux bonnes clés !)
+            if (
+                dep_icao
+                and dep_icao not in ("(NO AIRPORT SELECTED)", "(NO AIRPORTS FOUND)")
+                and flight.get("dep_icao", "").upper() != dep_icao
+            ):
+                continue
+            # Filtre arrivée ICAO
+            if (
+                arr_icao
+                and arr_icao not in ("(NO AIRPORT SELECTED)", "(NO AIRPORTS FOUND)")
+                and flight.get("arr_icao", "").upper() != arr_icao
+            ):
+                continue
+            # Filtre compagnie (si sélectionnée)
+            if (
+                company_label not in ("All airlines", "(No airline)", "")
+                and flight.get("airline_name", "").strip().lower()
+                != company_label.strip().lower()
+            ):
+                continue
+            filtered.append(flight)
+
+        if not filtered:
+            self.flights_list.addItem("No matching flights found.")
+            return
+
+        # --- Affichage résultats ---
+        for flight in filtered:
+            txt = (
+                f"{flight.get('flight_number', '???')} – {flight.get('airline_name', '???')}\n"
+                f"{flight.get('dep_icao', '???')} ⟶ {flight.get('arr_icao', '???')}"
+            )
+            item = QListWidgetItem(txt)
+            item.setData(Qt.UserRole, flight)
+            self.flights_list.addItem(item)
+
+    def show_flight_details(self, item):
+        flight_data = item.data(Qt.UserRole)
+        dlg = FlightCardDialog(flight_data, self)
+        dlg.exec_()
+
+class FlightCardDialog(QDialog, Ui_FlightCardDialog):
+    def __init__(self, flight_data, parent=None):  # <-- PARAM flight_data !
+        super().__init__(parent)
+        self.setupUi(self)
+        self.setStyleSheet(STYLE_FLIGHTCARD)
+        self.populate_fields(flight_data)  # <-- APPEL DIRECT !
+
+    def populate_fields(self, flight_data):
+        # Détection langue pour formatage date/heure
+        app_lang = "fr" if locale.getdefaultlocale()[0].startswith("fr") else "en"
+
+        # --- DATES ---
+        dep_dt = parse_iso_datetime(flight_data.get("scheduled_departure", ""))
+        arr_dt = parse_iso_datetime(flight_data.get("scheduled_arrival", ""))
+        self.DEPDATE.setText(format_date_localized(dep_dt, app_lang))
+        self.ARRDATE.setText(format_date_localized(arr_dt, app_lang))
+
+        dep_tz = flight_data.get("dep_timezone", "UTC")
+        arr_tz = flight_data.get("arr_timezone", "UTC")
+
+        # --- HEURES PRINCIPALES (UTC + LOCAL) ---
+        self.DEPTIME.setText(format_hour_utc_local(dep_dt, dep_tz, app_lang))
+        self.ARRUTC.setText(format_hour_utc_local(arr_dt, arr_tz, app_lang))
+
+        # --- HORAIRES PRÉVU/RÉEL ---
+        # Départ prévu = toujours l'heure prévue
+        dep_sched = flight_data.get("scheduled_departure", "")
+        dep_sched_dt = parse_iso_datetime(dep_sched)
+        self.DEPHRSCHED.setText(format_hour_utc_local(dep_sched_dt, dep_tz, app_lang))
+
+        # Départ réel (ou fallback prévu)
+        dep_actu = flight_data.get("actual_departure", "") or dep_sched
+        dep_actu_dt = parse_iso_datetime(dep_actu)
+        self.DEPACTU.setText(format_hour_utc_local(dep_actu_dt, dep_tz, app_lang))
+
+        # Arrivée prévue
+        arr_sched = flight_data.get("scheduled_arrival", "")
+        arr_sched_dt = parse_iso_datetime(arr_sched)
+        self.ARRHRSCHEDHR.setText(format_hour_utc_local(arr_sched_dt, arr_tz, app_lang))
+
+        # Arrivée réelle (ou fallback prévue)
+        arr_actu = flight_data.get("actual_arrival", "") or arr_sched
+        arr_actu_dt = parse_iso_datetime(arr_actu)
+        self.ARRESTIHR.setText(format_hour_utc_local(arr_actu_dt, arr_tz, app_lang))
+
+        # --- AVION ---
+        model_full = (
+            flight_data.get("aircraft_model", "")
+            or flight_data.get("model", "")
+            or flight_data.get("aircraft_type", "")
+            or flight_data.get("aircraft_icao", "Unknown")
+        )
+        engine = flight_data.get("engine", "")
+        if engine and engine.upper() not in model_full.upper():
+            model_full += f" {engine}"
+        if (
+            "sharklet" in model_full.lower()
+            or "w" in model_full.lower()
+            or "sl" in model_full.lower()
+        ):
+            if not any(x in model_full for x in ["SL", "W"]):
+                model_full += " SL"
+        self.MODEL.setText(model_full)
+
+        # --- IMMATRICULATION ---
+        reg = flight_data.get("registration", "") or "Unknown"
+        self.REGNUMBER.setText(reg)
+
+        # --- NUMÉRO DE VOL ---
+        flt_num = flight_data.get("flight_number", "") or "Unknown"
+        self.FLTNUMBER.setText(flt_num)
+
+        # --- CALLSIGN (avec phonétique) ---
+        self.CALNUMB.setText(get_flight_callsign(flight_data))
+
+        # --- COMPAGNIE (nom complet) ---
+        self.COMPTXT.setText(get_company_name(flight_data))
+
+        # --- DÉPART / ARRIVÉE : Ville – Aéroport ---
+        # Départ
+        dep_city = (
+            flight_data.get("dep_city", "") or flight_data.get("departure_city", "") or ""
+        )
+        dep_airport = flight_data.get("dep_airport_name", "") or flight_data.get(
+            "airport_name", ""
+        )
+        if not dep_city or not dep_airport:
+            dep_icao = flight_data.get("dep_icao", "")
+            if dep_icao and dep_icao in AIRPORTS_CSV:
+                dep_city = dep_city or AIRPORTS_CSV[dep_icao]["city"]
+                dep_airport = dep_airport or AIRPORTS_CSV[dep_icao]["name"]
+        self.DEPNAME.setText(get_city_airport_display(dep_city, dep_airport))
+
+        # Arrivée
+        arr_city = (
+            flight_data.get("arr_city", "") or flight_data.get("arrival_city", "") or ""
+        )
+        arr_airport = flight_data.get("arr_airport_name", "") or flight_data.get(
+            "airport_name", ""
+        )
+        if not arr_city or not arr_airport:
+            arr_icao = flight_data.get("arr_icao", "")
+            if arr_icao and arr_icao in AIRPORTS_CSV:
+                arr_city = arr_city or AIRPORTS_CSV[arr_icao]["city"]
+                arr_airport = arr_airport or AIRPORTS_CSV[arr_icao]["name"]
+        self.ARRNAME.setText(get_city_airport_display(arr_city, arr_airport))
+
+        # --- GATES ---
+        dep_icao = flight_data.get("dep_icao", "")
+        arr_icao = flight_data.get("arr_icao", "")
+        airline_icao = flight_data.get("airline_icao", "")
+
+        dep_gate = flight_data.get("dep_gate", "")
+        if not dep_gate or dep_gate == "Unknown":
+            dep_gate = pick_gate(dep_icao, airline_icao)
+        self.DEPNUMBER.setText(dep_gate)
+
+        arr_gate = flight_data.get("arr_gate", "")
+        if not arr_gate or arr_gate == "Unknown":
+            arr_gate = pick_gate(arr_icao, airline_icao)
+        self.ARRNUMB.setText(arr_gate)
+
+        # --- IMAGES AVION & COMPAGNIE ---
+        aircraft_img_path = os.path.join(aircraft_img_dir, registration_image_filename(reg))
+        if not os.path.exists(aircraft_img_path):
+            aircraft_img_path = os.path.join(aircraft_img_dir, "no-aircraft.jpg")
+        try:
+            self.AircratPNG.setPixmap(QPixmap(aircraft_img_path))
+        except Exception as e:
+            print(f"[WARN] Impossible de charger image avion: {aircraft_img_path} ({e})")
+            self.AircratPNG.clear()
+
+        company_name = get_company_name(flight_data)
+        company_logo_path = os.path.join(
+            company_img_dir, company_logo_filename(company_name)
+        )
+        if not os.path.exists(company_logo_path):
+            company_logo_path = os.path.join(company_img_dir, "no-company.png")
+        try:
+            self.CompanyPNG.setPixmap(QPixmap(company_logo_path))
+        except Exception as e:
+            print(f"[WARN] Impossible de charger logo compagnie: {company_logo_path} ({e})")
+            self.CompanyPNG.clear()
 
 
 # ==================== MAIN WINDOW ====================
@@ -1833,7 +2412,6 @@ class MainWindow(QMainWindow):
 
         self.set_panel(0)
 
-
     def set_panel(self, index):
         for btn, idx in zip(
             [
@@ -1987,12 +2565,12 @@ class MainWindow(QMainWindow):
         win.resize(800, 600)
         win.show()
 
-
 if __name__ == "__main__":
     import sys
     from PyQt5.QtWidgets import QApplication
 
     app = QApplication(sys.argv)
+    app.setStyleSheet(STYLE_FLIGHTCARD)
 
     # --- SPLASH SCREEN DE SCAN ---
     splash = SplashScanDialog()
