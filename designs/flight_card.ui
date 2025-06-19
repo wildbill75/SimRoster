@@ -50,7 +50,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QGroupBox" name="BOXDEP">
+  <widget class="QGroupBox" name="groupBox_DepIcao">
    <property name="geometry">
     <rect>
      <x>30</x>
@@ -188,7 +188,7 @@
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QLabel" name="DEPICAO">
+     <widget class="QLabel" name="labelDepIcaoValue">
       <property name="font">
        <font>
         <weight>75</weight>
@@ -210,7 +210,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QLabel" name="DEPNAME">
+     <widget class="QLabel" name="labelDepAirportNameValue">
       <property name="font">
        <font>
         <pointsize>15</pointsize>
@@ -225,7 +225,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QLabel" name="DEPDATE">
+     <widget class="QLabel" name="labelDepDateValue">
       <property name="layoutDirection">
        <enum>Qt::LeftToRight</enum>
       </property>
@@ -238,7 +238,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QLabel" name="DEPTIME">
+     <widget class="QLabel" name="labelDepMainTimeValue">
       <property name="font">
        <font>
         <weight>75</weight>
@@ -258,7 +258,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QLabel" name="AircratPNG">
+  <widget class="QLabel" name="labelAircraftImage">
    <property name="geometry">
     <rect>
      <x>-30</x>
@@ -280,7 +280,7 @@
     <set>Qt::AlignCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="CompanyPNG">
+  <widget class="QLabel" name="labelCompanyImage">
    <property name="geometry">
     <rect>
      <x>50</x>
@@ -302,7 +302,7 @@
     <set>Qt::AlignCenter</set>
    </property>
   </widget>
-  <widget class="QGroupBox" name="BOXARR">
+  <widget class="QGroupBox" name="groupBox_ArrIcao">
    <property name="geometry">
     <rect>
      <x>350</x>
@@ -446,7 +446,7 @@
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
-     <widget class="QLabel" name="ARRICAO">
+     <widget class="QLabel" name="labelArrIcaoValue">
       <property name="font">
        <font>
         <weight>75</weight>
@@ -465,7 +465,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QLabel" name="ARRNAME">
+     <widget class="QLabel" name="labelArrAirportNameValue">
       <property name="font">
        <font>
         <pointsize>15</pointsize>
@@ -480,7 +480,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QLabel" name="ARRDATE">
+     <widget class="QLabel" name="labelArrDateValue">
       <property name="text">
        <string>TUESDAY JUNE 17th</string>
       </property>
@@ -490,7 +490,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QLabel" name="ARRUTC">
+     <widget class="QLabel" name="labelArrMainTimeValue">
       <property name="font">
        <font>
         <weight>75</weight>
@@ -510,7 +510,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QGroupBox" name="BOXFLTDEPSHED">
+  <widget class="QGroupBox" name="groupBox_DepSchedTime">
    <property name="geometry">
     <rect>
      <x>30</x>
@@ -654,7 +654,7 @@
      <number>2</number>
     </property>
     <item>
-     <widget class="QLabel" name="DEPSCH">
+     <widget class="QLabel" name="labelDepSchedTimeTitle">
       <property name="font">
        <font>
         <weight>75</weight>
@@ -673,7 +673,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QLabel" name="DEPHRSCHED">
+     <widget class="QLabel" name="labelDepSchedTimeValue">
       <property name="font">
        <font>
         <weight>75</weight>
@@ -708,7 +708,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QGroupBox" name="BOXFLTDEPACTU">
+  <widget class="QGroupBox" name="groupBox_DepActualTime">
    <property name="geometry">
     <rect>
      <x>30</x>
@@ -852,7 +852,7 @@
      <number>2</number>
     </property>
     <item>
-     <widget class="QLabel" name="DEPACTU">
+     <widget class="QLabel" name="labelDepActualTimeTitle">
       <property name="font">
        <font>
         <weight>75</weight>
@@ -871,7 +871,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QLabel" name="DEPHRACTU">
+     <widget class="QLabel" name="labelDepActualTimeValue">
       <property name="font">
        <font>
         <weight>75</weight>
@@ -894,7 +894,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QGroupBox" name="BOXFLTARREST">
+  <widget class="QGroupBox" name="groupBox_ArrEstimatedTime">
    <property name="geometry">
     <rect>
      <x>350</x>
@@ -1038,7 +1038,7 @@
      <number>2</number>
     </property>
     <item>
-     <widget class="QLabel" name="ARRESTITLE">
+     <widget class="QLabel" name="labelArrEstimatedTimeTitle">
       <property name="font">
        <font>
         <weight>75</weight>
@@ -1054,7 +1054,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QLabel" name="ARRESTIHR">
+     <widget class="QLabel" name="labelArrEstimatedTimeValue">
       <property name="font">
        <font>
         <weight>75</weight>
@@ -1080,7 +1080,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QGroupBox" name="BOXFLTARRSHED">
+  <widget class="QGroupBox" name="groupBox_ArrSchedTime">
    <property name="geometry">
     <rect>
      <x>350</x>
@@ -1224,7 +1224,7 @@
      <number>2</number>
     </property>
     <item>
-     <widget class="QLabel" name="ARRSCHEDTITLE">
+     <widget class="QLabel" name="labelArrSchedTimeTitle">
       <property name="font">
        <font>
         <weight>75</weight>
@@ -1243,7 +1243,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QLabel" name="ARRHRSCHEDHR">
+     <widget class="QLabel" name="labelArrSchedTimeValue">
       <property name="font">
        <font>
         <weight>75</weight>
@@ -1278,7 +1278,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QGroupBox" name="AIRCRAFT">
+  <widget class="QGroupBox" name="groupBox_AircraftType">
    <property name="geometry">
     <rect>
      <x>30</x>
@@ -1416,7 +1416,7 @@
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_3">
     <item>
-     <widget class="QLabel" name="TYPE">
+     <widget class="QLabel" name="labelAircraftTypeTitle">
       <property name="font">
        <font>
         <pointsize>15</pointsize>
@@ -1431,7 +1431,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QLabel" name="MODEL">
+     <widget class="QLabel" name="labelAircraftTypeValue">
       <property name="font">
        <font>
         <pointsize>11</pointsize>
@@ -1450,7 +1450,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QGroupBox" name="REGISTRATION">
+  <widget class="QGroupBox" name="groupBox_Registration">
    <property name="geometry">
     <rect>
      <x>30</x>
@@ -1588,7 +1588,7 @@
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_4">
     <item>
-     <widget class="QLabel" name="REGTITLE">
+     <widget class="QLabel" name="labelRegistrationTitle">
       <property name="font">
        <font>
         <pointsize>15</pointsize>
@@ -1603,7 +1603,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QLabel" name="REGNUMBER">
+     <widget class="QLabel" name="labelRegistrationValue">
       <property name="font">
        <font>
         <pointsize>11</pointsize>
@@ -1622,7 +1622,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QGroupBox" name="FLTNUMB">
+  <widget class="QGroupBox" name="groupBox_FlightNumber">
    <property name="geometry">
     <rect>
      <x>350</x>
@@ -1760,7 +1760,7 @@
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_5">
     <item>
-     <widget class="QLabel" name="FLTTITLE">
+     <widget class="QLabel" name="labelFlightNumberTitle">
       <property name="font">
        <font>
         <pointsize>15</pointsize>
@@ -1775,7 +1775,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QLabel" name="FLTNUMBER">
+     <widget class="QLabel" name="labelFlightNumberValue">
       <property name="font">
        <font>
         <pointsize>11</pointsize>
@@ -1794,7 +1794,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QGroupBox" name="CALLSIGN">
+  <widget class="QGroupBox" name="groupBox_Callsign">
    <property name="geometry">
     <rect>
      <x>350</x>
@@ -1932,7 +1932,7 @@
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_6">
     <item>
-     <widget class="QLabel" name="CALLTITLE">
+     <widget class="QLabel" name="labelCallsignTitle">
       <property name="font">
        <font>
         <pointsize>15</pointsize>
@@ -1947,7 +1947,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QLabel" name="CALNUMB">
+     <widget class="QLabel" name="labelCallsignValue">
       <property name="font">
        <font>
         <pointsize>11</pointsize>
@@ -1966,7 +1966,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QGroupBox" name="DEPGATE">
+  <widget class="QGroupBox" name="groupBox_DepGate">
    <property name="geometry">
     <rect>
      <x>30</x>
@@ -2104,7 +2104,7 @@
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_7">
     <item>
-     <widget class="QLabel" name="DEPTITLE">
+     <widget class="QLabel" name="labelDepGateTitle">
       <property name="font">
        <font>
         <pointsize>15</pointsize>
@@ -2119,7 +2119,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QLabel" name="DEPNUMBER">
+     <widget class="QLabel" name="labelDepGateValue">
       <property name="font">
        <font>
         <pointsize>11</pointsize>
@@ -2138,7 +2138,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QGroupBox" name="ARRGATE">
+  <widget class="QGroupBox" name="groupBox_ArrGate">
    <property name="geometry">
     <rect>
      <x>350</x>
@@ -2276,7 +2276,7 @@
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_8">
     <item>
-     <widget class="QLabel" name="ARRTITLE">
+     <widget class="QLabel" name="labelArrGateTitle">
       <property name="font">
        <font>
         <pointsize>15</pointsize>
@@ -2291,7 +2291,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QLabel" name="ARRNUMB">
+     <widget class="QLabel" name="labelArrGateValue">
       <property name="font">
        <font>
         <pointsize>11</pointsize>
@@ -2310,7 +2310,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QGroupBox" name="COMPANY">
+  <widget class="QGroupBox" name="groupBox_Company">
    <property name="geometry">
     <rect>
      <x>30</x>
@@ -2448,7 +2448,7 @@
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_9">
     <item>
-     <widget class="QLabel" name="COMPTXT">
+     <widget class="QLabel" name="labelCompanyValue">
       <property name="font">
        <font>
         <pointsize>25</pointsize>
