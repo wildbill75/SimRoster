@@ -135,7 +135,6 @@ QDialog {
     background: #23252b;
     border-radius: 24px;
 }
-
 QGroupBox {
     border: none;
     background: transparent;
@@ -143,100 +142,58 @@ QGroupBox {
     padding: 0;
 }
 
-/* "Card" visuelle sur chaque bloc départ/arrivée */
-QGroupBox#BOXDEP, QGroupBox#BOXARR {
-    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #1d2240, stop:1 #232740);
-    border-radius: 18px;
-    margin: 0 14px 24px 14px;
-    padding: 22px 20px 10px 20px;
-    min-width: 320px;
-    max-width: 440px;
-    border: 2px solid #3551a3;
-}
-
+/* Toutes les valeurs et titres en blanc */
 QLabel {
-    color: #ecedf3;
-    font-size: 13px;
+    color: #fff;
+    font-size: 15px;
     background: transparent;
+    font-weight: 500;
     letter-spacing: 0.5px;
 }
 
-QLabel[objectName="DEPICAO"], QLabel[objectName="ARRICAO"] {
+/* Titres de section un peu plus gros et gras */
+QLabel[objectName$="_TITLE"] {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+/* ICAO (gros badge bleu) toujours en blanc et gras */
+QLabel#DEPICAO, QLabel#ARRICAO {
     color: #fff;
-    background: #3060ff;
-    border-radius: 10px;
     font-size: 22px;
     font-weight: bold;
     padding: 6px 24px;
     margin-bottom: 10px;
-    border: 2px solid #173080;
-    text-align: center;
-}
-
-QLabel[objectName="DEPNAME"], QLabel[objectName="ARRNAME"] {
-    color: #a1d0ff;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    margin-bottom: 2px;
-}
-
-QLabel[objectName="DEPDATE"], QLabel[objectName="ARRDATE"] {
-    color: #ffe36e;
-    font-size: 12px;
-    font-weight: bold;
-    margin-bottom: 4px;
-}
-
-/* Horaires - style pour tous les labels "class=timeblock" */
-QLabel[class="timeblock"] {
-    color: #fff;
-    font-size: 11px;
-    font-weight: 500;
-    margin: 2px 0 2px 0;
+    qproperty-alignment: 'AlignCenter';
     background: transparent;
     border: none;
-    box-shadow: none;
-    text-align: center;
 }
 
-/* Badges GATE */
-QLabel[objectName="DEPNUMBER"], QLabel[objectName="ARRNUMB"] {
-    color: #23252b;
-    background: #ffe36e;
-    border-radius: 10px;
-    font-weight: 900;
-    font-size: 24px;
-    padding: 2px 18px 2px 18px;
-    margin: 7px 0 7px 0;
-    border: 2px solid #dac030;
-    min-width: 0;
-    text-align: center;
+/* Aucune bordure sur les gates, texte blanc, centré */
+QLabel#DEPGATE, QLabel#ARRGATE {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+    qproperty-alignment: 'AlignCenter';
+    background: transparent;
+    border: none;
+    min-width: 70px;
 }
 
-/* Champs techniques alignés à gauche */
-QLabel[objectName="TYPE"], QLabel[objectName="MODEL"], QLabel[objectName="REGNUMBER"], QLabel[objectName="FLTNUMBER"], QLabel[objectName="CALNUMB"] {
-    color: #d5d8ff;
-    font-size: 13px;
-    font-weight: bold;
-    letter-spacing: 1px;
-    margin-bottom: 3px;
-    qproperty-alignment: 'AlignLeft';
-}
-
-/* Boutons */
+/* Boutons sobres */
 QPushButton, QDialogButtonBox QPushButton {
-    background-color: #2d5be7;
-    color: white;
+    background: #393a45;
+    color: #fff;
     border-radius: 12px;
     font-size: 16px;
     font-weight: 600;
     padding: 8px 28px;
-    margin: 8px 18px 8px 18px;
-    box-shadow: 0 2px 10px #193ca055;
+    margin: 10px 20px 10px 20px;
+    box-shadow: none;
 }
 QPushButton:hover, QDialogButtonBox QPushButton:hover {
-    background-color: #183060;
+    background: #23252b;
     color: #ffe36e;
 }
 """
@@ -2108,7 +2065,6 @@ class FlightCardDialog(QDialog, Ui_FlightCardDialog):
         self.populate_fields(flight_data)
         self.OKCancel.accepted.connect(self.accept)
         self.OKCancel.rejected.connect(self.reject)
-
 
     def populate_fields(self, flight_data):
         print("[DEBUG] FLIGHT_DATA :", flight_data)
