@@ -41,6 +41,8 @@ from PyQt5.QtWebChannel import QWebChannel
 from PyQt5.QtGui import QPixmap
 from scripts.gui.flight_card import Ui_FlightCardDialog
 from datetime import datetime, timezone
+from scripts.gui.flight_planning_line import FlightPlanningLineWidget
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QScrollArea, QFrame
 
 
 # Ajoute ta fonction de traduction ici si elle existe déjà ailleurs, sinon dummy :
@@ -1766,6 +1768,7 @@ class FleetManagerPanel(QWidget):
 
 # ==================== FLIGHT PLANNING PANEL ====================
 class FlightPlanningPanel(QWidget):
+
     def __init__(self, parent=None):
         super().__init__(parent)
         layout = QVBoxLayout(self)
@@ -1856,6 +1859,8 @@ class FlightPlanningPanel(QWidget):
         )
         layout.addWidget(results_label)
 
+        from PyQt5.QtWidgets import QListWidget
+
         self.flights_list = QListWidget()
         self.flights_list.setStyleSheet(
             "background: #343842; color: #fff; font-size: 14px; border: none;"
@@ -1869,7 +1874,7 @@ class FlightPlanningPanel(QWidget):
         self.btn_search.clicked.connect(self.search_real_flights)
         self.aircraft_combo.currentIndexChanged.connect(self.sync_company_from_aircraft)
 
-        self.flights_list.itemDoubleClicked.connect(self.show_flight_details)
+        self.flights_list.itemDoubleClicked.connect(self.open_flight_detail)
 
     def refresh_panel(self):
         """Reload les combos à partir des JSON de sélection."""
@@ -1962,9 +1967,10 @@ class FlightPlanningPanel(QWidget):
                         self.company_combo.setCurrentIndex(idx_company)
 
     def search_real_flights(self):
+        # 1. Vide la liste des résultats précédents
         self.flights_list.clear()
 
-        # --- Récupère les sélections dans l'UI ---
+        # 2. Récupère les sélections (aircraft, dep, arr, airline)
         aircraft_label = self.aircraft_combo.currentText()
         dep_label = self.dep_combo.currentText()
         arr_label = self.arr_combo.currentText()
@@ -1976,7 +1982,6 @@ class FlightPlanningPanel(QWidget):
             if len(parts) == 3:
                 registration, model, company = parts
 
-        # --- Extraction propre des ICAO (garde la casse UPPER) ---
         dep_icao = (
             dep_label.split(" - ")[0].strip().upper()
             if " - " in dep_label
@@ -1988,7 +1993,7 @@ class FlightPlanningPanel(QWidget):
             else arr_label.strip().upper()
         )
 
-        # --- Charge le mock FR24 ---
+        # 3. Charge la liste des vols mock FR24
         fr24_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "../../results/mock_fr24_flights.json")
         )
@@ -1996,66 +2001,95 @@ class FlightPlanningPanel(QWidget):
             with open(fr24_path, encoding="utf-8") as f:
                 all_flights = json.load(f)
         except Exception as e:
-            self.flights_list.addItem(f"Failed to load FR24 flights: {e}")
+            QMessageBox.warning(self, "Error", f"Could not load mock FR24 flights.\n{e}")
             return
 
-        # --- Filtrage ---
+        # 4. Filtre selon les critères choisis (optionnel, à adapter)
         filtered = []
         for flight in all_flights:
-            # Filtre registration (optionnel)
-            if (
-                registration
-                and registration not in ("(No aircraft selected)", "")
-                and flight.get("registration", "").upper() != registration.upper()
+            match = True
+            if dep_icao and dep_icao not in (
+                "",
+                "(NO AIRPORT SELECTED)",
+                "(NO AIRPORTS FOUND)",
             ):
-                continue
-            # Filtre départ ICAO (attention aux bonnes clés !)
-            if (
-                dep_icao
-                and dep_icao not in ("(NO AIRPORT SELECTED)", "(NO AIRPORTS FOUND)")
-                and flight.get("dep_icao", "").upper() != dep_icao
+                match = match and (flight.get("dep_icao", "").upper() == dep_icao)
+            if arr_icao and arr_icao not in (
+                "",
+                "(NO AIRPORT SELECTED)",
+                "(NO AIRPORTS FOUND)",
             ):
-                continue
-            # Filtre arrivée ICAO
-            if (
-                arr_icao
-                and arr_icao not in ("(NO AIRPORT SELECTED)", "(NO AIRPORTS FOUND)")
-                and flight.get("arr_icao", "").upper() != arr_icao
+                match = match and (flight.get("arr_icao", "").upper() == arr_icao)
+            if registration and registration not in (
+                "",
+                "(NO AIRCRAFT SELECTED)",
+                "(NO AIRCRAFT FOUND)",
             ):
-                continue
-            # Filtre compagnie (si sélectionnée)
-            if (
-                company_label not in ("All airlines", "(No airline)", "")
-                and flight.get("airline_name", "").strip().lower()
-                != company_label.strip().lower()
+                match = match and (flight.get("registration", "") == registration)
+            if company_label and company_label not in (
+                "All airlines",
+                "(No airline)",
+                "(No airline)",
             ):
-                continue
-            filtered.append(flight)
+                match = match and (flight.get("airline_name", "") == company_label)
+            if match:
+                filtered.append(flight)
+
+        # 5. Affiche chaque vol dans le QListWidget
+        from PyQt5.QtWidgets import QListWidgetItem
 
         if not filtered:
-            self.flights_list.addItem("No matching flights found.")
+            item = QListWidgetItem("No matching flights.")
+            item.setForeground(Qt.red)
+            font = item.font()
+            font.setBold(True)
+            item.setFont(font)
+            self.flights_list.addItem(item)
             return
 
-        # --- Affichage résultats ---
         for flight in filtered:
-            txt = (
-                f"{flight.get('flight_number', '???')} – {flight.get('airline_name', '???')}\n"
-                f"{flight.get('dep_icao', '???')} ⟶ {flight.get('arr_icao', '???')}"
+            text = (
+                f"{flight.get('flight_number', 'N/A')}   {flight.get('dep_icao', '')} → {flight.get('arr_icao', '')}   "
+                f"{flight.get('scheduled_departure', 'N/A')[11:16]} - {flight.get('scheduled_arrival', 'N/A')[11:16]}"
             )
-            item = QListWidgetItem(txt)
-            item.setData(Qt.UserRole, flight)
+            item = QListWidgetItem(text)
+            item.setData(Qt.UserRole, flight)  # <-- OBLIGATOIRE
+            print("[DEBUG] Ajout item:", text, "DATA:", flight)
             self.flights_list.addItem(item)
 
-    def show_flight_details(self, item):
+    def open_flight_detail(self, item):
         flight_data = item.data(Qt.UserRole)
         print("[DEBUG] FLIGHT_DATA : ", flight_data)
         dlg = FlightCardDialog(flight_data, self)
         dlg.exec_()
 
+class FlightPlanningListWidget(QWidget):
+    def __init__(self, flights_data, logo_dir="", parent=None):
+        super().__init__(parent)
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        scroll = QScrollArea(self)
+        scroll.setWidgetResizable(True)
+        content = QFrame()
+        content_layout = QVBoxLayout(content)
+        content_layout.setContentsMargins(6, 6, 6, 6)
+        content_layout.setSpacing(8)
+        for flight in flights_data:
+            icao = flight.get("airline_icao", "").lower()
+            logo_path = (
+                os.path.join(logo_dir, f"{icao}.png") if icao and logo_dir else ""
+            )
+            widget = FlightPlanningLineWidget(flight, logo_path=logo_path)
+            content_layout.addWidget(widget)
+        content_layout.addStretch()
+        scroll.setWidget(content)
+        layout.addWidget(scroll)
+        self.setLayout(layout)
+
 from PyQt5.QtWidgets import QDialog
 from scripts.gui.flight_card import Ui_FlightCardDialog
 from PyQt5.QtGui import QPixmap
-
 
 class FlightCardDialog(QDialog, Ui_FlightCardDialog):
     def __init__(self, flight_data, parent=None):
@@ -2163,7 +2197,6 @@ class FlightCardDialog(QDialog, Ui_FlightCardDialog):
         QMessageBox.information(
             self, self.tr("Fly"), self.tr("Ready to launch flight!")
         )
-
 
 # ==================== MAIN WINDOW ====================
 class MainWindow(QMainWindow):
